@@ -36,12 +36,12 @@
             background: #0ea5e9; /* bg-sky-500 */
         }
 
-        /* Frosted glass effect for the header */
+        /* Frosted glass effect for the header (ОНОВЛЕНО: прибрано border-bottom) */
         .frosted-glass {
             background-color: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            /* border-bottom: 1px solid rgba(51, 65, 85, 0.5); */ /* <--- ВИДАЛЕНО */
         }
 
         /* Animation classes for scroll effects */
@@ -123,11 +123,8 @@
         .modal-content-inner {
           position: relative; /* Щоб бути поверх анімації */
           background: #1e293b; /* Фон самого вікна (slate-800) */
-          /* Відступ 1px. Це і є "рамка". 
-            Крізь нього видно анімацію ::before, що обертається.
-          */
           margin: 1px; 
-          border-radius: 9px; /* 10px (батьківський) - 1px (відступ) */
+          border-radius: 9px; 
           padding: 1.5rem 2rem;
         }
 
@@ -135,26 +132,53 @@
         
         /* === Приховати скролбар у модальному вікні новин === */
         #modal-text::-webkit-scrollbar {
-            display: none; /* Повністю приховати скролбар для Chrome/Safari/Mobile */
+            display: none; 
         }
         #modal-text {
-            -ms-overflow-style: none;  /* Приховати для IE та Edge */
-            scrollbar-width: none;  /* Приховати для Firefox */
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
         }
         
-        /* === НОВИЙ КОД: Блокування прокрутки фону === */
+        /* === Блокування прокрутки фону (для модальних вікон) === */
         html.modal-open {
             overflow: hidden;
         }
+        
+        /* === НОВА ЛОГІКА: Приховування довгих секцій === */
+        #staff, #news, #gallery {
+            display: none;
+        }
+        html.showing-staff #staff,
+        html.showing-news #news,
+        html.showing-gallery #gallery {
+            display: block;
+        }
+        
+        /* === НОВА ЛОГІКА: Неоновий ефект для навігації === */
+        /* Базовий стиль для посилань (додаємо transition) */
+        header nav a, #mobile-menu a {
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        /* Активний стан (неоновий ефект) */
+        header nav a.nav-link-active,
+        #mobile-menu a.nav-link-active {
+            color: #7dd3fc; /* Світло-блакитний (sky-300) */
+            text-shadow: 
+                0 0 5px rgba(56, 189, 248, 0.7), /* 38bdf8 - sky-400 */
+                0 0 10px rgba(56, 189, 248, 0.5),
+                0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        /* === Кінець нової логіки === */
         
     </style>
 </head>
 <body class="antiasaed">
 
-<!-- === HEADER === -->
+<!-- === HEADER (ОНОВЛЕНО: h-24, прибрано border) === -->
 <header id="header" class="frosted-glass fixed top-0 left-0 right-0 z-50 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-28">
+        <div class="flex items-center justify-between h-24">
             <!-- Logo and Department Name -->
             <div class="flex-shrink-0">
                 <a href="#hero" class="flex items-center space-x-3">
@@ -207,17 +231,15 @@
 </header>
 
 <main>
-    <!-- === HERO SECTION (ОНОВЛЕНО) === -->
-    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-20">
+    <!-- === HERO SECTION === -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-24">
         <div class="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-900/80"></div>
         
-        <!-- Оновлено: max-w-3xl -> max-w-5xl для ширшого тексту -->
         <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
             <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight reveal">
                 Кафедра Приладів та<br>
                 <span class="gradient-text">Контрольно-Вимірювальних Систем</span>
             </h1>
-            <!-- Оновлено: max-w-3xl -> max-w-5xl для ширшого тексту -->
             <p class="mt-6 max-w-5xl mx-auto text-lg md:text-xl text-slate-300 reveal" style="transition-delay: 200ms;">
                 Створюємо майбутнє вимірювальних технологій. Готуємо фахівців, здатних розробляти та експлуатувати найсучасніші прилади та системи.
             </p>
@@ -233,7 +255,7 @@
         
     </section>
 
-    <!-- === ABOUT SECTION (ОНОВЛЕНО З ФОТО) === -->
+    <!-- === ABOUT SECTION === -->
     <section id="about" class="py-20 lg:py-32 bg-slate-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -242,7 +264,6 @@
             </div>
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="reveal">
-                    <!-- ОНОВЛЕНО: 'src' вказує на файл 'ludipv.jpg' у корені. Додано 'onerror' для резерву -->
                     <img src="ludipv.jpg" alt="Фото лабораторії кафедри" class="rounded-xl shadow-2xl" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Фото+не+знайдено'; this.onerror=null;">
                 </div>
                 <div class="reveal" style="transition-delay: 200ms;">
@@ -272,7 +293,7 @@
         </div>
     </section>
 
-    <!-- === SPECIALTIES SECTION (Оновлено вами) === -->
+    <!-- === SPECIALTIES SECTION === -->
     <section id="specialties" class="py-20 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -280,7 +301,7 @@
                 <p class="mt-4 text-lg text-slate-400">Обери свій шлях в інженерії</p>
             </div>
             <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Specialty Card 1 (Оновлено вами) -->
+                <!-- Specialty Card 1 -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 reveal">
                     <div class="p-8">
                         <div class="flex items-center gap-4 mb-4">
@@ -304,7 +325,7 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Specialty Card 2 (Оновлено вами) -->
+                <!-- Specialty Card 2 -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 reveal" style="transition-delay: 200ms;">
                     <div class="p-8">
                         <div class="flex items-center gap-4 mb-4">
@@ -332,7 +353,7 @@
         </div>
     </section>
 
-    <!-- === STAFF SECTION (ОНОВЛЕНО - 4 ВИДИМИХ) === -->
+    <!-- === STAFF SECTION (ПРИХОВАНО) === -->
     <section id="staff" class="py-20 lg:py-32 bg-slate-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -340,7 +361,6 @@
                 <p class="mt-4 text-lg text-slate-400">Професіонали, що надихають на нові звершення</p>
             </div>
             
-            <!-- Оновлений список персоналу (4 видимих) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Staff Card 1: Паламар -->
                 <div class="text-center reveal">
@@ -472,7 +492,7 @@
         </div>
     </section>
 
-    <!-- === NEWS SECTION === -->
+    <!-- === NEWS SECTION (ПРИХОВАНО) === -->
     <section id="news" class="py-20 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -481,7 +501,7 @@
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 
-                <!-- News Card 1 (Оновлена з текстом і поправленими відступами) -->
+                <!-- News Card 1 -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal">
                     <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот" alt="Автономна машинка">
                     <div class="p-6 flex-grow flex flex-col">
@@ -560,7 +580,7 @@
         </div>
     </section>
 
-    <!-- === GALLERY SECTION === -->
+    <!-- === GALLERY SECTION (ПРИХОВАНО) === -->
     <section id="gallery" class="py-20 lg:py-32 bg-slate-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -588,7 +608,7 @@
         </div>
     </section>
 
-    <!-- === CONTACTS SECTION (ОНОВЛЕНО) === -->
+    <!-- === CONTACTS SECTION === -->
     <section id="contacts" class="py-20 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -633,7 +653,7 @@
                     </div>
                 </div>
                 
-                <!-- Оновлена Карта (Виправлено - Маркер на Корпусі 9) -->
+                <!-- Карта -->
                 <div class="reveal" style="transition-delay: 200ms;">
                     <iframe 
                         src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1303.6288675121172!2d25.5689115!3d49.562283!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4730310217a4143b%3A0x868128328c31e289!2sTernopil%20Ivan%20Pul%27ui%20National%20Technical%20University%20building%209!5e0!3m2!1sen!2sua!4v1700147895000!5m2!1sen!2sua"
@@ -651,7 +671,7 @@
     </section>
 </main>
 
-<!-- === FOOTER (ОНОВЛЕНО З INSTAGRAM) === -->
+<!-- === FOOTER === -->
 <footer class="bg-slate-900 border-t border-slate-800">
     <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -682,7 +702,6 @@
                 <h3 class="text-sm font-semibold text-slate-200 tracking-wider uppercase">Ми в соцмережах</h3>
                 <div class="flex mt-4 space-x-6">
                     <a href="#" class="text-slate-400 hover:text-sky-400"><span class="sr-only">Facebook</span><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg></a>
-                    <!-- ОНОВЛЕНО: Додано посилання на Instagram -->
                     <a href="https://www.instagram.com/prila_dy2025?igsh=MWtyb2t1czMzNjEyNA%3D%3D" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-sky-400"><span class="sr-only">Instagram</span><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2.34a1.5 1.5 0 011.37 0 1.5 1.5 0 01.884.884 1.5 1.5 0 010 1.37 1.5 1.5 0 01-.884.884 1.5 1.5 0 01-1.37 0 1.5 1.5 0 01-.884-.884 1.5 1.5 0 010-1.37A1.5 1.5 0 0112.315 2.34z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-2.068 5.47a.75.75 0 01.996-.062l4.5 2.25a.75.75 0 010 1.328l-4.5 2.25a.75.75 0 11-.874-1.206L13.755 12 9.87 9.806a.75.75 0 01-.062-.996z" clip-rule="evenodd" /></svg></a>
                 </div>
             </div>
@@ -693,41 +712,39 @@
     </div>
 </footer>
 
-<!-- === ПОЧАТОК: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ (ВИПРАВЛЕНО) === -->
-<!-- Оновлено: прибрано 'overflow-y-auto' звідси -->
-<div id="news-modal" class="hidden fixed inset-0 z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+<!-- === ПОЧАТОК: MОДАЛЬНЕ ВІКНО (ПЕРЕРОБЛЕНО З ФІКСОМ ГОРТАННЯ) === -->
+<!-- 1. Головний контейнер: fixed, flex-center, p-4 (для відступів на мобільному) -->
+<div id="news-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    
+    <!-- 2. Затемнений фон (Overlay) -->
+    <!-- ОНОВЛЕНО: backdrop-blur-sm -> backdrop-blur-md (сильніший блюр) -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
+
+    <!-- 3. Контент модального вікна (вже не потрібен 'span' для центрування) -->
+    <!-- 'relative' потрібен для кнопки закриття -->
+    <div class="relative w-full max-w-2xl transform transition-all neon-border-box">
         
-        <!-- Затемнений фон (Overlay) -->
-        <div id="modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
-
-        <!-- Контейнер, що центрує вікно -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        <!-- Контент модального вікна -->
-        <div class="inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full neon-border-box">
+        <!-- 4. Внутрішня частина -->
+        <div class="modal-content-inner">
             
-            <!-- Внутрішня частина (щоб приховати анімацію під собою) -->
-            <div class="modal-content-inner">
-                
-                <!-- Кнопка закриття -->
-                <button id="modal-close-btn" class="absolute top-4 right-6 text-slate-400 hover:text-white z-10">
-                    <span class="sr-only">Закрити</span>
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                
-                <!-- Контент, що буде заповнюватись -->
-                <p id="modal-date" class="text-sm text-sky-400"></p>
-                <h3 id="modal-title" class="mt-2 text-2xl font-bold text-white pr-8"></h3>
-                <!-- 'whitespace-pre-wrap' поважає переноси абзаців з data-text -->
-                <!-- Оновлено: 'overflow-y-auto' тут, щоб гортався лише цей блок -->
-                <p id="modal-text" class="mt-4 text-slate-300 whitespace-pre-wrap max-h-[60vh] overflow-y-auto"></p>
+            <!-- Кнопка закриття -->
+            <button id="modal-close-btn" class="absolute top-4 right-6 text-slate-400 hover:text-white z-10">
+                <span class="sr-only">Закрити</span>
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
             
-            </div>
+            <!-- Контент, що буде заповнюватись -->
+            <p id="modal-date" class="text-sm text-sky-400"></p>
+            <h3 id="modal-title" class="mt-2 text-2xl font-bold text-white pr-8"></h3>
+            
+            <!-- 5. 'overflow-y-auto' тут, щоб гортався лише цей блок -->
+            <!-- ОНОВЛЕНО: max-h-[60vh] -> max-h-[70vh] (трохи більше місця для тексту) -->
+            <p id="modal-text" class="mt-4 text-slate-300 whitespace-pre-wrap max-h-[70vh] overflow-y-auto"></p>
+        
         </div>
     </div>
 </div>
-<!-- === КІНЕЦЬ: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ === -->
+<!-- === КІНЕЦЬ: MОДАЛЬНЕ ВІКНО === -->
 
 
 <!-- Scroll to top button -->
@@ -752,19 +769,6 @@
                 menuCloseIcon.classList.toggle('hidden');
             });
         }
-        
-        // Close mobile menu when a link is clicked
-        if (mobileMenu) {
-            const mobileNavLinks = mobileMenu.querySelectorAll('a');
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                    menuOpenIcon.classList.remove('hidden');
-                    menuCloseIcon.classList.add('hidden');
-                });
-            });
-        }
-
 
         // --- Scroll to Top Button ---
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
@@ -798,6 +802,97 @@
                 observer.observe(el);
             });
         }
+        
+        // --- НОВА ЛОГІКА: Навігація, Показ/Приховування Секцій, Неон та Закриття Меню ---
+        const desktopNavLinks = document.querySelectorAll('header nav a[href^="#"]'); // Тільки десктопні
+        const mobileNavLinks = document.querySelectorAll('#mobile-menu a[href^="#"]'); // Тільки мобільні
+        const allNavLinks = [...desktopNavLinks, ...mobileNavLinks]; // Об'єднуємо їх
+        const htmlEl = document.documentElement;
+
+        // Функція для обробки кліку по будь-якому навігаційному посиланню
+        const handleNavClick = (e, clickedLink) => {
+            const href = clickedLink.getAttribute('href');
+            
+            // --- ЛОГІКА НЕОНУ ---
+            // 1. Прибираємо неон з усіх посилань
+            allNavLinks.forEach(link => link.classList.remove('nav-link-active'));
+
+            // 2. Додаємо неон до натиснутого посилання
+            clickedLink.classList.add('nav-link-active');
+            
+            // 3. Знаходимо "пару" для посилання (мобільне/десктопне) і теж її підсвічуємо
+            const matchingLink = Array.from(allNavLinks).find(link => 
+                link !== clickedLink && link.getAttribute('href') === href
+            );
+            if (matchingLink) {
+                matchingLink.classList.add('nav-link-active');
+            }
+
+            // 4. Прибираємо неон через 3 секунди
+            setTimeout(() => {
+                clickedLink.classList.remove('nav-link-active');
+                if (matchingLink) {
+                    matchingLink.classList.remove('nav-link-active');
+                }
+            }, 3000);
+            // --- КІНЕЦЬ ЛОГІКИ НЕОНУ ---
+
+
+            // --- ЛОГІКА ПОКАЗУ/ПРИХОВУВАННЯ СЕКЦІЙ ---
+            if (href === '#staff' || href === '#news' || href === '#gallery') {
+                e.preventDefault(); 
+                const targetId = href.substring(1); 
+                const targetSection = document.getElementById(targetId);
+
+                if (targetSection) {
+                    htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
+                    htmlEl.classList.add('showing-' + targetId);
+                    
+                    const headerOffset = 96; // h-24 (96px)
+                    const elementPosition = targetSection.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                         top: offsetPosition,
+                         behavior: "smooth"
+                    });
+                }
+            } else {
+                htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
+                
+                if (href !== '#hero') { 
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        const headerOffset = 96; 
+                        const elementPosition = targetSection.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        window.scrollTo({
+                             top: offsetPosition,
+                             behavior: "smooth"
+                        });
+                    }
+                } else {
+                    // Для #hero просто крутимо наверх (дозволяємо стандартну поведінку, якщо e.preventDefault() не викликано)
+                }
+            }
+            
+            // --- ЛОГІКА ЗАКРИТТЯ МОБІЛЬНОГО МЕНЮ ---
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+                menuOpenIcon.classList.remove('hidden');
+                menuCloseIcon.classList.add('hidden');
+            }
+        };
+
+        // Вішаємо обробник на всі посилання (десктопні + мобільні)
+        allNavLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                handleNavClick(e, this); // 'this' - це 'link'
+            });
+        });
+
 
         // --- Staff Toggle ---
         const toggleStaffBtn = document.getElementById('toggle-staff-btn');
@@ -818,13 +913,11 @@
         }
         
         // --- Modal Window Logic (Версія з блокуванням прокрутки) ---
-        const htmlEl = document.documentElement; // Отримуємо <html>
         const openModalButtons = document.querySelectorAll('.open-modal-btn');
-        const modal = document.getElementById('news-modal');
+        const modal = document.getElementById('news-modal'); 
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const modalOverlay = document.getElementById('modal-overlay');
 
-        // Елементи, які ми будемо заповнювати
         const modalDate = document.getElementById('modal-date');
         const modalTitle = document.getElementById('modal-title');
         const modalText = document.getElementById('modal-text');
@@ -833,44 +926,36 @@
             
             openModalButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
-                    e.preventDefault(); // Зупиняємо перехід по #
+                    e.preventDefault(); 
                     
-                    // Отримуємо дані
                     const title = this.dataset.title;
                     const date = this.dataset.date;
                     const text = this.dataset.text;
 
-                    // Заповнюємо
                     if (modalDate) modalDate.textContent = date;
                     if (modalTitle) modalTitle.textContent = title;
                     if (modalText) modalText.textContent = text;
                     
-                    // Показуємо модальне вікно
                     modal.classList.remove('hidden');
                     setTimeout(() => {
                          modal.classList.add('modal-visible');
                     }, 10);
                    
-                    // Блокуємо прокрутку фону (НОВИЙ СПОСІБ)
                     htmlEl.classList.add('modal-open'); 
                 });
             });
 
-            // Функція закриття вікна
             const closeModal = () => {
                 modal.classList.remove('modal-visible');
                  setTimeout(() => {
                     modal.classList.add('hidden');
-                 }, 300); // 300ms - це час transition в CSS
-                // Повертаємо прокрутку фону (НОВИЙ СПОСІБ)
+                 }, 300);
                 htmlEl.classList.remove('modal-open'); 
             };
 
-            // Обробники закриття
             modalCloseBtn.addEventListener('click', closeModal);
             modalOverlay.addEventListener('click', closeModal);
             
-            // Закриття по клавіші Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === "Escape" && modal.classList.contains('modal-visible')) {
                     closeModal();
