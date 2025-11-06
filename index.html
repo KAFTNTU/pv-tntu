@@ -61,16 +61,19 @@
             -webkit-text-fill-color: transparent;
         }
         
-        /* === ПОЧАТОК КОДУ ДЛЯ МОДАЛЬНОГО ВІКНА З НЕОНОМ === */
+        /* === ПОЧАТОК КОДУ ДЛЯ МОДАЛЬНИХ ВІКОН === */
 
-        /* Стилі для появи/зникнення вікна */
-        #news-modal {
+        /* Базовий стиль для всіх модальних вікон (новин та секцій) */
+        .modal-base {
           opacity: 0;
           transform: scale(0.95);
           transition: opacity 0.3s ease, transform 0.3s ease;
           pointer-events: none; 
+          display: flex; /* Використовуємо Flex для центрування */
+          align-items: center;
+          justify-content: center;
         }
-        #news-modal.modal-visible {
+        .modal-base.modal-visible {
           opacity: 1;
           transform: scale(1);
           pointer-events: auto; 
@@ -108,8 +111,8 @@
             transparent 360deg
           );
           
-          /* Анімація обертання (сповільнена до 6 секунд) */
-          animation: neon-spin 6s linear infinite;
+          /* Анімація сповільнена (6s -> 9s) */
+          animation: neon-spin 9s linear infinite;
         }
 
         /* Анімація обертання */
@@ -118,7 +121,7 @@
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* Внутрішній контент, який має власний фон */
+        /* Внутрішній контент (для маленького вікна новин) */
         .modal-content-inner {
           position: relative; 
           background: #1e293b; 
@@ -126,10 +129,35 @@
           border-radius: 9px; 
           padding: 1.5rem 2rem;
         }
-
-        /* === КІНЕЦЬ КОДУ ДЛЯ МОДАЛЬНОГО ВІКНА === */
         
-        /* === Приховати скролбар у модальному вікні новин === */
+        /* НОВИЙ СТИЛЬ: Внутрішній контент (для ВЕЛИКИХ вікон секцій) */
+        .modal-section-inner {
+          position: relative; 
+          background: #1e293b; 
+          margin: 1px; 
+          border-radius: 9px; 
+          max-height: 85vh; /* Обмежуємо висоту */
+          overflow-y: auto; /* Додаємо скрол */
+        }
+        
+        /* Кастомний скролбар для ВЕЛИКИХ вікон */
+        .modal-section-inner::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-section-inner::-webkit-scrollbar-track {
+            background: #1e293b; /* bg-slate-800 */
+        }
+        .modal-section-inner::-webkit-scrollbar-thumb {
+            background: #38bdf8; /* bg-sky-400 */
+            border-radius: 10px;
+        }
+        .modal-section-inner::-webkit-scrollbar-thumb:hover {
+            background: #0ea5e9; /* bg-sky-500 */
+        }
+
+        /* === КІНЕЦЬ КОДУ ДЛЯ МОДАЛЬНИХ ВІКОН === */
+        
+        /* === Приховати скролбар у маленькому вікні новин === */
         #modal-text::-webkit-scrollbar {
             display: none; 
         }
@@ -143,25 +171,11 @@
             overflow: hidden;
         }
         
-        /* === НОВА ЛОГІКА: Приховування довгих секцій === */
-        #staff, #news, #gallery {
-            display: none;
-        }
-        html.showing-staff #staff,
-        html.showing-news #news,
-        html.showing-gallery #gallery {
-            display: block;
-        }
-        
-        /* === НОВА ЛОГІКА: Неоновий ефект для ЗАГОЛОВКІВ секцій === */
-        /* Базовий стиль для заголовків секцій (h2) */
+        /* === ОНОВЛЕНО: Неоновий ефект для ЗАГОЛОВКІВ секцій === */
         section h2 {
-            /* Додаємо плавний перехід для ефекту */
             transition: color 0.4s ease, text-shadow 0.4s ease;
         }
-        
         /* Цей клас буде додаватись/прибиратись через JavaScript */
-        /* ПЕРЕЙМЕНОВАНО з 'section-in-view' на 'section-title-active' */
         section.section-title-active h2 {
             color: #7dd3fc; /* Світло-блакитний (sky-300) */
             text-shadow: 
@@ -169,7 +183,6 @@
                 0 0 15px rgba(56, 189, 248, 0.5),
                 0 0 25px rgba(56, 189, 248, 0.3);
         }
-        /* === Кінець нової логіки === */
         
     </style>
 </head>
@@ -353,261 +366,6 @@
         </div>
     </section>
 
-    <!-- === STAFF SECTION (ПРИХОВАНО) === -->
-    <section id="staff" class="py-20 lg:py-32 bg-slate-800/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 reveal">
-                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Наш колектив</h2>
-                <p class="mt-4 text-lg text-slate-400">Професіонали, що надихають на нові звершення</p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Staff Card 1: Паламар -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Паламар Михайло Іванович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Паламар Михайло Іванович</h3>
-                        <p class="text-sky-400">д.р. техн. наук, завідувач кафедри</p>
-                    </div>
-                </div>
-                <!-- Staff Card 2: Яворська -->
-                <div class="text-center reveal" style="transition-delay: 100ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Яворська Мирослава Іванівна">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Яворська Мирослава Іванівна</h3>
-                        <p class="text-sky-400">к.т.н., доцент</p>
-                    </div>
-                </div>
-                <!-- Staff Card 3: Зелінський -->
-                <div class="text-center reveal" style="transition-delay: 200ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Зелінський Ігор Микитович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Зелінський Ігор Микитович</h3>
-                        <p class="text-sky-400">к.ф.-м.н, доцент</p>
-                    </div>
-                </div>
-                <!-- Staff Card 4: Наконечний -->
-                <div class="text-center reveal" style="transition-delay: 300ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Наконечний Юрій Іванович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Наконечний Юрій Іванович</h3>
-                        <p class="text-sky-400">старший викладач</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Прихований персонал (решта 10) -->
-            <div id="hidden-staff" class="hidden mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Staff Card 5: Апостол -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Апостол Юрій Орестович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Апостол Юрій Орестович</h3>
-                        <p class="text-sky-400">старший викладач</p>
-                    </div>
-                </div>
-                <!-- Staff Card 6: Дубиняк -->
-                <div class="text-center reveal" style="transition-delay: 100ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Дубиняк Тарас Степанович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Дубиняк Тарас Степанович</h3>
-                        <p class="text-sky-400">к.т.н., доцент</p>
-                    </div>
-                </div>
-                <!-- Staff Card 7: Чайковський -->
-                <div class="text-center reveal" style="transition-delay: 200ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Чайковський Андрій Вікторович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Чайковський Андрій Вікторович</h3>
-                        <p class="text-sky-400">к.т.н., доцент</p>
-                    </div>
-                </div>
-                <!-- Staff Card 8: Стрембіцький -->
-                <div class="text-center reveal" style="transition-delay: 300ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Стрембіцький Михайло Олексійович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Стрембіцький Михайло Олексійович</h3>
-                        <p class="text-sky-400">к.т.н., доцент</p>
-                    </div>
-                </div>
-                 <!-- Staff Card 9: Батюк -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Батюк Віталій Васильович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Батюк Віталій Васильович</h3>
-                        <p class="text-sky-400">асистент</p>
-                    </div>
-                </div>
-                 <!-- Staff Card 10: Рафалюк -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Рафалюк Олександр Олексійович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Рафалюк Олександр Олексійович</h3>
-                        <p class="text-sky-400">асистент (сумісник)</p>
-                    </div>
-                </div>
-                 <!-- Staff Card 11: Куцевич -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Куцевич Світлана Петрівна">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Куцевич Світлана Петрівна</h3>
-                        <p class="text-sky-400">навчально-допоміжний персонал</p>
-                    </div>
-                </div>
-                 <!-- Staff Card 12: Рудник -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Рудник Андрій Андрійович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Рудник Андрій Андрійович</h3>
-                        <p class="text-sky-400">навчально-допоміжний персонал</p>
-                    </div>
-                </div>
-                <!-- Staff Card 13: Остафійчук -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Остафійчук Іван Васильович">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Остафійчук Іван Васильович</h3>
-                        <p class="text-sky-400">навчально-допоміжний персонал</p>
-                    </div>
-                </div>
-                <!-- Staff Card 14: Папроцька -->
-                <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Папроцька Олена Володимирівна">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Папроцька Олена Володимирівна</h3>
-                        <p class="text-sky-400">інженер 2-ї категорії</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Toggle Button -->
-            <div class="mt-12 text-center">
-                <button id="toggle-staff-btn" class="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 font-semibold transition-colors duration-300">
-                    <span id="toggle-staff-text">Показати всіх</span>
-                    <svg id="toggle-staff-icon" class="w-5 h-5 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- === NEWS SECTION (ПРИХОВАНО) === -->
-    <section id="news" class="py-20 lg:py-32">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 reveal">
-                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Останні новини</h2>
-                <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
-            </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                
-                <!-- News Card 1 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal">
-                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот" alt="Автономна машинка">
-                    <div class="p-6 flex-grow flex flex-col">
-                        <p class="text-sm text-sky-400">29.03.2024</p>
-                        <h3 class="mt-2 text-xl font-semibold text-white">Автономна машинка із елементами штучного інтелекту</h3>
-                        <p class="mt-3 text-slate-400 flex-grow">
-                            Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок...
-                        </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
-                           data-title="Автономна машинка із елементами штучного інтелекту"
-                           data-date="29.03.2024"
-                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот"
-                           data-text="Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок, де кожен робот прокладає маршрут згідно напрямку, тим самим скорочуючи час на сортування посилок людьми і прискорює їх доставку адресату.&#10;Розроблено автономний мобільний робот який призначений для обминання перешкод під час руху і написання для нього програми.&#10;Проведено аналіз принципів побудови систем управління переміщенням мобільних роботів та розробка мобільного робота, який призначений для обминання перешкод під час руху, та написання програми для нього.">
-                           Читати більше &rarr;
-                        </a>
-                    </div>
-                </div>
-
-                <!-- News Card 2 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 200ms;">
-                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання">
-                    <div class="p-6 flex-grow flex flex-col">
-                        <p class="text-sm text-sky-400">05.10.2025</p>
-                        <h3 class="mt-2 text-xl font-semibold text-white">Модернізація лабораторії: нові горизонти для навчання</h3>
-                        <p class="mt-3 text-slate-400 flex-grow">
-                            Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації.
-                        </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
-                           data-title="Модернізація лабораторії: нові горизонти для навчання"
-                           data-date="05.10.2025"
-                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання"
-                           data-text="Лабораторія неруйнівного контролю поповнилася дефектоскопом 'PhaseScan-3' та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.&#10;&#10;Завдяки новому обладнанню, практичні заняття стануть ще більш наближеними до реальних умов виробництва.">
-                           Читати більше &rarr;
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- News Card 3 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 400ms;">
-                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера">
-                    <div class="p-6 flex-grow flex flex-col">
-                        <p class="text-sm text-sky-400">28.09.2025</p>
-                        <h3 class="mt-2 text-xl font-semibold text-white">Стратегічне партнерство з "Техно-Індастрі"</h3>
-                        <p class="mt-3 text-slate-400 flex-grow">
-                            Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів.
-                        </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
-                           data-title="Стратегічне партнерство з 'Техно-Індастрі'"
-                           data-date="28.09.2025"
-                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство"
-                           data-text="Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.&#10;&#10;Це відкриває нові можливості для працевлаштування наших випускників.">
-                           Читати більше &rarr;
-                        </a>
-                    </div>
-                </div>
-                 
-                 <!-- News Card 4 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 600ms;">
-                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн">
-                    <div class="p-6 flex-grow flex flex-col">
-                        <p class="text-sm text-sky-400">20.09.2025</p>
-                        <h3 class="mt-2 text-xl font-semibold text-white">День відкритих дверей у форматі онлайн-зустрічі</h3>
-                        <p class="mt-3 text-slate-400 flex-grow">
-                            Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою.
-                        </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
-                           data-title="День відкритих дверей у форматі онлайн-зустрічі"
-                           data-date="20.09.2025"
-                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн"
-                           data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.&#10;&#10;Реєстрація за посиланням у наших соцмережах.">
-                           Читати більше &rarr;
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- === GALLERY SECTION (ПРИХОВАНО) === -->
-    <section id="gallery" class="py-20 lg:py-32 bg-slate-800/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 reveal">
-                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Галерея</h2>
-                <p class="mt-4 text-lg text-slate-400">Наше студентське життя та навчальний процес</p>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="grid gap-4">
-                    <div class="reveal"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото1" alt=""></div>
-                    <div class="reveal" style="transition-delay: 100ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото2" alt=""></div>
-                </div>
-                <div class="grid gap-4">
-                    <div class="reveal" style="transition-delay: 200ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x500/1e293b/ffffff?text=Фото3" alt=""></div>
-                    <div class="reveal" style="transition-delay: 300ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x600/1e293b/ffffff?text=Фото4" alt=""></div>
-                </div>
-                <div class="grid gap-4">
-                    <div class="reveal" style="transition-delay: 400ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x800/1e293b/ffffff?text=Фото5" alt=""></div>
-                    <div class="reveal" style="transition-delay: 500ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x300/1e293b/ffffff?text=Фото6" alt=""></div>
-                </div>
-                <div class="grid gap-4">
-                    <div class="reveal" style="transition-delay: 600ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото7" alt=""></div>
-                    <div class="reveal" style="transition-delay: 700ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото8" alt=""></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- === CONTACTS SECTION === -->
     <section id="contacts" class="py-20 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -712,8 +470,8 @@
     </div>
 </footer>
 
-<!-- === ПОЧАТОК: MОДАЛЬНЕ ВІКНО (ПЕРЕРОБЛЕНО З ФІКСОМ ГОРТАННЯ) === -->
-<div id="news-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<!-- === ПОЧАТОК: MОДАЛЬНЕ ВІКНО ДЛЯ ОКРЕМОЇ НОВИНИ (маленьке) === -->
+<div id="news-modal" class="hidden fixed inset-0 z-[60] modal-base p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     
     <div id="modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
 
@@ -734,7 +492,194 @@
         </div>
     </div>
 </div>
-<!-- === КІНЕЦЬ: MОДАЛЬНЕ ВІКНО === -->
+<!-- === КІНЕЦЬ: MОДАЛЬНЕ ВІКНО НОВИНИ === -->
+
+
+<!-- === ПОЧАТОК: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "ВИКЛАДАЧІ" (велике) === -->
+<div id="staff-modal" class="hidden fixed inset-0 z-50 modal-base p-4" aria-labelledby="staff-modal-title" role="dialog" aria-modal="true">
+    <!-- Фон -->
+    <div id="staff-modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
+    
+    <!-- Контейнер -->
+    <div class="relative w-full max-w-6xl transform transition-all neon-border-box">
+        <!-- Внутрішня частина зі скролом -->
+        <div class="modal-section-inner">
+            <!-- Кнопка закриття (всередині, щоб скролитись разом з контентом, але приліплена) -->
+            <button id="staff-modal-close-btn" class="sticky top-4 right-6 float-right text-slate-400 hover:text-white z-20 p-2 bg-slate-800/50 rounded-full">
+                <span class="sr-only">Закрити</span>
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            
+            <!-- ОНОВЛЕНО: Додано id="staff" -->
+            <section id="staff" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16 reveal visible"> 
+                    <h2 id="staff-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Наш колектив</h2>
+                    <p class="mt-4 text-lg text-slate-400">Професіонали, що надихають на нові звершення</p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Staff Card 1: Паламар -->
+                    <div class="text-center reveal visible">
+                        <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Паламар Михайло Іванович">
+                        <div class="mt-4">
+                            <h3 class="text-lg font-semibold text-white">Паламар Михайло Іванович</h3>
+                            <p class="text-sky-400">д.р. техн. наук, завідувач кафедри</p>
+                        </div>
+                    </div>
+                    <!-- Staff Card 2: Яворська -->
+                    <div class="text-center reveal visible" style="transition-delay: 100ms;">
+                        <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Яворська Мирослава Іванівна">
+                        <div class="mt-4">
+                            <h3 class="text-lg font-semibold text-white">Яворська Мирослава Іванівна</h3>
+                            <p class="text-sky-400">к.т.н., доцент</p>
+                        </div>
+                    </div>
+                    <!-- Staff Card 3: Зелінський -->
+                    <div class="text-center reveal visible" style="transition-delay: 200ms;">
+                        <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Зелінський Ігор Микитович">
+                        <div class="mt-4">
+                            <h3 class="text-lg font-semibold text-white">Зелінський Ігор Микитович</h3>
+                            <p class="text-sky-400">к.ф.-м.н, доцент</p>
+                        </div>
+                    </div>
+                    <!-- Staff Card 4: Наконечний -->
+                    <div class="text-center reveal visible" style="transition-delay: 300ms;">
+                        <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Наконечний Юрій Іванович">
+                        <div class="mt-4">
+                            <h3 class="text-lg font-semibold text-white">Наконечний Юрій Іванович</h3>
+                            <p class="text-sky-400">старший викладач</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Прихований персонал (решта 10) -->
+                <div id="hidden-staff-modal" class="hidden mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Staff Card 5: Апостол -->
+                    <div class="text-center reveal visible">
+                        <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Апостол Юрій Орестович">
+                        <div class="mt-4">
+                            <h3 class="text-lg font-semibold text-white">Апостол Юрій Орестович</h3>
+                            <p class="text-sky-400">старший викладач</p>
+                        </div>
+                    </div>
+                    <!-- ... (решта карток персоналу) ... -->
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Дубиняк Тарас Степанович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Дубиняк Тарас Степанович</h3><p class="text-sky-400">к.т.н., доцент</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Чайковський Андрій Вікторович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Чайковський Андрій Вікторович</h3><p class="text-sky-400">к.т.н., доцент</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Стрембіцький Михайло Олексійович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Стрембіцький Михайло Олексійович</h3><p class="text-sky-400">к.т.н., доцент</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Батюк Віталій Васильович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Батюк Віталій Васильович</h3><p class="text-sky-400">асистент</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Рафалюк Олександр Олексійович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Рафалюк Олександр Олексійович</h3><p class="text-sky-400">асистент (сумісник)</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Куцевич Світлана Петрівна"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Куцевич Світлана Петрівна</h3><p class="text-sky-400">навчально-допоміжний персонал</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Рудник Андрій Андрійович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Рудник Андрій Андрійович</h3><p class="text-sky-400">навчально-допоміжний персонал</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Остафійчук Іван Васильович"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Остафійчук Іван Васильович</h3><p class="text-sky-400">навчально-допоміжний персонал</p></div></div>
+                    <div class="text-center reveal visible"><img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Папроцька Олена Володимирівна"><div class="mt-4"><h3 class="text-lg font-semibold text-white">Папроцька Олена Володимирівна</h3><p class="text-sky-400">інженер 2-ї категорії</p></div></div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="mt-12 text-center">
+                    <button id="toggle-staff-btn-modal" class="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 font-semibold transition-colors duration-300">
+                        <span id="toggle-staff-text-modal">Показати всіх</span>
+                        <svg id="toggle-staff-icon-modal" class="w-5 h-5 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<!-- === КІНЕЦЬ: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "ВИКЛАДАЧІ" === -->
+
+
+<!-- === ПОЧАТОК: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "НОВИНИ" (велике) === -->
+<div id="news-section-modal" class="hidden fixed inset-0 z-50 modal-base p-4" aria-labelledby="news-modal-title" role="dialog" aria-modal="true">
+    <!-- Фон -->
+    <div id="news-section-modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
+    
+    <!-- Контейнер -->
+    <div class="relative w-full max-w-6xl transform transition-all neon-border-box">
+        <!-- Внутрішня частина зі скролом -->
+        <div class="modal-section-inner">
+            <!-- Кнопка закриття -->
+            <button id="news-section-modal-close-btn" class="sticky top-4 right-6 float-right text-slate-400 hover:text-white z-20 p-2 bg-slate-800/50 rounded-full">
+                <span class="sr-only">Закрити</span>
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <!-- ОНОВЛЕНО: Додано id="news" -->
+            <section id="news" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16 reveal visible">
+                    <h2 id="news-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Останні новини</h2>
+                    <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    
+                    <!-- News Card 1 -->
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible">
+                        <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот" alt="Автономна машинка">
+                        <div class="p-6 flex-grow flex flex-col">
+                            <p class="text-sm text-sky-400">29.03.2024</p>
+                            <h3 class="mt-2 text-xl font-semibold text-white">Автономна машинка із елементами штучного інтелекту</h3>
+                            <p class="mt-3 text-slate-400 flex-grow">
+                                Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок...
+                            </p>
+                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
+                               data-title="Автономна машинка із елементами штучного інтелекту"
+                               data-date="29.03.2024"
+                               data-image="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот"
+                               data-text="Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок, де кожен робот прокладає маршрут згідно напрямку, тим самим скорочуючи час на сортування посилок людьми і прискорює їх доставку адресату.&#10;Розроблено автономний мобільний робот який призначений для обминання перешкод під час руху і написання для нього програми.&#10;Проведено аналіз принципів побудови систем управління переміщенням мобільних роботів та розробка мобільного робота, який призначений для обминання перешкод під час руху, та написання програми для нього.">
+                               Читати більше &rarr;
+                            </a>
+                        </div>
+                    </div>
+                    <!-- ... (решта карток новин) ... -->
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible" style="transition-delay: 200ms;"><img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання"><div class="p-6 flex-grow flex flex-col"><p class="text-sm text-sky-400">05.10.2025</p><h3 class="mt-2 text-xl font-semibold text-white">Модернізація лабораторії: нові горизонти для навчання</h3><p class="mt-3 text-slate-400 flex-grow">Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації.</p><a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Модернізація лабораторії: нові горизонти для навчання" data-date="05.10.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" data-text="Лабораторія неруйнівного контролю поповнилася дефектоскопом 'PhaseScan-3' та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.&#10;&#10;Завдяки новому обладнанню, практичні заняття стануть ще більш наближеними до реальних умов виробництва.">Читати більше &rarr;</a></div></div>
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible" style="transition-delay: 400ms;"><img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера"><div class="p-6 flex-grow flex flex-col"><p class="text-sm text-sky-400">28.09.2025</p><h3 class="mt-2 text-xl font-semibold text-white">Стратегічне партнерство з "Техно-Індастрі"</h3><p class="mt-3 text-slate-400 flex-grow">Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів.</p><a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Стратегічне партнерство з 'Техно-Індастрі'" data-date="28.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" data-text="Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.&#10;&#10;Це відкриває нові можливості для працевлаштування наших випускників.">Читати більше &rarr;</a></div></div>
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible" style="transition-delay: 600ms;"><img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн"><div class="p-6 flex-grow flex flex-col"><p class="text-sm text-sky-400">20.09.2025</p><h3 class="mt-2 text-xl font-semibold text-white">День відкритих дверей у форматі онлайн-зустрічі</h3><p class="mt-3 text-slate-400 flex-grow">Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою.</p><a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="День відкритих дверей у форматі онлайн-зустрічі" data-date="20.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.&#10;&#10;Реєстрація за посиланням у наших соцмережах.">Читати більше &rarr;</a></div></div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<!-- === КІНЕЦЬ: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "НОВИНИ" === -->
+
+
+<!-- === ПОЧАТОК: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "ГАЛЕРЕЯ" (велике) === -->
+<div id="gallery-modal" class="hidden fixed inset-0 z-50 modal-base p-4" aria-labelledby="gallery-modal-title" role="dialog" aria-modal="true">
+    <!-- Фон -->
+    <div id="gallery-modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
+    
+    <!-- Контейнер -->
+    <div class="relative w-full max-w-6xl transform transition-all neon-border-box">
+        <!-- Внутрішня частина зі скролом -->
+        <div class="modal-section-inner">
+            <!-- Кнопка закриття -->
+            <button id="gallery-modal-close-btn" class="sticky top-4 right-6 float-right text-slate-400 hover:text-white z-20 p-2 bg-slate-800/50 rounded-full">
+                <span class="sr-only">Закрити</span>
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <!-- ОНОВЛЕНО: Додано id="gallery" -->
+            <section id="gallery" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16 reveal visible">
+                    <h2 id="gallery-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Галерея</h2>
+                    <p class="mt-4 text-lg text-slate-400">Наше студентське життя та навчальний процес</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="grid gap-4">
+                        <div class="reveal visible"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото1" alt=""></div>
+                        <div class="reveal visible" style="transition-delay: 100ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото2" alt=""></div>
+                    </div>
+                    <!-- ... (решта фото галереї) ... -->
+                    <div class="grid gap-4"><div class="reveal visible" style="transition-delay: 200ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x500/1e293b/ffffff?text=Фото3" alt=""></div><div class="reveal visible" style="transition-delay: 300ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x600/1e293b/ffffff?text=Фото4" alt=""></div></div>
+                    <div class="grid gap-4"><div class="reveal visible" style="transition-delay: 400ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x800/1e293b/ffffff?text=Фото5" alt=""></div><div class="reveal visible" style="transition-delay: 500ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x300/1e293b/ffffff?text=Фото6" alt=""></div></div>
+                    <div class="grid gap-4"><div class="reveal visible" style="transition-delay: 600ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото7" alt=""></div><div class="reveal visible" style="transition-delay: 700ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото8" alt=""></div></div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<!-- === КІНЕЦЬ: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "ГАЛЕРЕЯ" === -->
 
 
 <!-- Scroll to top button -->
@@ -778,7 +723,7 @@
         }
 
         // --- Animate on Scroll (Intersection Observer) ---
-        const revealElements = document.querySelectorAll('.reveal');
+        const revealElements = document.querySelectorAll('main > section .reveal');
         if (revealElements.length > 0) {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -795,94 +740,150 @@
             });
         }
         
-        // --- НОВА ЛОГІКА: Навігація, Показ/Приховування Секцій, Неон на ЗАГОЛОВКУ та Закриття Меню ---
+        // --- ОНОВЛЕНА ЛОГІКА: Навігація + Відкриття Модалок + Неон на Заголовках ---
+        
+        // 1. Отримуємо всі посилання
         const desktopNavLinks = document.querySelectorAll('header nav a[href^="#"]'); 
         const mobileNavLinks = document.querySelectorAll('#mobile-menu a[href^="#"]'); 
         const allNavLinks = [...desktopNavLinks, ...mobileNavLinks]; 
-        const allSections = document.querySelectorAll('section[id]');
+        
+        // 2. Отримуємо всі модальні вікна секцій
+        const staffModal = document.getElementById('staff-modal');
+        const newsModal = document.getElementById('news-section-modal');
+        const galleryModal = document.getElementById('gallery-modal');
+        
+        // 3. Отримуємо кнопки закриття
+        const staffModalClose = document.getElementById('staff-modal-close-btn');
+        const newsModalClose = document.getElementById('news-section-modal-close-btn');
+        const galleryModalClose = document.getElementById('gallery-modal-close-btn');
+        const staffModalOverlay = document.getElementById('staff-modal-overlay');
+        const newsModalOverlay = document.getElementById('news-section-modal-overlay');
+        const galleryModalOverlay = document.getElementById('gallery-modal-overlay');
 
-        // Функція для обробки кліку по будь-якому навігаційному посиланню
+        // 4. Універсальна функція для відкриття модалки
+        const openModal = (modalEl) => {
+            if (!modalEl) return;
+            modalEl.classList.remove('hidden');
+            setTimeout(() => {
+                 modalEl.classList.add('modal-visible');
+            }, 10);
+            htmlEl.classList.add('modal-open'); 
+        };
+        
+        // 5. Універсальна функція для закриття модалки
+        const closeModal = (modalEl) => {
+            if (!modalEl) return;
+            modalEl.classList.remove('modal-visible');
+            setTimeout(() => {
+                modalEl.classList.add('hidden');
+            }, 300);
+            htmlEl.classList.remove('modal-open'); 
+        };
+
+        // 6. Обробник кліків на навігацію
         const handleNavClick = (e, clickedLink) => {
             e.preventDefault(); // Завжди забороняємо стандартний клік
             const href = clickedLink.getAttribute('href');
-            const targetId = href.substring(1); 
-            const targetSection = document.getElementById(targetId);
             
-            if (!targetSection) return; // Якщо секції не існує, нічого не робимо
-
-            // --- ЛОГІКА ПОКАЗУ/ПРИХОВУВАННЯ СЕКЦІЙ ---
-            if (href === '#staff' || href === '#news' || href === '#gallery') {
-                htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
-                htmlEl.classList.add('showing-' + targetId);
-            } else {
-                htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
-            }
-            
-            // --- ЛОГІКА ПЛАВНОГО СКРОЛУ ---
-            let headerOffset = 96; // h-24 (96px)
-            let elementPosition = targetSection.getBoundingClientRect().top;
-            
-            // Для #hero скрол на самий верх
-            let offsetPosition = (href === '#hero') 
-                ? 0 
-                : elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-                 top: offsetPosition,
-                 behavior: "smooth"
-            });
-            
-            // --- ЛОГІКА НЕОНУ ДЛЯ ЗАГОЛОВКА (ОНОВЛЕНО) ---
-            // 1. Прибираємо клас з усіх секцій
-            allSections.forEach(sec => sec.classList.remove('section-title-active'));
-            
-            // 2. Додаємо клас до цільової секції (окрім hero)
-            if (href !== '#hero') {
-                targetSection.classList.add('section-title-active');
-                
-                // 3. Прибираємо клас через 3 секунди
-                setTimeout(() => {
-                    targetSection.classList.remove('section-title-active');
-                }, 1500);
-            }
-            // --- КІНЕЦЬ ЛОГІКИ НЕОНУ ---
-
-            
-            // --- ЛОГІКА ЗАКРИТТЯ МОБІЛЬНОГО МЕНЮ ---
+            // Закриваємо мобільне меню, якщо воно відкрите
             if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
                 mobileMenu.classList.add('hidden');
                 menuOpenIcon.classList.remove('hidden');
                 menuCloseIcon.classList.add('hidden');
             }
+            
+            // --- ОНОВЛЕНО: ЛОГІКА НЕОНУ (1.5 сек) ---
+            const targetId = href.substring(1); 
+            // Шукаємо секцію (на сторінці АБО в прихованих модалках)
+            const targetSection = document.getElementById(targetId); 
+
+            // Скидаємо неон з усіх-усіх секцій
+            document.querySelectorAll('section[id]').forEach(sec => sec.classList.remove('section-title-active'));
+
+            // Активуємо неон, якщо це не 'hero'
+            if (targetSection && targetId !== 'hero') {
+                targetSection.classList.add('section-title-active');
+                
+                // Прибираємо клас через 1.5 секунди
+                setTimeout(() => {
+                    targetSection.classList.remove('section-title-active');
+                }, 1500); // 1.5 секунди
+            }
+            // --- КІНЕЦЬ ЛОГІКИ НЕОНУ ---
+
+
+            // --- ЛОГІКА: Що робити при кліку (відкрити модалку АБО скрол) ---
+            switch(href) {
+                // ВИПАДОК 1: Відкрити модальне вікно
+                case '#staff':
+                    openModal(staffModal);
+                    break;
+                case '#news':
+                    openModal(newsModal);
+                    break;
+                case '#gallery':
+                    openModal(galleryModal);
+                    break;
+                
+                // ВИПАДОК 2: Плавна прокрутка до секції
+                default:
+                    if (!targetSection) { // Наприклад, #hero
+                         window.scrollTo({ top: 0, behavior: "smooth" });
+                         break;
+                    }
+                    
+                    let headerOffset = 96; // h-24 (96px)
+                    let elementPosition = targetSection.getBoundingClientRect().top;
+                    let offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                         top: offsetPosition,
+                         behavior: "smooth"
+                    });
+            }
         };
 
-        // Вішаємо обробник на всі посилання (десктопні + мобільні)
+        // 7. Вішаємо обробник на всі посилання
         allNavLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                handleNavClick(e, this); // 'this' - це 'link'
+                handleNavClick(e, this); 
             });
         });
+        
+        // 8. Вішаємо обробники на кнопки закриття
+        if(staffModal) {
+            staffModalClose.addEventListener('click', () => closeModal(staffModal));
+            staffModalOverlay.addEventListener('click', () => closeModal(staffModal));
+        }
+        if(newsModal) {
+            newsModalClose.addEventListener('click', () => closeModal(newsModal));
+            newsModalOverlay.addEventListener('click', () => closeModal(newsModal));
+        }
+        if(galleryModal) {
+            galleryModalClose.addEventListener('click', () => closeModal(galleryModal));
+            galleryModalOverlay.addEventListener('click', () => closeModal(galleryModal));
+        }
 
 
-        // --- Staff Toggle ---
-        const toggleStaffBtn = document.getElementById('toggle-staff-btn');
-        const hiddenStaff = document.getElementById('hidden-staff');
-        const toggleStaffText = document.getElementById('toggle-staff-text');
-        const toggleStaffIcon = document.getElementById('toggle-staff-icon');
+        // --- Staff Toggle (для модального вікна) ---
+        const toggleStaffBtnModal = document.getElementById('toggle-staff-btn-modal');
+        const hiddenStaffModal = document.getElementById('hidden-staff-modal');
+        const toggleStaffTextModal = document.getElementById('toggle-staff-text-modal');
+        const toggleStaffIconModal = document.getElementById('toggle-staff-icon-modal');
 
-        if (toggleStaffBtn) {
-            toggleStaffBtn.addEventListener('click', () => {
-                const isHidden = hiddenStaff.classList.toggle('hidden');
-                toggleStaffIcon.classList.toggle('rotate-180');
+        if (toggleStaffBtnModal) {
+            toggleStaffBtnModal.addEventListener('click', () => {
+                const isHidden = hiddenStaffModal.classList.toggle('hidden');
+                toggleStaffIconModal.classList.toggle('rotate-180');
                 if (isHidden) {
-                    toggleStaffText.textContent = 'Показати всіх';
+                    toggleStaffTextModal.textContent = 'Показати всіх';
                 } else {
-                    toggleStaffText.textContent = 'Згорнути';
+                    toggleStaffTextModal.textContent = 'Згорнути';
                 }
             });
         }
         
-        // --- Modal Window Logic (Версія з блокуванням прокрутки) ---
+        // --- Modal Window Logic (для ОКРЕМИХ новин - всередині модалки новин) ---
         const openModalButtons = document.querySelectorAll('.open-modal-btn');
         const modal = document.getElementById('news-modal'); 
         const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -906,34 +907,32 @@
                     if (modalTitle) modalTitle.textContent = title;
                     if (modalText) modalText.textContent = text;
                     
-                    modal.classList.remove('hidden');
-                    setTimeout(() => {
-                         modal.classList.add('modal-visible');
-                    }, 10);
-                   
-                    htmlEl.classList.add('modal-open'); 
+                    openModal(modal); // Використовуємо нашу нову універсальну функцію
                 });
             });
 
-            const closeModal = () => {
-                modal.classList.remove('modal-visible');
-                 setTimeout(() => {
-                    modal.classList.add('hidden');
-                 }, 300);
-                htmlEl.classList.remove('modal-open'); 
-            };
-
-            modalCloseBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', closeModal);
-            
-            document.addEventListener('keydown', (e) => {
-                if (e.key === "Escape" && modal.classList.contains('modal-visible')) {
-                    closeModal();
-                }
-            });
+            // Використовуємо нашу нову універсальну функцію
+            modalCloseBtn.addEventListener('click', () => closeModal(modal));
+            modalOverlay.addEventListener('click', () => closeModal(modal));
         }
         
-        // --- (Стара логіка 'IntersectionObserver' для заголовків ВИДАЛЕНА) ---
+        // Закриття всіх модалок по 'Escape'
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                if(modal && modal.classList.contains('modal-visible')) {
+                    closeModal(modal);
+                }
+                if(staffModal && staffModal.classList.contains('modal-visible')) {
+                    closeModal(staffModal);
+                }
+                if(newsModal && newsModal.classList.contains('modal-visible')) {
+                    closeModal(newsModal);
+                }
+                if(galleryModal && galleryModal.classList.contains('modal-visible')) {
+                    closeModal(galleryModal);
+                }
+            }
+        });
         
     });
 </script>
