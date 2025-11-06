@@ -173,14 +173,12 @@
             scroll-snap-type: x mandatory;
             scrollbar-width: none; 
             -ms-overflow-style: none; 
-            /* ОНОВЛЕНО: Відступи для "прилипання" */
-            padding-left: 1rem;
-            padding-right: 1rem;
+            /* ОНОВЛЕНО: 'scroll-padding' замість 'padding' для коректного "прилипання" */
+            scroll-padding: 0 1rem;
         }
         @media (min-width: 1024px) { 
             .news-scroll-container {
-                padding-left: 1rem;
-                padding-right: 1rem;
+                 scroll-padding: 0 1rem;
             }
         }
         .news-scroll-container::-webkit-scrollbar {
@@ -189,7 +187,7 @@
 
         /* Кожна картка новин */
         .news-card {
-            width: 80%; /* 1 картка на мобільному */
+            width: calc(80% - 1rem); /* 1 картка на мобільному, з відступом */
             flex-shrink: 0;
             scroll-snap-align: center; /* Центруємо 1 картку */
             margin: 0 0.5rem; 
@@ -203,12 +201,33 @@
                 scroll-snap-align: start; /* "Прилипаємо" до початку */
             }
         }
+        
+        /* Перша та остання картка (для відступів по боках) */
+        .news-card:first-child {
+             margin-left: 1rem;
+        }
+        @media (min-width: 1024px) {
+            .news-card:first-child {
+                margin-left: 1rem;
+            }
+        }
+        .news-card:last-child {
+             margin-right: 1rem;
+        }
+        @media (min-width: 1024px) {
+            .news-card:last-child {
+                margin-right: 1rem;
+            }
+        }
+
 
         /* Контейнер для "горошинок" */
         .dots-container {
             display: flex;
             justify-content: center;
-            padding-top: 1rem; /* 16px */
+            /* ОНОВЛЕНО: Піднято "горошинки" вгору */
+            padding-top: 0.75rem; /* 12px */
+            padding-bottom: 0.5rem; /* 8px */
         }
 
         .dot {
@@ -666,9 +685,9 @@
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            <!-- ОНОВЛЕНО: Зменшені відступи py-12 та mb-8 -->
-            <section id="news" class="py-8 px-4 sm:px-6 lg:px-6">
-                <div class="text-center mb-8 reveal visible">
+            <!-- ОНОВЛЕНО: Зменшені відступи py-12 та mb-8, pb-0 -->
+            <section id="news" class="py-12 px-0 sm:px-0 lg:px-0">
+                <div class="text-center mb-8 reveal visible px-4 sm:px-6 lg:px-8">
                     <h2 id="news-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Останні новини</h2>
                     <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
                 </div>
@@ -680,13 +699,15 @@
                     <!-- ОНОВЛЕНО: Прибрано flex-grow з p-6, щоб підняти контент -->
                     <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
                         <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот" alt="Автономна машинка">
-                        <div class="p-6 flex flex-col"> <!-- Прибрано flex-grow -->
+                        <!-- ОНОВЛЕНО: Зменшені відступи (p-4) -->
+                        <div class="p-4 flex flex-col"> 
                             <p class="text-sm text-sky-400">29.03.2024</p>
                             <h3 class="mt-2 text-xl font-semibold text-white">Автономна машинка із елементами штучного інтелекту</h3>
-                            <p class="mt-3 text-slate-400"> <!-- Прибрано flex-grow -->
+                            <!-- ОНОВЛЕНО: Зменшені відступи (mt-2 mb-3) -->
+                            <p class="mt-2 mb-3 text-slate-400"> 
                                 Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок...
                             </p>
-                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
+                            <a href="#" class="mt-auto text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
                                data-title="Автономна машинка із елементами штучного інтелекту"
                                data-date="29.03.2024"
                                data-image="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот"
@@ -699,39 +720,39 @@
                     <!-- News Card 2 -->
                     <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
                         <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання">
-                        <div class="p-6 flex flex-col">
+                        <div class="p-4 flex flex-col">
                             <p class="text-sm text-sky-400">05.10.2025</p>
                             <h3 class="mt-2 text-xl font-semibold text-white">Модернізація лабораторії: нові горизонти для навчання</h3>
-                            <p class="mt-3 text-slate-400">Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації.</p>
-                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Модернізація лабораторії: нові горизонти для навчання" data-date="05.10.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" data-text="Лабораторія неруйнівного контролю поповнилася дефектоскопом 'PhaseScan-3' та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.&#10;&#10;Завдяки новому обладнанню, практичні заняття стануть ще більш наближеними до реальних умов виробництва.">Читати більше &rarr;</a>
+                            <p class="mt-2 mb-3 text-slate-400">Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації.</p>
+                            <a href="#" class="mt-auto text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Модернізація лабораторії: нові горизонти для навчання" data-date="05.10.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" data-text="Лабораторія неруйнівного контролю поповнилася дефектоскопом 'PhaseScan-3' та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.&#10;&#10;Завдяки новому обладнанню, практичні заняття стануть ще більш наближеними до реальних умов виробництва.">Читати більше &rarr;</a>
                         </div>
                     </div>
                     
                     <!-- News Card 3 -->
                     <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
                         <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера">
-                        <div class="p-6 flex flex-col">
+                        <div class="p-4 flex flex-col">
                             <p class="text-sm text-sky-400">28.09.2025</p>
                             <h3 class="mt-2 text-xl font-semibold text-white">Стратегічне партнерство з "Техно-Індастрі"</h3>
-                            <p class="mt-3 text-slate-400">Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів.</p>
-                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Стратегічне партнерство з 'Техно-Індастрі'" data-date="28.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" data-text="Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.&#10;&#10;Це відкриває нові можливості для працевлаштування наших випускників.">Читати більше &rarr;</a>
+                            <p class="mt-2 mb-3 text-slate-400">Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів.</p>
+                            <a href="#" class="mt-auto text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Стратегічне партнерство з 'Техно-Індастрі'" data-date="28.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" data-text="Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.&#10;&#10;Це відкриває нові можливості для працевлаштування наших випускників.">Читати більше &rarr;</a>
                         </div>
                     </div>
                     
                     <!-- News Card 4 -->
                     <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
                         <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн">
-                        <div class="p-6 flex flex-col">
+                        <div class="p-4 flex flex-col">
                             <p class="text-sm text-sky-400">20.09.2025</p>
                             <h3 class="mt-2 text-xl font-semibold text-white">День відкритих дверей у форматі онлайн-зустрічі</h3>
-                            <p class="mt-3 text-slate-400">Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою.</p>
-                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="День відкритих дверей у форматі онлайн-зустрічі" data-date="20.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.&#10;&#10;Реєстрація за посиланням у наших соцмережах.">Читати більше &rarr;</a>
+                            <p class="mt-2 mb-3 text-slate-400">Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою.</p>
+                            <a href="#" class="mt-auto text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="День відкритих дверей у форматі онлайн-зустрічі" data-date="20.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.&#10;&#10;Реєстрація за посиланням у наших соцмережах.">Читати більше &rarr;</a>
                         </div>
                     </div>
                     
                 </div>
                 
-                <!-- ОНОВЛЕНО: Контейнер для "горошинок" -->
+                <!-- ОНОВЛЕНО: Контейнер для "горошинок" (піднято вгору) -->
                 <div id="news-dots" class="dots-container"></div>
                 
             </section>
@@ -836,7 +857,7 @@
             });
         }
         
-        // --- ОНОВЛЕНО: Простий слайдер новин (без безкінечного скролу) ---
+        // --- ОНОВЛЕНО: Простий слайдер новин (з виправленням логіки "горошинок") ---
         const newsScrollContainer = document.getElementById('news-scroll-container');
         const dotsContainer = document.getElementById('news-dots');
         let newsDots = []; 
@@ -850,20 +871,15 @@
             const containerRect = newsScrollContainer.getBoundingClientRect();
             if (containerRect.width === 0) return; 
             
-            // ОНОВЛЕНО: Визначаємо, скільки карток видно (1 чи 2)
             const isDesktop = window.innerWidth >= 1024;
             const cardsPerPage = isDesktop ? 2 : 1;
             
             // ОНОВЛЕНО: Знаходимо індекс першої *майже* видимої картки
-            let firstVisibleIndex = 0;
-            for(let i=0; i < newsCards.length; i++) {
-                const cardRect = newsCards[i].getBoundingClientRect();
-                // Картка вважається "активною", якщо її лівий край перетнув 25% контейнера
-                if (cardRect.left >= (containerRect.left - containerRect.width * 0.25)) {
-                    firstVisibleIndex = i;
-                    break;
-                }
-            }
+            // Використовуємо scrollLeft для надійного визначення
+            const scrollLeft = newsScrollContainer.scrollLeft;
+            const cardWidth = newsCards[0].offsetWidth + parseInt(window.getComputedStyle(newsCards[0]).marginRight) * 2;
+            
+            let firstVisibleIndex = Math.round(scrollLeft / cardWidth);
             
             // ОНОВЛЕНО: Індекс "горошинки" базується на сторінці
             const dotIndex = Math.floor(firstVisibleIndex / cardsPerPage);
@@ -888,7 +904,6 @@
             const numCards = newsCards.length;
             if (numCards === 0) return;
 
-            // ОНОВЛЕНО: Створюємо "горошинки" для СТОРІНОК (по 1 або 2 картки)
             const isDesktop = window.innerWidth >= 1024;
             const cardsPerPage = isDesktop ? 2 : 1;
             const numDots = Math.ceil(numCards / cardsPerPage);
@@ -908,13 +923,11 @@
                 newsDots.push(dot);
             }
 
-            // 2. Вішаємо обробник на скрол
             newsScrollContainer.addEventListener('scroll', () => {
                 clearTimeout(scrollTimer);
                 scrollTimer = setTimeout(updateActiveDot, 100); 
             });
 
-            // 3. Встановлюємо активну "горошинку" при завантаженні (першу)
             if (newsDots.length > 0) {
                 newsDots[0].classList.add('active');
             }
@@ -955,7 +968,6 @@
             htmlEl.classList.remove('modal-open'); 
         };
 
-        // Змінна для відстеження, чи ініціалізовано скрол
         let isNewsScrollInit = false; 
 
         const handleNavClick = (e, clickedLink) => {
@@ -969,9 +981,15 @@
             }
             
             const targetId = href.substring(1); 
-            const targetSection = document.getElementById(targetId); 
+            let targetSection; 
 
-            document.querySelectorAll('section[id]').forEach(sec => sec.classList.remove('section-title-active'));
+            // ОНОВЛЕНО: Шукаємо ID або в 'main', або в модалках
+            if (href === '#staff') targetSection = document.getElementById('staff-modal-title').closest('section');
+            else if (href === '#news') targetSection = document.getElementById('news-modal-title').closest('section');
+            else if (href === '#gallery') targetSection = document.getElementById('gallery-modal-title').closest('section');
+            else targetSection = document.getElementById(targetId);
+
+            document.querySelectorAll('section[id] h2').forEach(h2 => h2.closest('section').classList.remove('section-title-active'));
 
             if (targetSection && targetId !== 'hero') {
                 targetSection.classList.add('section-title-active');
@@ -987,12 +1005,10 @@
                     break;
                 case '#news':
                     openModal(newsModal);
-                    // Ініціалізуємо скрол ТІЛЬКИ при першому відкритті
                     if (!isNewsScrollInit) {
-                        initSimpleScroll(); // ОНОВЛЕНО
+                        initSimpleScroll(); 
                         isNewsScrollInit = true;
                     }
-                    // Оновлюємо "горошинки" при кожному відкритті
                     setTimeout(updateActiveDot, 50); 
                     break;
                 case '#gallery':
@@ -1054,35 +1070,39 @@
         }
         
         // --- Modal Window Logic (для ОКРЕМИХ новин) ---
-        const openModalButtons = document.querySelectorAll('.open-modal-btn');
-        const modal = document.getElementById('news-modal'); 
-        const modalCloseBtn = document.getElementById('modal-close-btn');
-        const modalOverlay = document.getElementById('modal-overlay');
+        // ОНОВЛЕНО: Переконався, що ми шукаємо кнопки ТІЛЬКИ в модалці новин
+        const newsSectionModal = document.getElementById('news-section-modal');
+        if (newsSectionModal) {
+            const openModalButtons = newsSectionModal.querySelectorAll('.open-modal-btn');
+            const modal = document.getElementById('news-modal'); 
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalOverlay = document.getElementById('modal-overlay');
 
-        const modalDate = document.getElementById('modal-date');
-        const modalTitle = document.getElementById('modal-title');
-        const modalText = document.getElementById('modal-text');
+            const modalDate = document.getElementById('modal-date');
+            const modalTitle = document.getElementById('modal-title');
+            const modalText = document.getElementById('modal-text');
 
-        if (modal && modalCloseBtn && modalOverlay && openModalButtons.length > 0) {
-            
-            openModalButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault(); 
-                    
-                    const title = this.dataset.title;
-                    const date = this.dataset.date;
-                    const text = this.dataset.text;
+            if (modal && modalCloseBtn && modalOverlay && openModalButtons.length > 0) {
+                
+                openModalButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault(); 
+                        
+                        const title = this.dataset.title;
+                        const date = this.dataset.date;
+                        const text = this.dataset.text;
 
-                    if (modalDate) modalDate.textContent = date;
-                    if (modalTitle) modalTitle.textContent = title;
-                    if (modalText) modalText.textContent = text;
-                    
-                    openModal(modal); 
+                        if (modalDate) modalDate.textContent = date;
+                        if (modalTitle) modalTitle.textContent = title;
+                        if (modalText) modalText.textContent = text;
+                        
+                        openModal(modal); 
+                    });
                 });
-            });
 
-            modalCloseBtn.addEventListener('click', () => closeModal(modal));
-            modalOverlay.addEventListener('click', () => closeModal(modal));
+                modalCloseBtn.addEventListener('click', () => closeModal(modal));
+                modalOverlay.addEventListener('click', () => closeModal(modal));
+            }
         }
         
         // Закриття всіх модалок по 'Escape'
