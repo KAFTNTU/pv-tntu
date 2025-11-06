@@ -36,12 +36,11 @@
             background: #0ea5e9; /* bg-sky-500 */
         }
 
-        /* Frosted glass effect for the header (ОНОВЛЕНО: прибрано border-bottom) */
+        /* Frosted glass effect for the header */
         .frosted-glass {
             background-color: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            /* border-bottom: 1px solid rgba(51, 65, 85, 0.5); */ /* <--- ВИДАЛЕНО */
         }
 
         /* Animation classes for scroll effects */
@@ -69,20 +68,20 @@
           opacity: 0;
           transform: scale(0.95);
           transition: opacity 0.3s ease, transform 0.3s ease;
-          pointer-events: none; /* Блокувати кліки, коли приховано */
+          pointer-events: none; 
         }
         #news-modal.modal-visible {
           opacity: 1;
           transform: scale(1);
-          pointer-events: auto; /* Дозволити кліки, коли видимо */
+          pointer-events: auto; 
         }
 
         /* Контейнер для анімації рамки */
         .neon-border-box {
           position: relative;
-          background: #0f172a; /* Темний фон */
+          background: #0f172a; 
           border-radius: 10px;
-          overflow: hidden; /* Ховаємо все, що виходить за межі */
+          overflow: hidden; 
         }
 
         /* Псевдо-елемент, який створює анімацію "бігаючої" лінії */
@@ -91,8 +90,8 @@
           position: absolute;
           top: 50%;
           left: 50%;
-          width: 200%; /* Ширше, щоб кути були за межами */
-          height: 200%; /* Вище */
+          width: 200%; 
+          height: 200%; 
           transform-origin: center;
           transform: translate(-50%, -50%);
           
@@ -121,8 +120,8 @@
 
         /* Внутрішній контент, який має власний фон */
         .modal-content-inner {
-          position: relative; /* Щоб бути поверх анімації */
-          background: #1e293b; /* Фон самого вікна (slate-800) */
+          position: relative; 
+          background: #1e293b; 
           margin: 1px; 
           border-radius: 9px; 
           padding: 1.5rem 2rem;
@@ -154,20 +153,21 @@
             display: block;
         }
         
-        /* === НОВА ЛОГІКА: Неоновий ефект для навігації === */
-        /* Базовий стиль для посилань (додаємо transition) */
-        header nav a, #mobile-menu a {
-            transition: color 0.3s ease, text-shadow 0.3s ease;
+        /* === НОВА ЛОГІКА: Неоновий ефект для ЗАГОЛОВКІВ секцій === */
+        /* Базовий стиль для заголовків секцій (h2) */
+        section h2 {
+            /* Додаємо плавний перехід для ефекту */
+            transition: color 0.4s ease, text-shadow 0.4s ease;
         }
-
-        /* Активний стан (неоновий ефект) */
-        header nav a.nav-link-active,
-        #mobile-menu a.nav-link-active {
+        
+        /* Цей клас буде додаватись/прибиратись через JavaScript */
+        /* ПЕРЕЙМЕНОВАНО з 'section-in-view' на 'section-title-active' */
+        section.section-title-active h2 {
             color: #7dd3fc; /* Світло-блакитний (sky-300) */
             text-shadow: 
-                0 0 5px rgba(56, 189, 248, 0.7), /* 38bdf8 - sky-400 */
-                0 0 10px rgba(56, 189, 248, 0.5),
-                0 0 15px rgba(56, 189, 248, 0.3);
+                0 0 8px rgba(56, 189, 248, 0.7), /* 38bdf8 - sky-400 */
+                0 0 15px rgba(56, 189, 248, 0.5),
+                0 0 25px rgba(56, 189, 248, 0.3);
         }
         /* === Кінець нової логіки === */
         
@@ -175,7 +175,7 @@
 </head>
 <body class="antiasaed">
 
-<!-- === HEADER (ОНОВЛЕНО: h-24, прибрано border) === -->
+<!-- === HEADER === -->
 <header id="header" class="frosted-glass fixed top-0 left-0 right-0 z-50 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-24">
@@ -713,32 +713,22 @@
 </footer>
 
 <!-- === ПОЧАТОК: MОДАЛЬНЕ ВІКНО (ПЕРЕРОБЛЕНО З ФІКСОМ ГОРТАННЯ) === -->
-<!-- 1. Головний контейнер: fixed, flex-center, p-4 (для відступів на мобільному) -->
 <div id="news-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     
-    <!-- 2. Затемнений фон (Overlay) -->
-    <!-- ОНОВЛЕНО: backdrop-blur-sm -> backdrop-blur-md (сильніший блюр) -->
     <div id="modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
 
-    <!-- 3. Контент модального вікна (вже не потрібен 'span' для центрування) -->
-    <!-- 'relative' потрібен для кнопки закриття -->
     <div class="relative w-full max-w-2xl transform transition-all neon-border-box">
         
-        <!-- 4. Внутрішня частина -->
         <div class="modal-content-inner">
             
-            <!-- Кнопка закриття -->
             <button id="modal-close-btn" class="absolute top-4 right-6 text-slate-400 hover:text-white z-10">
                 <span class="sr-only">Закрити</span>
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            <!-- Контент, що буде заповнюватись -->
             <p id="modal-date" class="text-sm text-sky-400"></p>
             <h3 id="modal-title" class="mt-2 text-2xl font-bold text-white pr-8"></h3>
             
-            <!-- 5. 'overflow-y-auto' тут, щоб гортався лише цей блок -->
-            <!-- ОНОВЛЕНО: max-h-[60vh] -> max-h-[70vh] (трохи більше місця для тексту) -->
             <p id="modal-text" class="mt-4 text-slate-300 whitespace-pre-wrap max-h-[70vh] overflow-y-auto"></p>
         
         </div>
@@ -756,6 +746,8 @@
 <!-- JavaScript for interactivity -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const htmlEl = document.documentElement; // Отримуємо <html>
+        
         // --- Mobile Menu Toggle ---
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -803,80 +795,58 @@
             });
         }
         
-        // --- НОВА ЛОГІКА: Навігація, Показ/Приховування Секцій, Неон та Закриття Меню ---
-        const desktopNavLinks = document.querySelectorAll('header nav a[href^="#"]'); // Тільки десктопні
-        const mobileNavLinks = document.querySelectorAll('#mobile-menu a[href^="#"]'); // Тільки мобільні
-        const allNavLinks = [...desktopNavLinks, ...mobileNavLinks]; // Об'єднуємо їх
-        const htmlEl = document.documentElement;
+        // --- НОВА ЛОГІКА: Навігація, Показ/Приховування Секцій, Неон на ЗАГОЛОВКУ та Закриття Меню ---
+        const desktopNavLinks = document.querySelectorAll('header nav a[href^="#"]'); 
+        const mobileNavLinks = document.querySelectorAll('#mobile-menu a[href^="#"]'); 
+        const allNavLinks = [...desktopNavLinks, ...mobileNavLinks]; 
+        const allSections = document.querySelectorAll('section[id]');
 
         // Функція для обробки кліку по будь-якому навігаційному посиланню
         const handleNavClick = (e, clickedLink) => {
+            e.preventDefault(); // Завжди забороняємо стандартний клік
             const href = clickedLink.getAttribute('href');
+            const targetId = href.substring(1); 
+            const targetSection = document.getElementById(targetId);
             
-            // --- ЛОГІКА НЕОНУ ---
-            // 1. Прибираємо неон з усіх посилань
-            allNavLinks.forEach(link => link.classList.remove('nav-link-active'));
-
-            // 2. Додаємо неон до натиснутого посилання
-            clickedLink.classList.add('nav-link-active');
-            
-            // 3. Знаходимо "пару" для посилання (мобільне/десктопне) і теж її підсвічуємо
-            const matchingLink = Array.from(allNavLinks).find(link => 
-                link !== clickedLink && link.getAttribute('href') === href
-            );
-            if (matchingLink) {
-                matchingLink.classList.add('nav-link-active');
-            }
-
-            // 4. Прибираємо неон через 3 секунди
-            setTimeout(() => {
-                clickedLink.classList.remove('nav-link-active');
-                if (matchingLink) {
-                    matchingLink.classList.remove('nav-link-active');
-                }
-            }, 3000);
-            // --- КІНЕЦЬ ЛОГІКИ НЕОНУ ---
-
+            if (!targetSection) return; // Якщо секції не існує, нічого не робимо
 
             // --- ЛОГІКА ПОКАЗУ/ПРИХОВУВАННЯ СЕКЦІЙ ---
             if (href === '#staff' || href === '#news' || href === '#gallery') {
-                e.preventDefault(); 
-                const targetId = href.substring(1); 
-                const targetSection = document.getElementById(targetId);
-
-                if (targetSection) {
-                    htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
-                    htmlEl.classList.add('showing-' + targetId);
-                    
-                    const headerOffset = 96; // h-24 (96px)
-                    const elementPosition = targetSection.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                         top: offsetPosition,
-                         behavior: "smooth"
-                    });
-                }
+                htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
+                htmlEl.classList.add('showing-' + targetId);
             } else {
                 htmlEl.classList.remove('showing-staff', 'showing-news', 'showing-gallery');
-                
-                if (href !== '#hero') { 
-                    e.preventDefault();
-                    const targetId = href.substring(1);
-                    const targetSection = document.getElementById(targetId);
-                    if (targetSection) {
-                        const headerOffset = 96; 
-                        const elementPosition = targetSection.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                        window.scrollTo({
-                             top: offsetPosition,
-                             behavior: "smooth"
-                        });
-                    }
-                } else {
-                    // Для #hero просто крутимо наверх (дозволяємо стандартну поведінку, якщо e.preventDefault() не викликано)
-                }
             }
+            
+            // --- ЛОГІКА ПЛАВНОГО СКРОЛУ ---
+            let headerOffset = 96; // h-24 (96px)
+            let elementPosition = targetSection.getBoundingClientRect().top;
+            
+            // Для #hero скрол на самий верх
+            let offsetPosition = (href === '#hero') 
+                ? 0 
+                : elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                 top: offsetPosition,
+                 behavior: "smooth"
+            });
+            
+            // --- ЛОГІКА НЕОНУ ДЛЯ ЗАГОЛОВКА (ОНОВЛЕНО) ---
+            // 1. Прибираємо клас з усіх секцій
+            allSections.forEach(sec => sec.classList.remove('section-title-active'));
+            
+            // 2. Додаємо клас до цільової секції (окрім hero)
+            if (href !== '#hero') {
+                targetSection.classList.add('section-title-active');
+                
+                // 3. Прибираємо клас через 3 секунди
+                setTimeout(() => {
+                    targetSection.classList.remove('section-title-active');
+                }, 1500);
+            }
+            // --- КІНЕЦЬ ЛОГІКИ НЕОНУ ---
+
             
             // --- ЛОГІКА ЗАКРИТТЯ МОБІЛЬНОГО МЕНЮ ---
             if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
@@ -962,6 +932,8 @@
                 }
             });
         }
+        
+        // --- (Стара логіка 'IntersectionObserver' для заголовків ВИДАЛЕНА) ---
         
     });
 </script>
