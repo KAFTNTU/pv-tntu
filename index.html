@@ -133,13 +133,18 @@
 
         /* === КІНЕЦЬ КОДУ ДЛЯ МОДАЛЬНОГО ВІКНА === */
         
-        /* === НОВИЙ КОД: Приховати скролбар у модальному вікні новин === */
+        /* === Приховати скролбар у модальному вікні новин === */
         #modal-text::-webkit-scrollbar {
             display: none; /* Повністю приховати скролбар для Chrome/Safari/Mobile */
         }
         #modal-text {
             -ms-overflow-style: none;  /* Приховати для IE та Edge */
             scrollbar-width: none;  /* Приховати для Firefox */
+        }
+        
+        /* === НОВИЙ КОД: Блокування прокрутки фону === */
+        html.modal-open {
+            overflow: hidden;
         }
         
     </style>
@@ -267,7 +272,7 @@
         </div>
     </section>
 
-    <!-- === SPECIALTIES SECTION === -->
+    <!-- === SPECIALTIES SECTION (Оновлено вами) === -->
     <section id="specialties" class="py-20 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -275,7 +280,7 @@
                 <p class="mt-4 text-lg text-slate-400">Обери свій шлях в інженерії</p>
             </div>
             <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Specialty Card 1 -->
+                <!-- Specialty Card 1 (Оновлено вами) -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 reveal">
                     <div class="p-8">
                         <div class="flex items-center gap-4 mb-4">
@@ -299,7 +304,7 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Specialty Card 2 -->
+                <!-- Specialty Card 2 (Оновлено вами) -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 reveal" style="transition-delay: 200ms;">
                     <div class="p-8">
                         <div class="flex items-center gap-4 mb-4">
@@ -688,8 +693,9 @@
     </div>
 </footer>
 
-<!-- === ПОЧАТОК: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ === -->
-<div id="news-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<!-- === ПОЧАТОК: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ (ВИПРАВЛЕНО) === -->
+<!-- Оновлено: прибрано 'overflow-y-auto' звідси -->
+<div id="news-modal" class="hidden fixed inset-0 z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         
         <!-- Затемнений фон (Overlay) -->
@@ -714,6 +720,7 @@
                 <p id="modal-date" class="text-sm text-sky-400"></p>
                 <h3 id="modal-title" class="mt-2 text-2xl font-bold text-white pr-8"></h3>
                 <!-- 'whitespace-pre-wrap' поважає переноси абзаців з data-text -->
+                <!-- Оновлено: 'overflow-y-auto' тут, щоб гортався лише цей блок -->
                 <p id="modal-text" class="mt-4 text-slate-300 whitespace-pre-wrap max-h-[60vh] overflow-y-auto"></p>
             
             </div>
@@ -721,6 +728,7 @@
     </div>
 </div>
 <!-- === КІНЕЦЬ: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ === -->
+
 
 <!-- Scroll to top button -->
 <button id="scrollToTopBtn" class="hidden fixed bottom-5 right-5 bg-sky-500/80 hover:bg-sky-500 text-white p-3 rounded-full shadow-lg transition-opacity duration-300 z-50">
@@ -805,13 +813,12 @@
                     toggleStaffText.textContent = 'Показати всіх';
                 } else {
                     toggleStaffText.textContent = 'Згорнути';
-                    // Опціонально: прокрутити до кнопки
-                    // toggleStaffBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             });
         }
         
-        // --- Modal Window Logic (Нова версія з анімацією) ---
+        // --- Modal Window Logic (Версія з блокуванням прокрутки) ---
+        const htmlEl = document.documentElement; // Отримуємо <html>
         const openModalButtons = document.querySelectorAll('.open-modal-btn');
         const modal = document.getElementById('news-modal');
         const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -828,35 +835,35 @@
                 button.addEventListener('click', function(e) {
                     e.preventDefault(); // Зупиняємо перехід по #
                     
-                    // Отримуємо дані з кнопки, яку натиснули
+                    // Отримуємо дані
                     const title = this.dataset.title;
                     const date = this.dataset.date;
                     const text = this.dataset.text;
 
-                    // Заповнюємо модальне вікно
+                    // Заповнюємо
                     if (modalDate) modalDate.textContent = date;
                     if (modalTitle) modalTitle.textContent = title;
                     if (modalText) modalText.textContent = text;
                     
-                    // Показуємо модальне вікно, додаючи клас
+                    // Показуємо модальне вікно
                     modal.classList.remove('hidden');
-                    setTimeout(() => { // Даємо час 'hidden' зникнути перед анімацією
+                    setTimeout(() => {
                          modal.classList.add('modal-visible');
                     }, 10);
                    
-                    // Блокуємо прокрутку фону
-                    document.body.style.overflow = 'hidden';
+                    // Блокуємо прокрутку фону (НОВИЙ СПОСІБ)
+                    htmlEl.classList.add('modal-open'); 
                 });
             });
 
             // Функція закриття вікна
             const closeModal = () => {
                 modal.classList.remove('modal-visible');
-                 setTimeout(() => { // Чекаємо завершення анімації
+                 setTimeout(() => {
                     modal.classList.add('hidden');
                  }, 300); // 300ms - це час transition в CSS
-                // Повертаємо прокрутку фону
-                document.body.style.overflow = '';
+                // Повертаємо прокрутку фону (НОВИЙ СПОСІБ)
+                htmlEl.classList.remove('modal-open'); 
             };
 
             // Обробники закриття
