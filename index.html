@@ -98,7 +98,6 @@
           transform-origin: center;
           transform: translate(-50%, -50%);
           
-          /* Градієнт, що крутиться: червона та синя смужки */
           background: conic-gradient(
             from 0deg,
             #ff0000 0deg,   /* Червона */
@@ -111,7 +110,6 @@
             transparent 360deg
           );
           
-          /* Анімація сповільнена (6s -> 9s) */
           animation: neon-spin 9s linear infinite;
         }
 
@@ -130,7 +128,7 @@
           padding: 1.5rem 2rem;
         }
         
-        /* НОВИЙ СТИЛЬ: Внутрішній контент (для ВЕЛИКИХ вікон секцій) */
+        /* Внутрішній контент (для ВЕЛИКИХ вікон секцій) */
         .modal-section-inner {
           position: relative; 
           background: #1e293b; 
@@ -171,17 +169,102 @@
             overflow: hidden;
         }
         
-        /* === ОНОВЛЕНО: Неоновий ефект для ЗАГОЛОВКІВ секцій === */
+        /* === Неоновий ефект для ЗАГОЛОВКІВ секцій === */
         section h2 {
             transition: color 0.4s ease, text-shadow 0.4s ease;
         }
-        /* Цей клас буде додаватись/прибиратись через JavaScript */
         section.section-title-active h2 {
             color: #7dd3fc; /* Світло-блакитний (sky-300) */
             text-shadow: 
                 0 0 8px rgba(56, 189, 248, 0.7), /* 38bdf8 - sky-400 */
                 0 0 15px rgba(56, 189, 248, 0.5),
                 0 0 25px rgba(56, 189, 248, 0.3);
+        }
+        
+        /* === ОНОВЛЕНО: Горизонтальний скрол новин === */
+        .news-scroll-container {
+            display: flex;
+            overflow-x: auto;
+            /* Плавна "прив'язка" карток при скролі */
+            scroll-snap-type: x mandatory;
+            /* Приховуємо стандартний скролбар */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+            padding-bottom: 1rem; /* Відступ для скролбару, якщо він є */
+        }
+        .news-scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        /* Кожна картка новин */
+        .news-card {
+            /* flex: 0 0 90%; */
+            width: 90%; /* Ширина картки на мобільних */
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            margin-right: 1rem; /* gap-4 */
+        }
+        /* Адаптивність карток */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .news-card {
+                width: 60%; 
+            }
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .news-card {
+                width: 45%; /* ~2 картки */
+            }
+        }
+        @media (min-width: 1280px) { /* xl breakpoint (всередині модалки) */
+            .news-card {
+                width: 31%; /* ~3 картки */
+            }
+        }
+        /* Остання картка не має відступу */
+        .news-card:last-child {
+            margin-right: 0;
+        }
+
+        /* Контейнер для "горошинок" */
+        .dots-container {
+            display: flex;
+            justify-content: center;
+            padding-top: 1rem; /* 16px */
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #334155; /* bg-slate-700 */
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Активна "горошинка" з червоним неоном */
+        .dot.active {
+            background-color: #f43f5e; /* bg-rose-500 */
+            box-shadow: 
+                0 0 5px rgba(244, 63, 94, 0.9),
+                0 0 10px rgba(244, 63, 94, 0.7),
+                0 0 15px rgba(244, 63, 94, 0.5);
+            animation: neon-pulse 1.5s infinite alternate;
+        }
+
+        @keyframes neon-pulse {
+            from {
+                box-shadow: 
+                    0 0 5px rgba(244, 63, 94, 0.9),
+                    0 0 10px rgba(244, 63, 94, 0.7),
+                    0 0 15px rgba(244, 63, 94, 0.5);
+            }
+            to {
+                box-shadow: 
+                    0 0 10px rgba(244, 63, 94, 1),
+                    0 0 20px rgba(244, 63, 94, 0.8),
+                    0 0 30px rgba(244, 63, 94, 0.6);
+            }
         }
         
     </style>
@@ -510,7 +593,6 @@
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            <!-- ОНОВЛЕНО: Додано id="staff" -->
             <section id="staff" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16 reveal visible"> 
                     <h2 id="staff-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Наш колектив</h2>
@@ -590,7 +672,7 @@
 <!-- === КІНЕЦЬ: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "ВИКЛАДАЧІ" === -->
 
 
-<!-- === ПОЧАТОК: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "НОВИНИ" (велике) === -->
+<!-- === ПОЧАТОК: МОДАЛЬНЕ ВІКНО ДЛЯ СЕКЦІЇ "НОВИНИ" (ОНОВЛЕНО ЗІ СЛАЙДЕРОМ) === -->
 <div id="news-section-modal" class="hidden fixed inset-0 z-50 modal-base p-4" aria-labelledby="news-modal-title" role="dialog" aria-modal="true">
     <!-- Фон -->
     <div id="news-section-modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" aria-hidden="true"></div>
@@ -605,16 +687,17 @@
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <!-- ОНОВЛЕНО: Додано id="news" -->
             <section id="news" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16 reveal visible">
                     <h2 id="news-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Останні новини</h2>
                     <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
                 </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- ОНОВЛЕНО: Горизонтальний контейнер для скролу -->
+                <div id="news-scroll-container" class="news-scroll-container">
                     
                     <!-- News Card 1 -->
-                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible">
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
                         <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот" alt="Автономна машинка">
                         <div class="p-6 flex-grow flex flex-col">
                             <p class="text-sm text-sky-400">29.03.2024</p>
@@ -631,12 +714,45 @@
                             </a>
                         </div>
                     </div>
-                    <!-- ... (решта карток новин) ... -->
-                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible" style="transition-delay: 200ms;"><img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання"><div class="p-6 flex-grow flex flex-col"><p class="text-sm text-sky-400">05.10.2025</p><h3 class="mt-2 text-xl font-semibold text-white">Модернізація лабораторії: нові горизонти для навчання</h3><p class="mt-3 text-slate-400 flex-grow">Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації.</p><a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Модернізація лабораторії: нові горизонти для навчання" data-date="05.10.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" data-text="Лабораторія неруйнівного контролю поповнилася дефектоскопом 'PhaseScan-3' та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.&#10;&#10;Завдяки новому обладнанню, практичні заняття стануть ще більш наближеними до реальних умов виробництва.">Читати більше &rarr;</a></div></div>
-                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible" style="transition-delay: 400ms;"><img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера"><div class="p-6 flex-grow flex flex-col"><p class="text-sm text-sky-400">28.09.2025</p><h3 class="mt-2 text-xl font-semibold text-white">Стратегічне партнерство з "Техно-Індастрі"</h3><p class="mt-3 text-slate-400 flex-grow">Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів.</p><a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Стратегічне партнерство з 'Техно-Індастрі'" data-date="28.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" data-text="Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.&#10;&#10;Це відкриває нові можливості для працевлаштування наших випускників.">Читати більше &rarr;</a></div></div>
-                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible" style="transition-delay: 600ms;"><img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн"><div class="p-6 flex-grow flex flex-col"><p class="text-sm text-sky-400">20.09.2025</p><h3 class="mt-2 text-xl font-semibold text-white">День відкритих дверей у форматі онлайн-зустрічі</h3><p class="mt-3 text-slate-400 flex-grow">Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою.</p><a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="День відкритих дверей у форматі онлайн-зустрічі" data-date="20.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.&#10;&#10;Реєстрація за посиланням у наших соцмережах.">Читати більше &rarr;</a></div></div>
-
+                    
+                    <!-- News Card 2 -->
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
+                        <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання">
+                        <div class="p-6 flex-grow flex flex-col">
+                            <p class="text-sm text-sky-400">05.10.2025</p>
+                            <h3 class="mt-2 text-xl font-semibold text-white">Модернізація лабораторії: нові горизонти для навчання</h3>
+                            <p class="mt-3 text-slate-400 flex-grow">Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації.</p>
+                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Модернізація лабораторії: нові горизонти для навчання" data-date="05.10.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" data-text="Лабораторія неруйнівного контролю поповнилася дефектоскопом 'PhaseScan-3' та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.&#10;&#10;Завдяки новому обладнанню, практичні заняття стануть ще більш наближеними до реальних умов виробництва.">Читати більше &rarr;</a>
+                        </div>
+                    </div>
+                    
+                    <!-- News Card 3 -->
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
+                        <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера">
+                        <div class="p-6 flex-grow flex flex-col">
+                            <p class="text-sm text-sky-400">28.09.2025</p>
+                            <h3 class="mt-2 text-xl font-semibold text-white">Стратегічне партнерство з "Техно-Індастрі"</h3>
+                            <p class="mt-3 text-slate-400 flex-grow">Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів.</p>
+                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="Стратегічне партнерство з 'Техно-Індастрі'" data-date="28.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" data-text="Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.&#10;&#10;Це відкриває нові можливості для працевлаштування наших випускників.">Читати більше &rarr;</a>
+                        </div>
+                    </div>
+                    
+                    <!-- News Card 4 -->
+                    <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal visible news-card">
+                        <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн">
+                        <div class="p-6 flex-grow flex flex-col">
+                            <p class="text-sm text-sky-400">20.09.2025</p>
+                            <h3 class="mt-2 text-xl font-semibold text-white">День відкритих дверей у форматі онлайн-зустрічі</h3>
+                            <p class="mt-3 text-slate-400 flex-grow">Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою.</p>
+                            <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn" data-title="День відкритих дверей у форматі онлайн-зустрічі" data-date="20.09.2025" data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.&#10;&#10;Реєстрація за посиланням у наших соцмережах.">Читати більше &rarr;</a>
+                        </div>
+                    </div>
+                    
                 </div>
+                
+                <!-- ОНОВЛЕНО: Контейнер для "горошинок" -->
+                <div id="news-dots" class="dots-container"></div>
+                
             </section>
         </div>
     </div>
@@ -659,7 +775,6 @@
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <!-- ОНОВЛЕНО: Додано id="gallery" -->
             <section id="gallery" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16 reveal visible">
                     <h2 id="gallery-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Галерея</h2>
@@ -740,19 +855,90 @@
             });
         }
         
-        // --- ОНОВЛЕНА ЛОГІКА: Навігація + Відкриття Модалок + Неон на Заголовках ---
+        // --- ОНОВЛЕНО: Горизонтальний скрол новин з "горошинками" ---
+        const newsScrollContainer = document.getElementById('news-scroll-container');
+        const dotsContainer = document.getElementById('news-dots');
+        let newsDots = []; // Масив "горошинок"
+        let newsCards = []; // Масив карток
         
-        // 1. Отримуємо всі посилання
+        // Функція оновлення активної "горошинки"
+        const updateActiveDot = () => {
+            if (!newsScrollContainer || newsCards.length === 0 || newsDots.length === 0) return; 
+            
+            // Перевірка, чи контейнер видимий
+            const containerRect = newsScrollContainer.getBoundingClientRect();
+            if (containerRect.width === 0) return; 
+            
+            const containerCenter = containerRect.left + containerRect.width / 2;
+            let closestCardIndex = 0;
+            let minDistance = Infinity;
+
+            newsCards.forEach((card, index) => {
+                const cardRect = card.getBoundingClientRect();
+                if (cardRect.width === 0) return; 
+                
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const distance = Math.abs(containerCenter - cardCenter);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestCardIndex = index;
+                }
+            });
+
+            // Оновлюємо класи
+            newsDots.forEach((dot, index) => {
+                if (index === closestCardIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        };
+
+        // Ініціалізація скролу новин
+        if (newsScrollContainer && dotsContainer) {
+            newsCards = newsScrollContainer.querySelectorAll('.news-card');
+            const numCards = newsCards.length;
+
+            // 1. Створюємо "горошинки"
+            for (let i = 0; i < numCards; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                dot.addEventListener('click', () => {
+                    newsCards[i].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        inline: 'center', 
+                        block: 'nearest' 
+                    });
+                });
+                dotsContainer.appendChild(dot);
+                newsDots.push(dot);
+            }
+
+            // 2. Вішаємо обробник на скрол
+            let scrollTimer;
+            newsScrollContainer.addEventListener('scroll', () => {
+                clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(updateActiveDot, 100); 
+            });
+
+            // 3. Встановлюємо активну "горошинку" при завантаженні (першу)
+            if (newsDots.length > 0) {
+                newsDots[0].classList.add('active');
+            }
+        }
+        
+        // --- Навігація + Відкриття Модалок + Неон на Заголовках ---
+        
         const desktopNavLinks = document.querySelectorAll('header nav a[href^="#"]'); 
         const mobileNavLinks = document.querySelectorAll('#mobile-menu a[href^="#"]'); 
         const allNavLinks = [...desktopNavLinks, ...mobileNavLinks]; 
         
-        // 2. Отримуємо всі модальні вікна секцій
         const staffModal = document.getElementById('staff-modal');
         const newsModal = document.getElementById('news-section-modal');
         const galleryModal = document.getElementById('gallery-modal');
         
-        // 3. Отримуємо кнопки закриття
         const staffModalClose = document.getElementById('staff-modal-close-btn');
         const newsModalClose = document.getElementById('news-section-modal-close-btn');
         const galleryModalClose = document.getElementById('gallery-modal-close-btn');
@@ -760,7 +946,6 @@
         const newsModalOverlay = document.getElementById('news-section-modal-overlay');
         const galleryModalOverlay = document.getElementById('gallery-modal-overlay');
 
-        // 4. Універсальна функція для відкриття модалки
         const openModal = (modalEl) => {
             if (!modalEl) return;
             modalEl.classList.remove('hidden');
@@ -770,7 +955,6 @@
             htmlEl.classList.add('modal-open'); 
         };
         
-        // 5. Універсальна функція для закриття модалки
         const closeModal = (modalEl) => {
             if (!modalEl) return;
             modalEl.classList.remove('modal-visible');
@@ -780,54 +964,43 @@
             htmlEl.classList.remove('modal-open'); 
         };
 
-        // 6. Обробник кліків на навігацію
         const handleNavClick = (e, clickedLink) => {
-            e.preventDefault(); // Завжди забороняємо стандартний клік
+            e.preventDefault(); 
             const href = clickedLink.getAttribute('href');
             
-            // Закриваємо мобільне меню, якщо воно відкрите
             if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
                 mobileMenu.classList.add('hidden');
                 menuOpenIcon.classList.remove('hidden');
                 menuCloseIcon.classList.add('hidden');
             }
             
-            // --- ОНОВЛЕНО: ЛОГІКА НЕОНУ (1.5 сек) ---
             const targetId = href.substring(1); 
-            // Шукаємо секцію (на сторінці АБО в прихованих модалках)
             const targetSection = document.getElementById(targetId); 
 
-            // Скидаємо неон з усіх-усіх секцій
             document.querySelectorAll('section[id]').forEach(sec => sec.classList.remove('section-title-active'));
 
-            // Активуємо неон, якщо це не 'hero'
             if (targetSection && targetId !== 'hero') {
                 targetSection.classList.add('section-title-active');
                 
-                // Прибираємо клас через 1.5 секунди
                 setTimeout(() => {
                     targetSection.classList.remove('section-title-active');
                 }, 1500); // 1.5 секунди
             }
-            // --- КІНЕЦЬ ЛОГІКИ НЕОНУ ---
 
-
-            // --- ЛОГІКА: Що робити при кліку (відкрити модалку АБО скрол) ---
             switch(href) {
-                // ВИПАДОК 1: Відкрити модальне вікно
                 case '#staff':
                     openModal(staffModal);
                     break;
                 case '#news':
                     openModal(newsModal);
+                    setTimeout(updateActiveDot, 50); // Оновлюємо "горошинки"
                     break;
                 case '#gallery':
                     openModal(galleryModal);
                     break;
                 
-                // ВИПАДОК 2: Плавна прокрутка до секції
                 default:
-                    if (!targetSection) { // Наприклад, #hero
+                    if (!targetSection) { 
                          window.scrollTo({ top: 0, behavior: "smooth" });
                          break;
                     }
@@ -843,14 +1016,12 @@
             }
         };
 
-        // 7. Вішаємо обробник на всі посилання
         allNavLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 handleNavClick(e, this); 
             });
         });
         
-        // 8. Вішаємо обробники на кнопки закриття
         if(staffModal) {
             staffModalClose.addEventListener('click', () => closeModal(staffModal));
             staffModalOverlay.addEventListener('click', () => closeModal(staffModal));
@@ -863,7 +1034,6 @@
             galleryModalClose.addEventListener('click', () => closeModal(galleryModal));
             galleryModalOverlay.addEventListener('click', () => closeModal(galleryModal));
         }
-
 
         // --- Staff Toggle (для модального вікна) ---
         const toggleStaffBtnModal = document.getElementById('toggle-staff-btn-modal');
@@ -883,7 +1053,7 @@
             });
         }
         
-        // --- Modal Window Logic (для ОКРЕМИХ новин - всередині модалки новин) ---
+        // --- Modal Window Logic (для ОКРЕМИХ новин) ---
         const openModalButtons = document.querySelectorAll('.open-modal-btn');
         const modal = document.getElementById('news-modal'); 
         const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -907,11 +1077,10 @@
                     if (modalTitle) modalTitle.textContent = title;
                     if (modalText) modalText.textContent = text;
                     
-                    openModal(modal); // Використовуємо нашу нову універсальну функцію
+                    openModal(modal); 
                 });
             });
 
-            // Використовуємо нашу нову універсальну функцію
             modalCloseBtn.addEventListener('click', () => closeModal(modal));
             modalOverlay.addEventListener('click', () => closeModal(modal));
         }
