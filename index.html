@@ -665,9 +665,10 @@
                 <span class="sr-only">Закрити</span>
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-
-            <section id="news" class="py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16 reveal visible">
+            
+            <!-- ОНОВЛЕНО: Зменшені відступи py-12 та mb-8 -->
+            <section id="news" class="py-12 px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-8 reveal visible">
                     <h2 id="news-modal-title" class="text-3xl lg:text-4xl font-extrabold text-white">Останні новини</h2>
                     <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
                 </div>
@@ -849,27 +850,27 @@
             const containerRect = newsScrollContainer.getBoundingClientRect();
             if (containerRect.width === 0) return; 
             
-            const containerCenter = containerRect.left + containerRect.width / 2;
+            // ОНОВЛЕНО: Визначаємо, скільки карток видно (1 чи 2)
+            const isDesktop = window.innerWidth >= 1024;
+            const cardsPerPage = isDesktop ? 2 : 1;
             
-            let closestCardIndex = 0;
-            let minDistance = Infinity;
-
-            newsCards.forEach((card, index) => {
-                const cardRect = card.getBoundingClientRect();
-                if (cardRect.width === 0) return; 
-                
-                const cardCenter = cardRect.left + cardRect.width / 2;
-                const distance = Math.abs(containerCenter - cardCenter);
-
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestCardIndex = index;
+            // ОНОВЛЕНО: Знаходимо індекс першої *майже* видимої картки
+            let firstVisibleIndex = 0;
+            for(let i=0; i < newsCards.length; i++) {
+                const cardRect = newsCards[i].getBoundingClientRect();
+                // Картка вважається "активною", якщо її лівий край перетнув 25% контейнера
+                if (cardRect.left >= (containerRect.left - containerRect.width * 0.25)) {
+                    firstVisibleIndex = i;
+                    break;
                 }
-            });
+            }
             
+            // ОНОВЛЕНО: Індекс "горошинки" базується на сторінці
+            const dotIndex = Math.floor(firstVisibleIndex / cardsPerPage);
+
             // Оновлюємо класи
             newsDots.forEach((dot, index) => {
-                if (index === closestCardIndex) {
+                if (index === dotIndex) {
                     dot.classList.add('active');
                 } else {
                     dot.classList.remove('active');
@@ -887,14 +888,19 @@
             const numCards = newsCards.length;
             if (numCards === 0) return;
 
-            // 1. Створюємо "горошинки"
-            for (let i = 0; i < numCards; i++) {
+            // ОНОВЛЕНО: Створюємо "горошинки" для СТОРІНОК (по 1 або 2 картки)
+            const isDesktop = window.innerWidth >= 1024;
+            const cardsPerPage = isDesktop ? 2 : 1;
+            const numDots = Math.ceil(numCards / cardsPerPage);
+
+            for (let i = 0; i < numDots; i++) {
                 const dot = document.createElement('div');
                 dot.classList.add('dot');
                 dot.addEventListener('click', () => {
-                    newsCards[i].scrollIntoView({ 
+                    const cardIndex = i * cardsPerPage;
+                    newsCards[cardIndex].scrollIntoView({ 
                         behavior: 'smooth', 
-                        inline: 'center', // 'center' для мобільного
+                        inline: 'start', // "Прилипаємо" до початку
                         block: 'nearest' 
                     });
                 });
