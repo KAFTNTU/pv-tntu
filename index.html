@@ -61,6 +61,74 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
+        /* === ПОЧАТОК КОДУ ДЛЯ МОДАЛЬНОГО ВІКНА З НЕОНОМ === */
+
+        /* Стилі для появи/зникнення вікна */
+        #news-modal {
+          opacity: 0;
+          transform: scale(0.95);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+          pointer-events: none; /* Блокувати кліки, коли приховано */
+        }
+        #news-modal.modal-visible {
+          opacity: 1;
+          transform: scale(1);
+          pointer-events: auto; /* Дозволити кліки, коли видимо */
+        }
+
+        /* Контейнер для анімації рамки */
+        .neon-border-box {
+          position: relative;
+          background: #0f172a; /* Темний фон */
+          border-radius: 10px;
+          overflow: hidden; /* Ховаємо все, що виходить за межі */
+        }
+
+        /* Псевдо-елемент, який створює анімацію "бігаючої" лінії */
+        .neon-border-box::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 150%; /* Ширше, щоб кути були за межами */
+          height: 150%; /* Вище */
+          transform-origin: center;
+          transform: translate(-50%, -50%);
+          
+          /* Оновлений градієнт з червоною та синьою смужками */
+          background: conic-gradient(
+            from 0deg,
+            transparent 0deg, transparent 178deg,
+            #38bdf8 178deg, #38bdf8 180deg, /* Синя смужка */
+            transparent 180deg, transparent 358deg,
+            #ff0000 358deg, #ff0000 360deg /* Червона смужка */
+          );
+          
+          /* Анімація обертання (сповільнена) */
+          animation: neon-spin 6s linear infinite; /* Змінено з 3s на 6s */
+        }
+
+        /* Анімація обертання */
+        @keyframes neon-spin {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Внутрішній контент, який має власний фон */
+        .modal-content-inner {
+          position: relative; /* Щоб бути поверх анімації */
+          background: #1e293b; /* Фон самого вікна (slate-800) */
+          /* Цей відступ (margin) в 1px і є "рамкою". 
+            Крізь нього видно анімацію ::before, що обертається.
+          */
+          margin: 1px; 
+          border-radius: 9px; /* Трохи менше, ніж у .neon-border-box */
+          padding: 1.5rem 2rem;
+        }
+
+        /* === КІНЕЦЬ КОДУ ДЛЯ МОДАЛЬНОГО ВІКНА === */
+
     </style>
 
 </head>
@@ -199,7 +267,7 @@
                                 <svg class="w-8 h-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-white">G6 "Інформаціно-вимірювальні технології"</h3>
+                                <h3 class="text-xl font-bold text-white">152 - Метрологія та інформаційно-вимірювальна техніка</h3>
                                 <p class="text-sm text-sky-400">Освітня програма: "Інтелектуальні вимірювальні системи"</p>
                             </div>
                         </div>
@@ -223,7 +291,7 @@
                                 <svg class="w-8 h-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-white">G5 "Електроніка, електронні комунікації, приладобудування та радіотехніка"</h3>
+                                <h3 class="text-xl font-bold text-white">171 - Електроніка</h3>
                                 <p class="text-sm text-sky-400">Освітня програма: "Прилади та системи неруйнівного контролю"</p>
                             </div>
                         </div>
@@ -243,88 +311,130 @@
         </div>
     </section>
 
-    <!-- === STAFF SECTION === -->
+    <!-- === STAFF SECTION (Оновлено) === -->
     <section id="staff" class="py-20 lg:py-32 bg-slate-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Наш колектив</h2>
                 <p class="mt-4 text-lg text-slate-400">Професіонали, що надихають на нові звершення</p>
             </div>
+            
+            <!-- Оновлений список персоналу (8 видимих) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Staff Card 1: Head of Department -->
+                <!-- 1. Паламар -->
                 <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Паламар Михайло Іванович">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Петренко Іван Іванович</h3>
-                        <p class="text-sky-400">Завідувач кафедри, д.т.н., професор</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: Інтелектуальні системи</p>
+                        <h3 class="text-lg font-semibold text-white">Паламар Михайло Іванович</h3>
+                        <p class="text-sky-400">д.ф. техн. наук., завідувач кафедри</p>
                     </div>
                 </div>
-                <!-- Staff Card 2: Deputy -->
+                <!-- 2. Яворська -->
                 <div class="text-center reveal" style="transition-delay: 100ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Яворська Мирослава Іванівна">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Коваленко Ольга Петрівна</h3>
-                        <p class="text-sky-400">Заступник завідувача, к.т.н., доцент</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: Неруйнівний контроль</p>
-                    </div>
-                </div>
-                <!-- Staff Card 3 -->
-                <div class="text-center reveal" style="transition-delay: 200ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
-                    <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Сидоренко Василь Васильович</h3>
+                        <h3 class="text-lg font-semibold text-white">Яворська Мирослава Іванівна</h3>
                         <p class="text-sky-400">к.т.н., доцент</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: Обробка сигналів</p>
                     </div>
                 </div>
-                <!-- Staff Card 4 -->
-                <div class="text-center reveal" style="transition-delay: 300ms;">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                <!-- 3. Зелінський -->
+                <div class="text-center reveal" style="transition-delay: 200ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Зелінський Ігор Микитович">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Мельник Анна Сергіївна</h3>
-                        <p class="text-sky-400">асистент</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: Програмування МК</p>
+                        <h3 class="text-lg font-semibold text-white">Зелінський Ігор Микитович</h3>
+                        <p class="text-sky-400">к.ф.-м.н. доцент</p>
+                    </div>
+                </div>
+                <!-- 4. Наконечний -->
+                <div class="text-center reveal" style="transition-delay: 300ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Наконечний Юрій Іванович">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Наконечний Юрій Іванович</h3>
+                        <p class="text-sky-400">старший викладач</p>
+                    </div>
+                </div>
+                <!-- 5. Апостол -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Апостол Юрій Орестович">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Апостол Юрій Орестович</h3>
+                        <p class="text-sky-400">старший викладач</p>
+                    </div>
+                </div>
+                <!-- 6. Дубиняк -->
+                <div class="text-center reveal" style="transition-delay: 100ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Дубиняк Тарас Степанович">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Дубиняк Тарас Степанович</h3>
+                        <p class="text-sky-400">к.т.н., доцент</p>
+                    </div>
+                </div>
+                <!-- 7. Чайковський -->
+                <div class="text-center reveal" style="transition-delay: 200ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Чайковський Андрій Вікторович">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Чайковський Андрій Вікторович</h3>
+                        <p class="text-sky-400">к.т.н., доцент</p>
+                    </div>
+                </div>
+                <!-- 8. Стрембіцький -->
+                <div class="text-center reveal" style="transition-delay: 300ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Стрембіцький Михайло Олексійович">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Стрембіцький Михайло Олексійович</h3>
+                        <p class="text-sky-400">к.т.н., доцент</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Hidden Staff Members -->
+            <!-- Оновлений прихований список (решта 6) -->
             <div id="hidden-staff" class="hidden mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                 <!-- Staff Card 5 -->
+                 <!-- 9. Батюк -->
                 <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Батюк Віталій Васильович">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Григоренко Петро Львович</h3>
-                        <p class="text-sky-400">к.т.н., доцент</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: Медичне приладобудування</p>
+                        <h3 class="text-lg font-semibold text-white">Батюк Віталій Васильович</h3>
+                        <p class="text-sky-400">асистент</p>
                     </div>
                 </div>
-                 <!-- Staff Card 6 -->
+                 <!-- 10. Рафалюк -->
                 <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Рафалюк Олександр Олексійович">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Ткачук Марія Ігорівна</h3>
-                        <p class="text-sky-400">старший викладач</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: Метрологія та стандартизація</p>
+                        <h3 class="text-lg font-semibold text-white">Рафалюк Олександр Олексійович</h3>
+                        <p class="text-sky-400">асистент (сумісник)</p>
                     </div>
                 </div>
-                 <!-- Staff Card 7 -->
+                 <!-- 11. Куцевич -->
                 <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Куцевич Світлана Петрівна">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Захарченко Андрій Вікторович</h3>
-                        <p class="text-sky-400">к.т.н., доцент</p>
-                        <p class="text-sm text-slate-400 mt-1">Сфера: IoT та вбудовані системи</p>
+                        <h3 class="text-lg font-semibold text-white">Куцевич Світлана Петрівна</h3>
+                        <p class="text-sky-400">Посада не вказана</p> <!-- Ви не надали посаду для неї -->
                     </div>
                 </div>
-                 <!-- Staff Card 8 -->
+                 <!-- 12. Рудник -->
                 <div class="text-center reveal">
-                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Рудник Андрій Андрійович">
                     <div class="mt-4">
-                        <h3 class="text-lg font-semibold text-white">Лисенко Катерина Юріївна</h3>
-                        <p class="text-sky-400">інженер, завідувач лабораторії</p>
-                        <p class="text-sm text-slate-400 mt-1">Забезпечення навчального процесу</p>
+                        <h3 class="text-lg font-semibold text-white">Рудник Андрій Андрійович</h3>
+                        <p class="text-sky-400">Посада не вказана</p> <!-- Ви не надали посаду для нього -->
+                    </div>
+                </div>
+                 <!-- 13. Остафійчук -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Остафійчук Іван Васильович">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Остафійчук Іван Васильович</h3>
+                        <p class="text-sky-400">Посада не вказана</p> <!-- Ви не надали посаду для нього -->
+                    </div>
+                </div>
+                 <!-- 14. Папроцька -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото Папроцька Олена Володимирівна">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Папроцька Олена Володимирівна</h3>
+                        <p class="text-sky-400">інженер 2-ї категорії</p>
                     </div>
                 </div>
             </div>
@@ -349,18 +459,29 @@
                 <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- News Card 1 -->
+                
+                <!-- News Card 1 (Оновлена) -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal">
-                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Конференція" alt="Студенти на конференції">
+                    <!-- Ви можете змінити це фото на своє, наприклад "images/mashynka.jpg" -->
+                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот" alt="Автономна машинка">
                     <div class="p-6 flex-grow flex flex-col">
-                        <p class="text-sm text-sky-400">14.10.2025</p>
-                        <h3 class="mt-2 text-xl font-semibold text-white">Студентська конференція "Вимірювання 2025" - нові перемоги!</h3>
+                        <p class="text-sm text-sky-400">29.03.2024</p>
+                        <h3 class="mt-2 text-xl font-semibold text-white">Автономна машинка із елементами штучного інтелекту</h3>
                         <p class="mt-3 text-slate-400 flex-grow">
-                            Наші студенти вкотре довели свій високий потенціал на щорічній конференції. Особливо відзначились роботи Івана Сидоренка (4 курс) та Ольги Мельник (магістрантка).
+                            Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок...
                         </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
+                           data-title="Автономна машинка із елементами штучного інтелекту"
+                           data-date="29.03.2024"
+                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=AI+Робот"
+                           data-text="Автономні роботи використовуються такими компаніями як Amazon а Нова Пошта у своїх великих центрах сортування посилок, де кожен робот прокладає маршрут згідно напрямку, тим самим скорочуючи час на сортування посилок людьми і прискорює їх доставку адресату.
+&#10;Розроблено автономний мобільний робот який призначений для обминання  перешкод  під час руху  і написання для нього програми.
+&#10;Проведено аналіз принципів побудови систем управління переміщенням мобільних роботів та розробка мобільного робота, який призначений для обминання перешкод під час руху, та написання програми для нього.">
+                           Читати більше &rarr;
+                        </a>
                     </div>
                 </div>
+
                 <!-- News Card 2 -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 200ms;">
                     <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання">
@@ -370,9 +491,16 @@
                         <p class="mt-3 text-slate-400 flex-grow">
                             Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.
                         </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
+                           data-title="Модернізація лабораторії: нові горизонти для навчання"
+                           data-date="05.10.2025"
+                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання"
+                           data-text="Лабораторія неруйнівного контролю поповнилася ультразвуковим дефектоскопом на фазованих решітках 'PhaseScan-3' та спеціалізованим програмним забезпеченням для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи діагностики та отримувати практичні навички, що високо цінуються на ринку праці. Модернізація стала можливою завдяки гранту від Міністерства освіти і науки України.">
+                           Читати більше &rarr;
+                        </a>
                     </div>
                 </div>
+
                 <!-- News Card 3 -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 400ms;">
                     <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера">
@@ -382,9 +510,16 @@
                         <p class="mt-3 text-slate-400 flex-grow">
                             Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.
                         </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
+                           data-title="Стратегічне партнерство з &quot;Техно-Індастрі&quot;"
+                           data-date="28.09.2025"
+                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство"
+                           data-text="Укладено договір про співпрацю з провідною IT-компанією 'Техно-Індастрі'. Договір передбачає стажування кращих студентів кафедри на базі компанії, участь фахівців 'Техно-Індастрі' у навчальному процесі, а також проведення спільних хакатонів для розвитку практичних навичок у студентів. Це відкриває нові можливості для працевлаштування наших випускників.">
+                           Читати більше &rarr;
+                        </a>
                     </div>
                 </div>
+
                  <!-- News Card 4 -->
                 <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 600ms;">
                     <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн">
@@ -394,7 +529,13 @@
                         <p class="mt-3 text-slate-400 flex-grow">
                             Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.
                         </p>
-                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold open-modal-btn"
+                           data-title="День відкритих дверей у форматі онлайн-зустрічі"
+                           data-date="20.09.2025"
+                           data-image="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн"
+                           data-text="Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою, яка відбудеться 15 жовтня о 12:00 на платформі Zoom. Ви зможете поспілкуватися з викладачами, дізнатися все про наші освітні програми 'Інтелектуальні вимірювальні системи' та 'Прилади та системи неруйнівного контролю', а також поставити будь-які питання щодо умов вступу та навчання. Посилання на реєстрацію буде опубліковано згодом.">
+                           Читати більше &rarr;
+                        </a>
                     </div>
                 </div>
             </div>
@@ -429,7 +570,7 @@
         </div>
     </section>
 
-    <!-- === CONTACTS SECTION === -->
+    <!-- === CONTACTS SECTION (Оновлено) === -->
     <section id="contacts" class="py-20 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -439,13 +580,18 @@
             <div class="grid md:grid-cols-2 gap-10">
                 <div class="reveal">
                     <div class="bg-slate-800 p-8 rounded-xl space-y-6">
+                        <!-- Оновлена Адреса -->
                         <div class="flex items-start space-x-4">
                             <div class="bg-sky-500/10 p-3 rounded-full flex-shrink-0">
                                 <svg class="w-6 h-6 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
                             </div>
                             <div>
                                 <h3 class="text-lg font-semibold text-white">Адреса</h3>
-                                <p class="text-slate-400">вул. Руська, 56, корпус №2, ауд. 310<br>м. Тернопіль, 46001, Україна</p>
+                                <p class="text-slate-400">
+                                    46400, Україна, м. Тернопіль<br>
+                                    вул. Текстильна, 28, навч-й корпус №9<br>
+                                    ТНТУ, кафедра ПВ
+                                </p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
@@ -468,9 +614,10 @@
                         </div>
                     </div>
                 </div>
+                <!-- Оновлена Карта -->
                 <div class="reveal" style="transition-delay: 200ms;">
                     <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2607.729792404028!2d25.59016131568603!3d49.55393197936173!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4730314f3319013d%3A0x63a8a38a7c264a4d!2sTernopil%20Ivan%20Puluj%20National%20Technical%20University!5e0!3m2!1sen!2sua!4v1665768560317!5m2!1sen!2sua"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2607.30906880012!2d25.56847151568625!3d49.56221797936279!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4730310217a4143b%3A0x868128328c31e289!2z0KLQndCY0YDQviDQotC-0YLRgNC-0LbRjNC10YHRgtC90LDRjyDRg9C90ZbQstC-0LDRgNC80LXRgNGB0YLQstC-LCDQstC-0Lcg0LguINCi0LXRgNGA0L7QvdCwINCj0LzQsNC_LCDQo9C60LDQutC-0LLQsNGPINC-0LHQu9Cw0YfQsNC_!5e0!3m2!1suk!2sua!4v1715886646841!5m2!1suk!2sua"
                         width="100%" 
                         height="100%" 
                         style="border:0;" 
@@ -484,6 +631,44 @@
         </div>
     </section>
 </main>
+
+<!-- === ПОЧАТОК: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ === -->
+<div id="news-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        
+        <!-- Затемнений фон (Overlay) -->
+        <div id="modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+
+        <!-- Контейнер, що центрує вікно -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <!-- 
+          Контент модального вікна 
+          (Тут ми використовуємо нові CSS-класи для анімації)
+        -->
+        <div class="inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full neon-border-box">
+            
+            <!-- Внутрішня частина (щоб приховати анімацію під собою) -->
+            <div class="modal-content-inner">
+                
+                <!-- Кнопка закриття -->
+                <button id="modal-close-btn" class="absolute top-4 right-6 text-slate-400 hover:text-white z-10">
+                    <span class="sr-only">Закрити</span>
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                
+                <!-- Контент, що буде заповнюватись -->
+                <p id="modal-date" class="text-sm text-sky-400"></p>
+                <h3 id="modal-title" class="mt-2 text-2xl font-bold text-white pr-8"></h3>
+                <!-- 'whitespace-pre-wrap' поважає переноси абзаців з data-text -->
+                <p id="modal-text" class="mt-4 text-slate-300 whitespace-pre-wrap max-h-[60vh] overflow-y-auto"></p>
+            
+            </div>
+        </div>
+    </div>
+</div>
+<!-- === КІНЕЦЬ: НОВЕ МОДАЛЬНЕ ВІКНО З НЕОНОМ === -->
+
 
 <!-- === FOOTER === -->
 <footer class="bg-slate-900 border-t border-slate-800">
@@ -612,9 +797,72 @@
                 }
             });
         }
+
+        // --- Modal Window Logic (Нова версія з анімацією) ---
+        const openModalButtons = document.querySelectorAll('.open-modal-btn');
+        const modal = document.getElementById('news-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalOverlay = document.getElementById('modal-overlay');
+
+        // Елементи, які ми будемо заповнювати
+        const modalDate = document.getElementById('modal-date');
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+
+        if (modal && modalCloseBtn && modalOverlay && openModalButtons.length > 0) {
+            
+            openModalButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); // Зупиняємо перехід по #
+                    
+                    // Отримуємо дані з кнопки, яку натиснули
+                    const title = this.dataset.title;
+                    const date = this.dataset.date;
+                    const text = this.dataset.text;
+                    // const image = this.dataset.image; // Фото нам більше не потрібне у вікні
+
+                    // Заповнюємо модальне вікно
+                    if (modalDate) modalDate.textContent = date;
+                    if (modalTitle) modalTitle.textContent = title;
+                    if (modalText) modalText.textContent = text;
+
+                    // Показуємо модальне вікно, додаючи клас
+                    modal.classList.remove('hidden');
+                    // Використовуємо requestAnimationFrame для плавного старту анімації
+                    requestAnimationFrame(() => {
+                        modal.classList.add('modal-visible');
+                    });
+                    
+                    // Блокуємо прокрутку фону
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            // Функція закриття вікна
+            const closeModal = () => {
+                modal.classList.remove('modal-visible');
+                // Повертаємо прокрутку фону
+                document.body.style.overflow = '';
+                // Ховаємо вікно після завершення анімації
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // 300ms - це час transition
+            };
+
+            // Обробники закриття
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', closeModal);
+            
+            // Закриття по клавіші Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape" && modal.classList.contains('modal-visible')) {
+                    closeModal();
+                }
+            });
+        }
+
     });
 </script>
 
 </body>
 </html>
-
