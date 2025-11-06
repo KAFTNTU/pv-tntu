@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кафедра Приладів та Контрольно-Вимірювальних Систем | ТНТУ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS and Tailwind Configuration -->
+    <style>
+        /* Base styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* bg-slate-900 */
+            color: #cbd5e1; /* text-slate-300 */
+        }
+
+        /* Custom scrollbar for a modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; /* bg-slate-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8; /* bg-sky-400 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0ea5e9; /* bg-sky-500 */
+        }
+
+        /* Frosted glass effect for the header */
+        .frosted-glass {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        /* Animation classes for scroll effects */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Custom gradient text */
+        .gradient-text {
+            background: linear-gradient(to right, #38bdf8, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+
+</head>
+<body class="antialiased">
+<!-- === HEADER === -->
+<header id="header" class="frosted-glass fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <!-- Logo and Department Name -->
+            <div class="flex-shrink-0">
+                <a href="#hero" class="flex items-center space-x-3">
+                    <svg class="h-10 w-10 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5l.415-.207a.75.75 0 011.085.67V10.5m0 0h6m-6 0v-1.5m6 1.5v-1.5m0 0l.415-.207a.75.75 0 011.085.67V10.5m-6-3h6m-6 3a.75.75 0 01-.75-.75V7.5m7.5 3a.75.75 0 00-.75-.75V7.5m-6 3h.008v.008H8.25v-.008zm5.25 0h.008v.008H13.5v-.008zm2.25 0h.008v.008H15.75v-.008zm2.25 0h.008v.008H18v-.008zm-2.25 3h.008v.008H15.75v-.008zm2.25 0h.008v.008H18v-.008zm-2.25 3h.008v.008H15.75v-.008zm2.25 0h.008v.008H18v-.008zm-6-6h.008v.008H12v-.008zm-2.25 0h.008v.008H9.75v-.008zm-2.25 0h.008v.008H7.5v-.008zm-2.25 0h.008v.008H5.25v-.008zm2.25 3h.008v.008H7.5v-.008zm2.25 0h.008v.008H9.75v-.008zm2.25 0h.008v.008H12v-.008zm2.25 0h.008v.008H14.25v-.008zm-2.25 3h.008v.008H12v-.008zm-2.25 0h.008v.008H9.75v-.008zm-2.25 0h.008v.008H7.5v-.008zm-2.25 0h.008v.008H5.25v-.008z" />
+                    </svg>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg text-white">Кафедра ПВ</span>
+                        <span class="text-xs text-slate-400">ТНТУ ім. Івана Пулюя</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="text-slate-300 hover:text-sky-400 transition-colors duration-300 font-medium">Про кафедру</a>
+                <a href="#specialties" class="text-slate-300 hover:text-sky-400 transition-colors duration-300 font-medium">Спеціальності</a>
+                <a href="#staff" class="text-slate-300 hover:text-sky-400 transition-colors duration-300 font-medium">Викладачі</a>
+                <a href="#news" class="text-slate-300 hover:text-sky-400 transition-colors duration-300 font-medium">Новини</a>
+                <a href="#gallery" class="text-slate-300 hover:text-sky-400 transition-colors duration-300 font-medium">Галерея</a>
+                <a href="#contacts" class="text-slate-300 hover:text-sky-400 transition-colors duration-300 font-medium">Контакти</a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden flex items-center">
+                <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500">
+                    <span class="sr-only">Відкрити меню</span>
+                    <svg class="h-6 w-6" id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                    <svg class="h-6 w-6 hidden" id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="md:hidden hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="#about" class="text-slate-300 hover:bg-slate-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Про кафедру</a>
+            <a href="#specialties" class="text-slate-300 hover:bg-slate-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Спеціальності</a>
+            <a href="#staff" class="text-slate-300 hover:bg-slate-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Викладачі</a>
+            <a href="#news" class="text-slate-300 hover:bg-slate-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Новини</a>
+            <a href="#gallery" class="text-slate-300 hover:bg-slate-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Галерея</a>
+            <a href="#contacts" class="text-slate-300 hover:bg-slate-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Контакти</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- === HERO SECTION === -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-20">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-900/80"></div>
+        
+        <div class="relative z-10 text-center px-4">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight reveal">
+                Кафедра Приладів та<br>
+                <span class="gradient-text">Контрольно-Вимірювальних Систем</span>
+            </h1>
+            <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-slate-300 reveal" style="transition-delay: 200ms;">
+                Створюємо майбутнє вимірювальних технологій. Готуємо фахівців, здатних розробляти та експлуатувати найсучасніші прилади та системи.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4 reveal" style="transition-delay: 400ms;">
+                <a href="#specialties" class="w-full sm:w-auto bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105 shadow-lg shadow-sky-500/20">
+                    Дізнатись про вступ
+                </a>
+                <a href="#about" class="w-full sm:w-auto bg-slate-700/50 hover:bg-slate-700 text-white font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105 border border-slate-600">
+                    Історія кафедри
+                </a>
+            </div>
+        </div>
+        
+    </section>
+
+    <!-- === ABOUT SECTION === -->
+    <section id="about" class="py-20 lg:py-32 bg-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Про нашу кафедру</h2>
+                <p class="mt-4 text-lg text-slate-400">Історія, місія та досягнення</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="reveal">
+                    <img src="https://placehold.co/600x400/1e293b/38bdf8?text=Лабораторія" alt="Фото лабораторії кафедри" class="rounded-xl shadow-2xl">
+                </div>
+                <div class="reveal" style="transition-delay: 200ms;">
+                    <h3 class="text-2xl font-bold text-sky-400 mb-4">Наша історія та місія</h3>
+                    <p class="text-slate-300 mb-6">
+                        Кафедра приладів та контрольно-вимірювальних систем була заснована у 1995 році для підготовки висококваліфікованих фахівців у галузі метрології, вимірювальної техніки та неруйнівного контролю. З моменту заснування ми пройшли шлях від невеликого колективу ентузіастів до потужного освітньо-наукового центру.
+                    </p>
+                    <p class="text-slate-300">
+                        Наша місія - надавати студентам глибокі теоретичні знання та практичні навички, що відповідають сучасним вимогам ринку праці, а також проводити передові наукові дослідження, сприяючи інноваційному розвитку України.
+                    </p>
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <span class="text-3xl font-bold text-sky-400">25+</span>
+                            <p class="text-sm text-slate-400 mt-1">років досвіду</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <span class="text-3xl font-bold text-sky-400">1000+</span>
+                            <p class="text-sm text-slate-400 mt-1">випускників</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <span class="text-3xl font-bold text-sky-400">15+</span>
+                            <p class="text-sm text-slate-400 mt-1">партнерів-роботодавців</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- === SPECIALTIES SECTION === -->
+    <section id="specialties" class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Наші спеціальності</h2>
+                <p class="mt-4 text-lg text-slate-400">Обери свій шлях в інженерії</p>
+            </div>
+            <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Specialty Card 1 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 reveal">
+                    <div class="p-8">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="bg-sky-500/10 p-3 rounded-full">
+                                <svg class="w-8 h-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">152 - Метрологія та інформаційно-вимірювальна техніка</h3>
+                                <p class="text-sm text-sky-400">Освітня програма: "Інтелектуальні вимірювальні системи"</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-400 mb-6">
+                            Ця спеціальність готує фахівців, здатних розробляти, програмувати та впроваджувати комп'ютеризовані вимірювальні системи, працювати з датчиками, Інтернетом речей (IoT) та системами обробки великих даних (Big Data).
+                        </p>
+                        <h4 class="font-semibold text-white mb-2">Ключові дисципліни:</h4>
+                        <ul class="list-disc list-inside text-slate-400 space-y-1">
+                            <li>Програмування мікроконтролерів та ПЛК</li>
+                            <li>Цифрова обробка сигналів</li>
+                            <li>Інтелектуальні датчики та системи</li>
+                            <li>Технології IoT та хмарні обчислення</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Specialty Card 2 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 reveal" style="transition-delay: 200ms;">
+                    <div class="p-8">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="bg-sky-500/10 p-3 rounded-full">
+                                <svg class="w-8 h-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">171 - Електроніка</h3>
+                                <p class="text-sm text-sky-400">Освітня програма: "Прилади та системи неруйнівного контролю"</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-400 mb-6">
+                            Студенти навчаються розробляти та застосовувати методи і прилади для діагностики матеріалів та конструкцій без їх руйнування. Це надзвичайно важлива галузь в авіації, енергетиці, машинобудуванні та медицині.
+                        </p>
+                        <h4 class="font-semibold text-white mb-2">Ключові дисципліни:</h4>
+                        <ul class="list-disc list-inside text-slate-400 space-y-1">
+                            <li>Ультразвукові, радіохвильові, магнітні методи контролю</li>
+                            <li>Комп'ютерна томографія та обробка зображень</li>
+                            <li>Технічна діагностика та моніторинг</li>
+                            <li>Проектування приладів НК</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- === STAFF SECTION === -->
+    <section id="staff" class="py-20 lg:py-32 bg-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Наш колектив</h2>
+                <p class="mt-4 text-lg text-slate-400">Професіонали, що надихають на нові звершення</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Staff Card 1: Head of Department -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Петренко Іван Іванович</h3>
+                        <p class="text-sky-400">Завідувач кафедри, д.т.н., професор</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: Інтелектуальні системи</p>
+                    </div>
+                </div>
+                <!-- Staff Card 2: Deputy -->
+                <div class="text-center reveal" style="transition-delay: 100ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Коваленко Ольга Петрівна</h3>
+                        <p class="text-sky-400">Заступник завідувача, к.т.н., доцент</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: Неруйнівний контроль</p>
+                    </div>
+                </div>
+                <!-- Staff Card 3 -->
+                <div class="text-center reveal" style="transition-delay: 200ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Сидоренко Василь Васильович</h3>
+                        <p class="text-sky-400">к.т.н., доцент</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: Обробка сигналів</p>
+                    </div>
+                </div>
+                <!-- Staff Card 4 -->
+                <div class="text-center reveal" style="transition-delay: 300ms;">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Мельник Анна Сергіївна</h3>
+                        <p class="text-sky-400">асистент</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: Програмування МК</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden Staff Members -->
+            <div id="hidden-staff" class="hidden mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                 <!-- Staff Card 5 -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Григоренко Петро Львович</h3>
+                        <p class="text-sky-400">к.т.н., доцент</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: Медичне приладобудування</p>
+                    </div>
+                </div>
+                 <!-- Staff Card 6 -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Ткачук Марія Ігорівна</h3>
+                        <p class="text-sky-400">старший викладач</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: Метрологія та стандартизація</p>
+                    </div>
+                </div>
+                 <!-- Staff Card 7 -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Захарченко Андрій Вікторович</h3>
+                        <p class="text-sky-400">к.т.н., доцент</p>
+                        <p class="text-sm text-slate-400 mt-1">Сфера: IoT та вбудовані системи</p>
+                    </div>
+                </div>
+                 <!-- Staff Card 8 -->
+                <div class="text-center reveal">
+                    <img class="mx-auto h-40 w-40 rounded-full object-cover border-4 border-slate-700 shadow-lg" src="https://placehold.co/160x160/1e293b/ffffff?text=Фото" alt="Фото викладача">
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-white">Лисенко Катерина Юріївна</h3>
+                        <p class="text-sky-400">інженер, завідувач лабораторії</p>
+                        <p class="text-sm text-slate-400 mt-1">Забезпечення навчального процесу</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toggle Button -->
+            <div class="mt-12 text-center">
+                <button id="toggle-staff-btn" class="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 font-semibold transition-colors duration-300">
+                    <span id="toggle-staff-text">Показати всіх</span>
+                    <svg id="toggle-staff-icon" class="w-5 h-5 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- === NEWS SECTION === -->
+    <section id="news" class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Останні новини</h2>
+                <p class="mt-4 text-lg text-slate-400">Будьте в курсі подій нашої кафедри</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- News Card 1 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal">
+                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Конференція" alt="Студенти на конференції">
+                    <div class="p-6 flex-grow flex flex-col">
+                        <p class="text-sm text-sky-400">14.10.2025</p>
+                        <h3 class="mt-2 text-xl font-semibold text-white">Студентська конференція "Вимірювання 2025" - нові перемоги!</h3>
+                        <p class="mt-3 text-slate-400 flex-grow">
+                            Наші студенти вкотре довели свій високий потенціал на щорічній конференції. Особливо відзначились роботи Івана Сидоренка (4 курс) та Ольги Мельник (магістрантка).
+                        </p>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                    </div>
+                </div>
+                <!-- News Card 2 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 200ms;">
+                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Обладнання" alt="Нове лабораторне обладнання">
+                    <div class="p-6 flex-grow flex flex-col">
+                        <p class="text-sm text-sky-400">05.10.2025</p>
+                        <h3 class="mt-2 text-xl font-semibold text-white">Модернізація лабораторії: нові горизонти для навчання</h3>
+                        <p class="mt-3 text-slate-400 flex-grow">
+                            Лабораторія неруйнівного контролю поповнилася дефектоскопом "PhaseScan-3" та ПЗ для 3D-візуалізації. Це дозволить студентам опановувати найновіші методи.
+                        </p>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                    </div>
+                </div>
+                <!-- News Card 3 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 400ms;">
+                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Партнерство" alt="Логотип компанії-партнера">
+                    <div class="p-6 flex-grow flex flex-col">
+                        <p class="text-sm text-sky-400">28.09.2025</p>
+                        <h3 class="mt-2 text-xl font-semibold text-white">Стратегічне партнерство з "Техно-Індастрі"</h3>
+                        <p class="mt-3 text-slate-400 flex-grow">
+                            Укладено договір про співпрацю з провідною IT-компанією. Договір передбачає стажування кращих студентів та проведення спільних хакатонів для розвитку навичок.
+                        </p>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                    </div>
+                </div>
+                 <!-- News Card 4 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden flex flex-col reveal" style="transition-delay: 600ms;">
+                    <img class="h-56 w-full object-cover" src="https://placehold.co/400x224/1e293b/38bdf8?text=Онлайн" alt="День відкритих дверей онлайн">
+                    <div class="p-6 flex-grow flex flex-col">
+                        <p class="text-sm text-sky-400">20.09.2025</p>
+                        <h3 class="mt-2 text-xl font-semibold text-white">День відкритих дверей у форматі онлайн-зустрічі</h3>
+                        <p class="mt-3 text-slate-400 flex-grow">
+                            Запрошуємо абітурієнтів та їх батьків на віртуальну екскурсію кафедрою. Ви зможете поспілкуватися з викладачами та дізнатися все про наші освітні програми.
+                        </p>
+                        <a href="#" class="mt-4 text-sky-400 hover:text-sky-300 font-semibold">Читати більше &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- === GALLERY SECTION === -->
+    <section id="gallery" class="py-20 lg:py-32 bg-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Галерея</h2>
+                <p class="mt-4 text-lg text-slate-400">Наше студентське життя та навчальний процес</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid gap-4">
+                    <div class="reveal"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото1" alt=""></div>
+                    <div class="reveal" style="transition-delay: 100ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото2" alt=""></div>
+                </div>
+                <div class="grid gap-4">
+                    <div class="reveal" style="transition-delay: 200ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x500/1e293b/ffffff?text=Фото3" alt=""></div>
+                    <div class="reveal" style="transition-delay: 300ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x600/1e293b/ffffff?text=Фото4" alt=""></div>
+                </div>
+                <div class="grid gap-4">
+                    <div class="reveal" style="transition-delay: 400ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x800/1e293b/ffffff?text=Фото5" alt=""></div>
+                    <div class="reveal" style="transition-delay: 500ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x300/1e293b/ffffff?text=Фото6" alt=""></div>
+                </div>
+                <div class="grid gap-4">
+                    <div class="reveal" style="transition-delay: 600ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото7" alt=""></div>
+                    <div class="reveal" style="transition-delay: 700ms;"><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото8" alt=""></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- === CONTACTS SECTION === -->
+    <section id="contacts" class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Контакти</h2>
+                <p class="mt-4 text-lg text-slate-400">Зв'яжіться з нами</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="reveal">
+                    <div class="bg-slate-800 p-8 rounded-xl space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-sky-500/10 p-3 rounded-full flex-shrink-0">
+                                <svg class="w-6 h-6 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Адреса</h3>
+                                <p class="text-slate-400">вул. Руська, 56, корпус №2, ауд. 310<br>м. Тернопіль, 46001, Україна</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-sky-500/10 p-3 rounded-full flex-shrink-0">
+                                 <svg class="w-6 h-6 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Електронна пошта</h3>
+                                <a href="mailto:kafedra-pv@tntu.edu.ua" class="text-sky-400 hover:text-sky-300">kafedra-pv@tntu.edu.ua</a>
+                            </div>
+                        </div>
+                         <div class="flex items-start space-x-4">
+                            <div class="bg-sky-500/10 p-3 rounded-full flex-shrink-0">
+                                <svg class="w-6 h-6 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 6.75z" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Телефон</h3>
+                                <a href="tel:+380352253509" class="text-sky-400 hover:text-sky-300">+38 (0352) 25-35-09 (вн. 12-34)</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal" style="transition-delay: 200ms;">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2607.729792404028!2d25.59016131568603!3d49.55393197936173!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4730314f3319013d%3A0x63a8a38a7c264a4d!2sTernopil%20Ivan%20Puluj%20National%20Technical%20University!5e0!3m2!1sen!2sua!4v1665768560317!5m2!1sen!2sua"
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        class="rounded-xl min-h-[300px] shadow-lg">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- === FOOTER === -->
+<footer class="bg-slate-900 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="space-y-4 col-span-2 md:col-span-1">
+                 <a href="#hero" class="flex items-center space-x-3">
+                    <svg class="h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5l.415-.207a.75.75 0 011.085.67V10.5m0 0h6m-6 0v-1.5m6 1.5v-1.5m0 0l.415-.207a.75.75 0 011.085.67V10.5m-6-3h6m-6 3a.75.75 0 01-.75-.75V7.5m7.5 3a.75.75 0 00-.75-.75V7.5m-6 3h.008v.008H8.25v-.008zm5.25 0h.008v.008H13.5v-.008zm2.25 0h.008v.008H15.75v-.008zm2.25 0h.008v.008H18v-.008zm-2.25 3h.008v.008H15.75v-.008zm2.25 0h.008v.008H18v-.008zm-2.25 3h.008v.008H15.75v-.008zm2.25 0h.008v.008H18v-.008zm-6-6h.008v.008H12v-.008zm-2.25 0h.008v.008H9.75v-.008zm-2.25 0h.008v.008H7.5v-.008zm-2.25 0h.008v.008H5.25v-.008zm2.25 3h.008v.008H7.5v-.008zm2.25 0h.008v.008H9.75v-.008zm2.25 0h.008v.008H12v-.008zm2.25 0h.008v.008H14.25v-.008zm-2.25 3h.008v.008H12v-.008zm-2.25 0h.008v.008H9.75v-.008zm-2.25 0h.008v.008H7.5v-.008zm-2.25 0h.008v.008H5.25v-.008z" /></svg>
+                    <span class="font-bold text-lg text-white">Кафедра ПВ ТНТУ</span>
+                </a>
+                <p class="text-slate-400 text-sm">Інновації у вимірюваннях, якість в освіті.</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-slate-200 tracking-wider uppercase">Навігація</h3>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="#about" class="text-base text-slate-400 hover:text-sky-400">Про кафедру</a></li>
+                    <li><a href="#specialties" class="text-base text-slate-400 hover:text-sky-400">Спеціальності</a></li>
+                    <li><a href="#staff" class="text-base text-slate-400 hover:text-sky-400">Викладачі</a></li>
+                </ul>
+            </div>
+             <div>
+                <h3 class="text-sm font-semibold text-slate-200 tracking-wider uppercase">Ресурси</h3>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="#news" class="text-base text-slate-400 hover:text-sky-400">Новини</a></li>
+                    <li><a href="#gallery" class="text-base text-slate-400 hover:text-sky-400">Галерея</a></li>
+                    <li><a href="https://tntu.edu.ua" target="_blank" class="text-base text-slate-400 hover:text-sky-400">Сайт ТНТУ</a></li>
+                </ul>
+            </div>
+             <div>
+                <h3 class="text-sm font-semibold text-slate-200 tracking-wider uppercase">Ми в соцмережах</h3>
+                <div class="flex mt-4 space-x-6">
+                    <a href="#" class="text-slate-400 hover:text-sky-400"><span class="sr-only">Facebook</span><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg></a>
+                    <a href="#" class="text-slate-400 hover:text-sky-400"><span class="sr-only">Instagram</span><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2.34a1.5 1.5 0 011.37 0 1.5 1.5 0 01.884.884 1.5 1.5 0 010 1.37 1.5 1.5 0 01-.884.884 1.5 1.5 0 01-1.37 0 1.5 1.5 0 01-.884-.884 1.5 1.5 0 010-1.37A1.5 1.5 0 0112.315 2.34z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-2.068 5.47a.75.75 0 01.996-.062l4.5 2.25a.75.75 0 010 1.328l-4.5 2.25a.75.75 0 11-.874-1.206L13.755 12 9.87 9.806a.75.75 0 01-.062-.996z" clip-rule="evenodd" /></svg></a>
+                </div>
+            </div>
+        </div>
+        <div class="mt-8 border-t border-slate-800 pt-8 text-center">
+            <p class="text-base text-slate-400">&copy; 2025 Кафедра Приладів та Контрольно-Вимірювальних Систем, ТНТУ. Всі права захищено.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Scroll to top button -->
+<button id="scrollToTopBtn" class="hidden fixed bottom-5 right-5 bg-sky-500/80 hover:bg-sky-500 text-white p-3 rounded-full shadow-lg transition-opacity duration-300 z-50">
+  <span class="sr-only">Нагору</span>
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+</button>
+
+<!-- JavaScript for interactivity -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuOpenIcon = document.getElementById('menu-open-icon');
+        const menuCloseIcon = document.getElementById('menu-close-icon');
+
+        if(mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuOpenIcon.classList.toggle('hidden');
+                menuCloseIcon.classList.toggle('hidden');
+            });
+        }
+        
+        // Close mobile menu when a link is clicked
+        if (mobileMenu) {
+            const mobileNavLinks = mobileMenu.querySelectorAll('a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    menuOpenIcon.classList.remove('hidden');
+                    menuCloseIcon.classList.add('hidden');
+                });
+            });
+        }
+
+
+        // --- Scroll to Top Button ---
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        if (scrollToTopBtn) {
+            window.onscroll = function() {
+                if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                    scrollToTopBtn.classList.remove('hidden');
+                } else {
+                    scrollToTopBtn.classList.add('hidden');
+                }
+            };
+            scrollToTopBtn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // --- Animate on Scroll (Intersection Observer) ---
+        const revealElements = document.querySelectorAll('.reveal');
+        if (revealElements.length > 0) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            revealElements.forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // --- Staff Toggle ---
+        const toggleStaffBtn = document.getElementById('toggle-staff-btn');
+        const hiddenStaff = document.getElementById('hidden-staff');
+        const toggleStaffText = document.getElementById('toggle-staff-text');
+        const toggleStaffIcon = document.getElementById('toggle-staff-icon');
+
+        if (toggleStaffBtn) {
+            toggleStaffBtn.addEventListener('click', () => {
+                const isHidden = hiddenStaff.classList.toggle('hidden');
+                toggleStaffIcon.classList.toggle('rotate-180');
+                if (isHidden) {
+                    toggleStaffText.textContent = 'Показати всіх';
+                } else {
+                    toggleStaffText.textContent = 'Згорнути';
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
+
