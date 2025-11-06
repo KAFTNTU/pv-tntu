@@ -133,6 +133,15 @@
 
         /* === КІНЕЦЬ КОДУ ДЛЯ МОДАЛЬНОГО ВІКНА === */
         
+        /* === НОВИЙ КОД: Приховати скролбар у модальному вікні новин === */
+        #modal-text::-webkit-scrollbar {
+            display: none; /* Повністю приховати скролбар для Chrome/Safari/Mobile */
+        }
+        #modal-text {
+            -ms-overflow-style: none;  /* Приховати для IE та Edge */
+            scrollbar-width: none;  /* Приховати для Firefox */
+        }
+        
     </style>
 </head>
 <body class="antiasaed">
@@ -219,7 +228,7 @@
         
     </section>
 
-    <!-- === ABOUT SECTION === -->
+    <!-- === ABOUT SECTION (ОНОВЛЕНО З ФОТО) === -->
     <section id="about" class="py-20 lg:py-32 bg-slate-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -228,7 +237,8 @@
             </div>
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="reveal">
-                  <img src="ludipv.jpg" alt="Фото лабораторії кафедри" class="rounded-xl shadow-2xl" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Фото+не+знайдено'; this.onerror=null;">
+                    <!-- ОНОВЛЕНО: 'src' вказує на файл 'ludipv.jpg' у корені. Додано 'onerror' для резерву -->
+                    <img src="ludipv.jpg" alt="Фото лабораторії кафедри" class="rounded-xl shadow-2xl" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Фото+не+знайдено'; this.onerror=null;">
                 </div>
                 <div class="reveal" style="transition-delay: 200ms;">
                     <h3 class="text-2xl font-bold text-sky-400 mb-4">Наша історія та місія</h3>
