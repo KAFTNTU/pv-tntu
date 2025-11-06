@@ -14,6 +14,14 @@
     
     <!-- Custom CSS and Tailwind Configuration -->
     <style>
+        /* === ОНОВЛЕНО: Фікс "обрізаних" заголовків при прокрутці === */
+        html {
+            /* 6rem = 96px (висота шапки h-24). 
+               Це каже браузеру зупинити прокрутку за 96px до якоря. 
+            */
+            scroll-padding-top: 6rem; 
+        }
+
         /* Base styling */
         body {
             font-family: 'Inter', sans-serif;
@@ -43,7 +51,6 @@
             background-color: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            /* border-bottom: 1px solid rgba(51, 65, 85, 0.5); --- Прибрано на прохання */
         }
 
         /* Animation classes for scroll effects */
@@ -145,7 +152,6 @@
           background: #1e293b; /* Фон самого вікна (slate-800) */
           margin: 1px; /* Це і є "рамка" */
           border-radius: 9px;
-          /* padding: 1.5rem; -- Прибрано, контролюється всередині */
           overflow: hidden; /* Ховаємо кути контенту */
           display: flex;
           flex-direction: column;
@@ -153,7 +159,6 @@
         }
         
         /* Стилі для контенту всередині великих модалок (Викладачі, Новини, Галерея) */
-        /* ОНОВЛЕНО: Винесено заголовок, тому padding тут */
         .modal-section-content {
             overflow-y: auto; /* Дозволяє гортати контент, А НЕ вікно */
             height: 100%; /* Займає доступну висоту */
@@ -814,7 +819,8 @@
             <div class="modal-section-content flex-grow relative">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="grid gap-4">
-                        <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x700/1e293b/ffffff?text=Фото1" alt=""></div>
+                        <!-- ОНОВЛЕНО: Додано фото 'pavuk.jpg' -->
+                        <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="pavuk.jpg" alt="Фото Галереї 1" onerror="this.src='https://placehold.co/500x700/1e293b/ffffff?text=Фото1'; this.onerror=null;"></div>
                         <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x400/1e293b/ffffff?text=Фото2" alt=""></div>
                     </div>
                     <div class="grid gap-4">
@@ -822,7 +828,7 @@
                         <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x600/1e293b/ffffff?text=Фото4" alt=""></div>
                     </div>
                     <div class="grid gap-4">
-                      <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="pavuk.jpg" alt="Фото Галереї 1" onerror="this.src='https://placehold.co/500x700/1e293b/ffffff?text=Фото1'; this.onerror=null;"></div>
+                        <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x800/1e293b/ffffff?text=Фото5" alt=""></div>
                         <div><img class="h-auto max-w-full rounded-lg shadow-md hover:shadow-sky-500/30 transition-shadow duration-300" src="https://placehold.co/500x300/1e293b/ffffff?text=Фото6" alt=""></div>
                     </div>
                     <div class="grid gap-4">
@@ -958,7 +964,25 @@
         
         // Закриття по 'X' та Оверлею (закриває всі)
         document.querySelectorAll('.modal-close-btn, .modal-overlay').forEach(el => {
-            el.addEventListener('click', () => closeAllModals()); // Закриває всі
+            el.addEventListener('click', (e) => {
+                // Перевіряємо, чи клік був НЕ по дочірньому модальному вікну (для вкладених вікон)
+                if (e.target.classList.contains('modal-overlay') || e.target.closest('.modal-close-btn')) {
+                     // Знаходимо найближче батьківське модальне вікно і закриваємо його
+                     const parentModal = e.target.closest('.modal-base');
+                     if (parentModal) {
+                        parentModal.classList.remove('modal-visible');
+                        setTimeout(() => parentModal.classList.add('hidden'), 300);
+                        
+                        // Якщо це було останнє відкрите вікно - розблокувати скрол
+                        const anyModalVisible = document.querySelector('.modal-base.modal-visible');
+                        if (!anyModalVisible) {
+                            htmlEl.classList.remove('modal-open');
+                        }
+                     } else {
+                        closeAllModals(); // Якщо щось пішло не так, закрити всі
+                     }
+                }
+            });
         });
         
         // Закриття по 'Escape' (закриває всі)
@@ -990,7 +1014,7 @@
             }
         };
 
-        // Обробник кліків на посилання в навігації (ВИПРАВЛЕНО)
+        // Обробник кліків на посилання в навігації (ВИПРАВЛЕНО ЛОГІКУ "БЛИМАННЯ")
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 const modalId = link.dataset.modalId;
@@ -1000,27 +1024,28 @@
                 if (modalId) {
                     e.preventDefault(); 
                     
+                    const modalToOpen = document.getElementById(modalId);
+                    if (!modalToOpen) return;
+
+                    // Якщо це вікно ВЖЕ відкрите, нічого не робити
+                    if (modalToOpen.classList.contains('modal-visible')) {
+                        return;
+                    }
+
                     // Закрити всі, ОКРІМ того, що ми відкриваємо
                     closeAllModals(modalId); 
                     
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.classList.remove('hidden');
-                        setTimeout(() => modal.classList.add('modal-visible'), 10);
-                        htmlEl.classList.add('modal-open'); // Заблокувати скрол
-                        
-                        // Підсвітити заголовок
-                        highlightSectionTitle(targetId);
-                    }
+                    modalToOpen.classList.remove('hidden');
+                    setTimeout(() => modalToOpen.classList.add('modal-visible'), 10);
+                    htmlEl.classList.add('modal-open'); // Заблокувати скрол
+                    
+                    // Підсвітити заголовок
+                    highlightSectionTitle(targetId);
                 } 
                 // 2. Якщо це посилання на ЯКІР (Секцію)
                 else if (targetId) {
                     // e.preventDefault() не потрібен, браузер сам прокрутить
                     closeAllModals(); // Закрити всі модалки
-                    
-                    // Підсвітка заголовка (для 'about', 'specialties', 'contacts', 'hero-section')
-                    // Прокрутка відбудеться автоматично через href="#about"
-                    // Ми просто додаємо підсвітку
                     highlightSectionTitle(targetId);
                 }
                 
