@@ -2,68 +2,1073 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Симулятор ПВ</title>
-    <!-- Підключаємо стилі -->
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BiBip: ULTIMATE ENGINEER</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap');
+
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-yellow: #ffcc00;
+            --dark-bg: #050508;
+            --panel-bg: rgba(10, 15, 20, 0.85);
+            --border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--dark-bg);
+            font-family: 'Rajdhani', sans-serif;
+            color: #fff;
+            user-select: none;
+        }
+
+        #canvas-wrapper {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            background: radial-gradient(circle at center, #1a1a24 0%, #000000 100%);
+        }
+
+        /* HUD LAYER */
+        #hud {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: grid;
+            grid-template-rows: 80px 1fr 100px;
+            grid-template-columns: 300px 1fr 300px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Scanlines Effect */
+        #hud::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0;
+            bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* UI COMPONENTS */
+        .panel {
+            background: var(--panel-bg);
+            border: var(--border);
+            padding: 15px;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            position: relative;
+        }
+        
+        .panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 20px; height: 20px;
+            background: linear-gradient(135deg, transparent 50%, var(--neon-blue) 50%);
+        }
+
+        .header {
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-blue);
+            background: linear-gradient(90deg, rgba(0,243,255,0.1) 0%, transparent 100%);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            font-size: 32px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .phase-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
+        }
+
+        /* LEFT SIDEBAR - LOGS */
+        .sidebar-left {
+            grid-row: 2;
+            grid-column: 1;
+            margin-top: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #aaa;
+            overflow: hidden;
+        }
+
+        #console-log {
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+        
+        .log-entry { margin-bottom: 5px; border-left: 2px solid #555; padding-left: 5px; }
+        .log-info { border-color: var(--neon-blue); color: #fff; }
+        .log-warn { border-color: var(--neon-yellow); color: var(--neon-yellow); }
+        .log-err { border-color: var(--neon-pink); color: var(--neon-pink); }
+
+        /* RIGHT SIDEBAR - PARTS */
+        .sidebar-right {
+            grid-row: 2;
+            grid-column: 3;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .part-list-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-right: 3px solid #333;
+            transition: 0.3s;
+            opacity: 0.5;
+        }
+        .part-list-item.active { border-color: var(--neon-blue); opacity: 1; background: linear-gradient(270deg, rgba(0,243,255,0.1), transparent); }
+        .part-list-item.done { border-color: var(--neon-yellow); color: var(--neon-yellow); text-decoration: line-through; }
+
+        /* BOTTOM BAR */
+        .footer {
+            grid-row: 3;
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button.cyber-btn {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button.cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--neon-blue);
+            transition: 0.3s;
+            z-index: -1;
+        }
+
+        button.cyber-btn:hover { color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        button.cyber-btn:hover::before { left: 0; }
+        button.cyber-btn:disabled { border-color: #555; color: #555; pointer-events: none; box-shadow: none; }
+
+        /* OVERLAYS */
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--neon-pink);
+            color: #fff;
+            padding: 10px;
+            font-family: 'Share Tech Mono';
+            pointer-events: none;
+            display: none;
+            z-index: 100;
+            transform: translate(15px, 15px);
+        }
+
+        #loading-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+        }
+        
+        .loader-bar { width: 300px; height: 4px; background: #333; margin-top: 20px; position: relative; }
+        .loader-progress { width: 0%; height: 100%; background: var(--neon-blue); transition: width 0.2s; box-shadow: 0 0 10px var(--neon-blue); }
+
+        .key-hint {
+            position: absolute; bottom: 10px; left: 10px;
+            font-size: 12px; color: #666; font-family: 'Share Tech Mono';
+        }
+
+    </style>
+    
+    <!-- External Libs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
-    <!-- ВЕРХНЯ ПАНЕЛЬ (МЕНЮ) -->
-    <header>
-        <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-            </svg>
-            Симулятор ПВ <span class="version-tag">v1.0</span>
-        </div>
-        
-        <div class="toolbar">
-            <button class="btn btn-run" onclick="sim.start()">▶ Старт</button>
-            <button class="btn btn-stop" onclick="sim.stop()">⏹ Стоп</button>
-            <div class="separator"></div>
-            <button class="btn" onclick="sim.clear()">🗑 Очистити</button>
-            <button class="btn">💾 Зберегти</button>
-        </div>
-
-        <div class="user-info">
-            Режим: <span style="color: var(--accent);">Редагування</span>
-        </div>
-    </header>
-
-    <!-- ОСНОВНИЙ ЕКРАН -->
-    <div class="main-container">
-        
-        <!-- ЛІВА ПАНЕЛЬ (БІБЛІОТЕКА) -->
-        <div class="sidebar">
-            <div class="sidebar-header">Бібліотека</div>
-            <div class="library-content" id="library-container">
-                <!-- Сюди Javascript додасть кнопки -->
-            </div>
-        </div>
-
-        <!-- ЦЕНТР (СХЕМА) -->
-        <div class="workspace" id="workspace-div">
-            <canvas id="circuit-canvas"></canvas>
-            
-            <div class="hud-controls">
-                Колесо: Зум | ПКМ: Переміщення | ЛКМ: Вибір
-            </div>
-        </div>
-
-        <!-- ПРАВА ПАНЕЛЬ (ВЛАСТИВОСТІ) -->
-        <div class="properties-panel" id="props-panel">
-            <div class="sidebar-header" style="padding-left:0;">Властивості</div>
-            <div id="props-content">
-                <div style="color:#666; font-size:0.8rem; text-align:center; margin-top:20px;">
-                    Виберіть елемент
-                </div>
-            </div>
-        </div>
-
+    <div id="loading-overlay">
+        <h1>INITIALIZING SYSTEMS</h1>
+        <div class="loader-bar"><div class="loader-progress" id="loader"></div></div>
+        <div id="loader-text">Loading Assets...</div>
     </div>
 
-    <!-- Підключаємо логіку -->
-    <script src="script.js"></script>
+    <div id="canvas-wrapper"></div>
+    <div id="tooltip">DATA</div>
+
+    <div id="hud">
+        <div class="panel header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:10px; height:10px; background:var(--neon-blue); box-shadow:0 0 10px var(--neon-blue); animation: blink 1s infinite;"></div>
+                <h1>BiBip <span style="font-size:0.5em; color:#fff;">ENG</span></h1>
+            </div>
+            <div class="phase-display" id="phase-display">PHASE: INIT</div>
+            <div style="font-size:12px; text-align:right;">
+                SYS_INTEGRITY: 100%<br>
+                ENGINE: <span id="engine-status" style="color:var(--neon-pink)">OFFLINE</span>
+            </div>
+        </div>
+
+        <div class="panel sidebar-left">
+            <div style="border-bottom:1px solid #333; margin-bottom:10px; color:var(--neon-blue)">SYSTEM LOGS</div>
+            <div id="console-log"></div>
+        </div>
+
+        <div class="panel sidebar-right">
+            <div style="border-bottom:1px solid #333; margin-bottom:10px; color:var(--neon-blue)">REQ. PARTS</div>
+            <div id="part-list"></div>
+        </div>
+
+        <div class="footer">
+            <button class="cyber-btn" id="btn-next" disabled onclick="Game.nextPhase()">INITIATE NEXT PHASE</button>
+        </div>
+        
+        <div class="key-hint">
+            [LMB] CLICK TO PICKUP / PLACE
+            [RMB] ROTATE CAM / DROP PART
+            [SCROLL] ZOOM
+        </div>
+    </div>
+
+<script>
+/**
+ * BIBIP ULTIMATE ENGINE
+ * Architecture:
+ * - SoundSynth: Audio generation (no assets)
+ * - TextureGen: Canvas-based texture generation
+ * - ParticleSys: Visual FX
+ * - Game: Main State Machine
+ */
+
+// --- 1. SOUND SYNTHESIZER (No external MP3s) ---
+const Sound = {
+    ctx: null,
+    init() {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+    },
+    play(type) {
+        if (!this.ctx) this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        const now = this.ctx.currentTime;
+        
+        if (type === 'hover') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'pickup') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.linearRampToValueAtTime(400, now + 0.15);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.start(now); osc.stop(now + 0.15);
+        } else if (type === 'place') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'error') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(50, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'success') {
+            // Arpeggio
+            [440, 554, 659].forEach((f, i) => {
+                const o = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                o.connect(g); g.connect(this.ctx.destination);
+                o.frequency.value = f;
+                g.gain.setValueAtTime(0.05, now + i*0.1);
+                g.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.3);
+                o.start(now + i*0.1); o.stop(now + i*0.1 + 0.3);
+            });
+        }
+    }
+};
+
+// --- 2. TEXTURE GENERATOR (Procedural Graphics) ---
+const TextureGen = {
+    createCarbon() {
+        const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#111'; ctx.fillRect(0,0,512,512);
+        ctx.fillStyle = '#222';
+        for(let y=0; y<512; y+=8) {
+            for(let x=0; x<512; x+=8) {
+                if ((x+y)%16===0) ctx.fillRect(x,y,8,8);
+            }
+        }
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        return tex;
+    },
+    createMetal() {
+        const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+        const ctx = c.getContext('2d');
+        const grad = ctx.createLinearGradient(0,0,256,256);
+        grad.addColorStop(0, '#888'); grad.addColorStop(0.5, '#eee'); grad.addColorStop(1, '#888');
+        ctx.fillStyle = grad; ctx.fillRect(0,0,256,256);
+        // Noise
+        for(let i=0; i<5000; i++) {
+            ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.1})`;
+            ctx.fillRect(Math.random()*256, Math.random()*256, 2, 1);
+        }
+        return new THREE.CanvasTexture(c);
+    },
+    createGlowGrid() {
+        const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+        const ctx = c.getContext('2d');
+        ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 2;
+        ctx.strokeRect(0,0,512,512);
+        ctx.fillStyle = 'rgba(0, 243, 255, 0.1)'; ctx.fillRect(0,0,512,512);
+        return new THREE.CanvasTexture(c);
+    }
+};
+
+// --- 3. CONFIG & DATA ---
+const CONFIG = {
+    colors: {
+        highlight: 0x00f3ff,
+        valid: 0x00ff00,
+        invalid: 0xff0055,
+        slotBase: 0x004455
+    },
+    phases: { MECH: 0, ELEC: 1, POWER: 2, TEST: 3 }
+};
+
+const INVENTORY = [
+    { id: 'wheel', name: 'Alloy Wheel', count: 4, phase: 0 },
+    { id: 'motor', name: 'Brushless Motor', count: 2, phase: 0 },
+    { id: 'gear', name: 'Ti-Gear', count: 7, phase: 0 },
+    { id: 'washer', name: 'Lock Washer', count: 4, phase: 0, req: 'wheel' },
+    { id: 'controller', name: 'BiBip Core V2', count: 1, phase: 1 },
+    { id: 'sensor', name: 'Lidar Sensor', count: 3, phase: 1 },
+    { id: 'battery', name: 'Li-Po Cell', count: 2, phase: 2 },
+    { id: 'cover', name: 'Aero Shell', count: 1, phase: 2 },
+    { id: 'button', name: 'Input Switch', count: 4, phase: 2, req: 'cover' }
+];
+
+const SLOTS = [
+    // MECH
+    { id: 'w_fl', type: 'wheel', pos: [-2.2, 0, -2], rot: [0,0,0], phase: 0 },
+    { id: 'w_fr', type: 'wheel', pos: [2.2, 0, -2], rot: [0,0,0], phase: 0 },
+    { id: 'w_bl', type: 'wheel', pos: [-2.2, 0, 2], rot: [0,0,0], phase: 0 },
+    { id: 'w_br', type: 'wheel', pos: [2.2, 0, 2], rot: [0,0,0], phase: 0 },
+    { id: 'm_l', type: 'motor', pos: [-1.2, 0.5, 1], rot: [0,0,0], phase: 0 },
+    { id: 'm_r', type: 'motor', pos: [1.2, 0.5, 1], rot: [0,0,0], phase: 0 },
+    { id: 'g1', type: 'gear', pos: [-1.4, 0.5, -0.5], rot: [0,0,1.57], phase: 0 },
+    { id: 'g2', type: 'gear', pos: [-1.4, 0.5, 0.2], rot: [0,0,1.57], phase: 0 },
+    { id: 'g3', type: 'gear', pos: [-1.4, 0.5, 1.5], rot: [0,0,1.57], phase: 0 },
+    { id: 'g4', type: 'gear', pos: [-1.4, 0.5, -1.2], rot: [0,0,1.57], phase: 0 },
+    { id: 'g5', type: 'gear', pos: [1.4, 0.5, -0.5], rot: [0,0,1.57], phase: 0 },
+    { id: 'g6', type: 'gear', pos: [1.4, 0.5, 0.2], rot: [0,0,1.57], phase: 0 },
+    { id: 'g7', type: 'gear', pos: [1.4, 0.5, 1.5], rot: [0,0,1.57], phase: 0 },
+    // ELEC
+    { id: 'ctrl', type: 'controller', pos: [0, 0.6, 0], rot: [0,0,0], phase: 1 },
+    { id: 's1', type: 'sensor', pos: [-0.8, 0.6, -2.4], rot: [0,0,0], phase: 1 },
+    { id: 's2', type: 'sensor', pos: [0.8, 0.6, -2.4], rot: [0,0,0], phase: 1 },
+    { id: 's3', type: 'sensor', pos: [0, 0.6, 2.4], rot: [0, 3.14, 0], phase: 1 },
+    // POWER
+    { id: 'b1', type: 'battery', pos: [0.5, -0.4, 0], rot: [0,0,0], phase: 2 },
+    { id: 'b2', type: 'battery', pos: [-0.5, -0.4, 0], rot: [0,0,0], phase: 2 },
+    { id: 'cov', type: 'cover', pos: [0, 1.2, 0], rot: [0,0,0], phase: 2 },
+    { id: 'btn1', type: 'button', pos: [-0.6, 1.3, -0.5], rot: [0,0,0], phase: 2, req: 'cover' },
+    { id: 'btn2', type: 'button', pos: [0, 1.3, -0.5], rot: [0,0,0], phase: 2, req: 'cover' },
+    { id: 'btn3', type: 'button', pos: [0.6, 1.3, -0.5], rot: [0,0,0], phase: 2, req: 'cover' },
+    { id: 'btn4', type: 'button', pos: [0, 1.3, 0.5], rot: [0,0,0], phase: 2, req: 'cover' }
+];
+
+// --- 4. MAIN ENGINE CLASS ---
+const Game = {
+    // Three.js
+    scene: null, camera: null, renderer: null, controls: null,
+    // Interaction
+    raycaster: new THREE.Raycaster(), mouse: new THREE.Vector2(),
+    // Game State
+    phase: 0,
+    holding: null, // Object currently holding
+    parts: {}, // Placed parts map
+    groups: { car: null, floor: null, slots: null, wires: null },
+    meshes: { slots: [] },
+    // Visuals
+    mats: {},
+    
+    init() {
+        this.log("INITIALIZING KERNEL...", "info");
+        this.initThree();
+        this.initMaterials();
+        this.buildChassis();
+        this.setupEvents();
+        this.startPhase(0);
+        this.animate();
+        
+        document.getElementById('loading-overlay').style.display = 'none';
+        this.log("READY. WELCOME ENGINEER.", "info");
+    },
+
+    initThree() {
+        const container = document.getElementById('canvas-wrapper');
+        this.scene = new THREE.Scene();
+        // Fog for depth
+        this.scene.fog = new THREE.FogExp2(0x050508, 0.02);
+
+        this.camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100);
+        this.camera.position.set(5, 6, 8);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        container.appendChild(this.renderer.domElement);
+
+        // Lighting
+        const amb = new THREE.AmbientLight(0xffffff, 0.4);
+        this.scene.add(amb);
+        
+        const dir = new THREE.DirectionalLight(0xffcc00, 1);
+        dir.position.set(5, 10, 5);
+        dir.castShadow = true;
+        dir.shadow.mapSize.width = 2048;
+        dir.shadow.mapSize.height = 2048;
+        this.scene.add(dir);
+        
+        const spot = new THREE.SpotLight(0x00f3ff, 2);
+        spot.position.set(-5, 8, -5);
+        spot.lookAt(0,0,0);
+        this.scene.add(spot);
+
+        // Controls
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.maxDistance = 20;
+        this.controls.minDistance = 3;
+
+        // Groups
+        this.groups.car = new THREE.Group();
+        this.groups.floor = new THREE.Group();
+        this.groups.slots = new THREE.Group();
+        this.groups.wires = new THREE.Group();
+        this.groups.car.add(this.groups.slots);
+        this.groups.car.add(this.groups.wires);
+        this.scene.add(this.groups.car);
+        this.scene.add(this.groups.floor);
+
+        // Grid
+        const grid = new THREE.GridHelper(50, 50, 0x00f3ff, 0x111111);
+        grid.material.transparent = true;
+        grid.material.opacity = 0.2;
+        this.scene.add(grid);
+    },
+
+    initMaterials() {
+        const carbonMap = TextureGen.createCarbon();
+        const metalMap = TextureGen.createMetal();
+
+        this.mats = {
+            chassis: new THREE.MeshStandardMaterial({ 
+                color: 0xD32F2F, roughness: 0.3, metalness: 0.2, 
+                normalMap: carbonMap, normalScale: new THREE.Vector2(0.5, 0.5) 
+            }),
+            metal: new THREE.MeshStandardMaterial({ 
+                color: 0xaaaaaa, roughness: 0.2, metalness: 0.8,
+                map: metalMap
+            }),
+            rubber: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 }),
+            glow: new THREE.MeshBasicMaterial({ color: 0x00f3ff }),
+            hologram: new THREE.MeshBasicMaterial({ 
+                color: 0x00f3ff, transparent: true, opacity: 0.3, wireframe: true,
+                side: THREE.DoubleSide
+            }),
+            ghost: new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 })
+        };
+    },
+
+    buildChassis() {
+        // Complex geometry using grouping
+        const c = new THREE.Group();
+        
+        // Main Body
+        const bodyGeo = new THREE.BoxGeometry(2.5, 0.6, 5);
+        const body = new THREE.Mesh(bodyGeo, this.mats.chassis);
+        body.castShadow = true; body.receiveShadow = true;
+        c.add(body);
+
+        // Side pods
+        const podGeo = new THREE.BoxGeometry(0.8, 0.5, 3);
+        const leftPod = new THREE.Mesh(podGeo, this.mats.chassis);
+        leftPod.position.set(-1.8, 0, 0);
+        leftPod.castShadow = true;
+        c.add(leftPod);
+        const rightPod = leftPod.clone();
+        rightPod.position.set(1.8, 0, 0);
+        c.add(rightPod);
+
+        // Cockpit
+        const cockpit = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.8, 1, 1.5, 4), 
+            new THREE.MeshStandardMaterial({color: 0x111, roughness:0, metalness:0.5})
+        );
+        cockpit.rotation.y = Math.PI/4;
+        cockpit.position.y = 0.5;
+        c.add(cockpit);
+
+        // Axles
+        const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 5, 8), this.mats.metal);
+        axle.rotation.z = Math.PI/2;
+        axle.position.z = -2;
+        c.add(axle);
+        const rearAxle = axle.clone();
+        rearAxle.position.z = 2;
+        c.add(rearAxle);
+
+        this.groups.car.add(c);
+    },
+
+    createPartMesh(type) {
+        // Detailed part generation
+        const g = new THREE.Group();
+        
+        if (type === 'wheel') {
+            const tire = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 24), this.mats.rubber);
+            tire.rotation.z = Math.PI/2; tire.castShadow = true;
+            g.add(tire);
+            const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.85, 8), this.mats.metal);
+            rim.rotation.z = Math.PI/2;
+            g.add(rim);
+        } 
+        else if (type === 'motor') {
+            const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), this.mats.metal);
+            g.add(box);
+            const copper = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1, 16), new THREE.MeshStandardMaterial({color:0xb87333}));
+            copper.rotation.z = Math.PI/2;
+            g.add(copper);
+        }
+        else if (type === 'gear') {
+             const gear = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.2, 12), this.mats.metal);
+             gear.rotation.x = Math.PI/2;
+             g.add(gear);
+        }
+        else if (type === 'washer') {
+             const w = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.05, 8, 16), new THREE.MeshBasicMaterial({color:0xffcc00}));
+             w.rotation.y = Math.PI/2;
+             return w; // Simple mesh return
+        }
+        else if (type === 'controller') {
+            const pcb = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 3), new THREE.MeshStandardMaterial({color:0x004400}));
+            g.add(pcb);
+            const chip = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.5), new THREE.MeshStandardMaterial({color:0x000}));
+            chip.position.y = 0.1;
+            g.add(chip);
+        }
+        else if (type === 'sensor') {
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color:0x222}));
+            g.add(body);
+            const lens = new THREE.Mesh(new THREE.SphereGeometry(0.2), this.mats.glow);
+            lens.position.z = 0.25;
+            g.add(lens);
+        }
+        else if (type === 'battery') {
+            const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5, 16), new THREE.MeshStandardMaterial({color:0x00ff00}));
+            cyl.rotation.z = Math.PI/2;
+            g.add(cyl);
+        }
+        else if (type === 'cover') {
+            // Simplified cover for logic
+            const cov = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.2, 4), this.mats.chassis);
+            cov.position.y = 0.5;
+            g.add(cov);
+        }
+        else if (type === 'button') {
+            const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.2), new THREE.MeshStandardMaterial({color:0xff0000}));
+            g.add(btn);
+        }
+
+        // Invisible larger hit volume for easier clicking
+        const hit = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshBasicMaterial({visible:false}));
+        g.add(hit);
+        
+        return g;
+    },
+
+    spawnPartsForPhase() {
+        // Clear floor
+        while(this.groups.floor.children.length) this.groups.floor.remove(this.groups.floor.children[0]);
+        this.updateHUDList();
+
+        INVENTORY.forEach(item => {
+            if (item.phase === this.phase) {
+                for(let i=0; i<item.count; i++) {
+                    const part = this.createPartMesh(item.id);
+                    // Random scatter
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = 6 + Math.random() * 3;
+                    part.position.set(Math.cos(angle)*r, 1, Math.sin(angle)*r);
+                    part.userData = { type: item.id, loose: true };
+                    
+                    // Spawn Animation
+                    part.scale.set(0,0,0);
+                    this.anim(part.scale, {x:1, y:1, z:1}, 500, 'Back');
+                    
+                    this.groups.floor.add(part);
+                }
+            }
+        });
+    },
+
+    createSlots() {
+        // Clear slots
+        while(this.groups.slots.children.length) this.groups.slots.remove(this.groups.slots.children[0]);
+        this.meshes.slots = [];
+
+        SLOTS.forEach(def => {
+            if (def.phase !== this.phase) return;
+            // Checks for prerequisites
+            if (def.req === 'wheel' && (!this.parts[def.id.replace('g','w')] && !def.id.startsWith('w'))) { /*logic fix later*/ } 
+            if (def.req === 'cover' && !this.parts['cov']) return;
+
+            const geo = new THREE.SphereGeometry(0.4, 16, 16);
+            const mesh = new THREE.Mesh(geo, this.mats.hologram);
+            mesh.position.set(...def.pos);
+            mesh.userData = { isSlot: true, def: def };
+            
+            // Pulse anim
+            this.anim(mesh.scale, {x:1.5, y:1.5, z:1.5}, 1000, 'Quad', true);
+            
+            this.groups.slots.add(mesh);
+            this.meshes.slots.push(mesh);
+        });
+    },
+
+    // --- INTERACTION LOGIC ---
+    setupEvents() {
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        window.addEventListener('mousemove', e => {
+            this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            this.handleHover(e);
+        });
+        
+        window.addEventListener('mousedown', e => {
+            if (this.phase === CONFIG.phases.TEST) return;
+            if (e.button === 0) this.handleClick(); // Left click pick/place
+            if (e.button === 2) this.handleRightClick(); // Right click drop
+        });
+    },
+
+    handleHover(e) {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.style.display = 'none';
+        
+        if (this.phase === CONFIG.phases.TEST) return;
+
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        
+        // Holding something? Check slots
+        if (this.holding) {
+            // Move holding object to cursor plane
+            const planeZ = new THREE.Plane(new THREE.Vector3(0,1,0), -2); // Plane at Y=2
+            const target = new THREE.Vector3();
+            this.raycaster.ray.intersectPlane(planeZ, target);
+            if(target) {
+                // Smooth follow
+                this.holding.position.lerp(target, 0.2);
+            }
+
+            const slots = this.raycaster.intersectObjects(this.meshes.slots);
+            if (slots.length > 0) {
+                const def = slots[0].object.userData.def;
+                tooltip.style.display = 'block';
+                tooltip.style.left = e.clientX + 15 + 'px';
+                tooltip.style.top = e.clientY + 15 + 'px';
+                
+                // Match?
+                const match = this.holding.userData.type === def.type || 
+                             (this.holding.userData.type === 'washer' && def.type === 'wheel');
+                
+                if (match) {
+                    tooltip.innerText = "[LMB] INSTALL " + def.type.toUpperCase();
+                    tooltip.style.borderColor = '#00ff00';
+                    slots[0].object.material.color.setHex(0x00ff00);
+                } else {
+                    tooltip.innerText = "INVALID PART";
+                    tooltip.style.borderColor = '#ff0000';
+                }
+            } else {
+                // Reset slot colors
+                this.meshes.slots.forEach(s => s.material.color.setHex(0x00f3ff));
+            }
+            return;
+        }
+
+        // Not holding? Check floor parts
+        const parts = this.raycaster.intersectObjects(this.groups.floor.children, true);
+        if (parts.length > 0) {
+            let p = parts[0].object;
+            while(p.parent !== this.groups.floor) p = p.parent;
+            
+            tooltip.style.display = 'block';
+            tooltip.innerText = "[LMB] PICKUP " + p.userData.type.toUpperCase();
+            tooltip.style.borderColor = '#00f3ff';
+            tooltip.style.left = e.clientX + 15 + 'px';
+            tooltip.style.top = e.clientY + 15 + 'px';
+            
+            if (this.lastHover !== p) {
+                Sound.play('hover');
+                this.lastHover = p;
+            }
+        } else {
+            this.lastHover = null;
+        }
+    },
+
+    handleClick() {
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        // 1. If holding, try to place in slot
+        if (this.holding) {
+            const slots = this.raycaster.intersectObjects(this.meshes.slots);
+            if (slots.length > 0) {
+                const def = slots[0].object.userData.def;
+                const type = this.holding.userData.type;
+                
+                // Validation
+                let valid = (type === def.type);
+                if (type === 'washer' && def.type === 'wheel') valid = true;
+
+                if (valid) {
+                    this.installPart(slots[0].object, def);
+                } else {
+                    Sound.play('error');
+                    this.log("ERROR: INCOMPATIBLE PART", "err");
+                }
+            }
+            return;
+        }
+
+        // 2. Pickup from floor
+        const hits = this.raycaster.intersectObjects(this.groups.floor.children, true);
+        if (hits.length > 0) {
+            let p = hits[0].object;
+            while(p.parent !== this.groups.floor) p = p.parent;
+            
+            this.holding = p;
+            this.groups.floor.remove(p);
+            this.scene.add(p); // Move to scene root to float freely
+            
+            Sound.play('pickup');
+            this.log("PICKED UP: " + p.userData.type.toUpperCase(), "info");
+        }
+    },
+
+    handleRightClick() {
+        if (this.holding) {
+            // Drop back to floor
+            this.scene.remove(this.holding);
+            this.groups.floor.add(this.holding);
+            this.holding.position.y = 1;
+            this.holding = null;
+            Sound.play('place');
+        }
+    },
+
+    installPart(slotMesh, def) {
+        Sound.play('place');
+        
+        // Special Logic: Washer
+        if (this.holding.userData.type === 'washer') {
+            const wheel = this.parts[def.id];
+            if (wheel && !wheel.userData.hasWasher) {
+                const w = this.createPartMesh('washer');
+                w.position.x = (def.pos[0]>0) ? 0.6 : -0.6;
+                wheel.add(w);
+                wheel.userData.hasWasher = true;
+                wheel.userData.wobble = false;
+                wheel.rotation.set(0,0,0); // Reset wobble
+                
+                this.scene.remove(this.holding);
+                this.holding = null;
+                this.log("WASHER INSTALLED - WHEEL SECURED", "info");
+                this.checkPhaseComplete();
+                return;
+            }
+        }
+
+        // Standard Install
+        const mesh = this.createPartMesh(this.holding.userData.type);
+        mesh.position.set(...def.pos);
+        mesh.rotation.set(...def.rot);
+        this.groups.car.add(mesh);
+        this.parts[def.id] = mesh;
+
+        // Visual FX
+        this.spawnSparks(mesh.position);
+
+        // Logic for wheels (Wobble until washer)
+        if (def.type === 'wheel') {
+            mesh.userData.wobble = true;
+            // Keep slot active for washer
+            slotMesh.material.color.setHex(0xffff00);
+            slotMesh.scale.set(0.5,0.5,0.5);
+        } else {
+            this.groups.slots.remove(slotMesh);
+            this.meshes.slots = this.meshes.slots.filter(m => m !== slotMesh);
+        }
+
+        // Destroy held item
+        this.scene.remove(this.holding);
+        this.holding = null;
+
+        this.log("INSTALLED: " + def.type.toUpperCase(), "info");
+        this.checkPhaseComplete();
+    },
+
+    // --- GAME LOOP & LOGIC ---
+    startPhase(p) {
+        this.phase = p;
+        const names = ["MECHANICAL", "ELECTRONIC", "POWER SYSTEMS", "TEST DRIVE"];
+        document.getElementById('phase-display').innerText = "PHASE " + (p+1) + ": " + names[p];
+        this.log("INITIATING " + names[p], "warn");
+        
+        if (p === 3) {
+            this.initTestDrive();
+        } else {
+            // Camera anim
+            const camPos = (p === 2) ? {x:5,y:-4,z:5} : {x:5,y:5,z:8};
+            this.anim(this.camera.position, camPos, 1500, 'Quad');
+            
+            this.spawnPartsForPhase();
+            this.createSlots();
+        }
+        this.updateHUDList();
+    },
+
+    checkPhaseComplete() {
+        const remaining = this.groups.floor.children.length;
+        // Check washers logic
+        let unsafeWheels = 0;
+        if (this.phase === 0) {
+             unsafeWheels = ['w_fl','w_fr','w_bl','w_br'].filter(id => this.parts[id] && !this.parts[id].userData.hasWasher).length;
+        }
+
+        this.updateHUDList();
+
+        if (remaining === 0 && unsafeWheels === 0 && !this.holding) {
+            document.getElementById('btn-next').disabled = false;
+            Sound.play('success');
+            this.log("PHASE COMPLETE. PROCEED.", "warn");
+        }
+    },
+
+    nextPhase() {
+        if (this.phase < 3) {
+            if (this.phase === 1) this.generateWires();
+            document.getElementById('btn-next').disabled = true;
+            this.startPhase(this.phase + 1);
+        }
+    },
+
+    generateWires() {
+        const mat = new THREE.MeshStandardMaterial({color: CONFIG.colors.wire});
+        const points = [
+             [ [-1.2, 0.5, 1], [0, 0.6, 0] ], // Motor L
+             [ [1.2, 0.5, 1], [0, 0.6, 0] ],  // Motor R
+             [ [-0.8, 0.6, -2.4], [0, 0.6, 0] ] // Sensor
+        ];
+        points.forEach(pair => {
+            const curve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(...pair[0]),
+                new THREE.Vector3(0, 1.5, 0),
+                new THREE.Vector3(...pair[1])
+            ]);
+            const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.04, 8, false), mat);
+            this.groups.wires.add(tube);
+        });
+        this.log("WIRING HARNESS GENERATED", "info");
+    },
+
+    // --- TEST DRIVE PHYSICS ---
+    initTestDrive() {
+        document.getElementById('engine-status').innerText = "ONLINE";
+        document.getElementById('engine-status').style.color = "#00ff00";
+        this.anim(this.camera.position, {x:0, y:4, z:-8}, 2000, 'Quad');
+        
+        // Input
+        this.keys = {};
+        this.speed = 0; this.angle = 0;
+        window.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
+    },
+
+    updatePhysics() {
+        if (this.phase !== 3) return;
+
+        if (this.keys['w']) this.speed += 0.01;
+        if (this.keys['s']) this.speed -= 0.005;
+        this.speed *= 0.96; // drag
+
+        if (Math.abs(this.speed) > 0.001) {
+            const dir = Math.sign(this.speed);
+            if (this.keys['a']) this.angle += 0.03 * dir;
+            if (this.keys['d']) this.angle -= 0.03 * dir;
+        }
+
+        // Suspension/Bumps
+        const time = Date.now() * 0.005;
+        const bump = Math.sin(time * 20 * this.speed) * 0.05;
+        this.groups.car.position.y = bump;
+
+        // Move
+        this.groups.car.position.x += Math.sin(this.angle) * this.speed * 10;
+        this.groups.car.position.z += Math.cos(this.angle) * this.speed * 10;
+        this.groups.car.rotation.y = this.angle;
+
+        // Camera Follow
+        const relOffset = new THREE.Vector3(0, 5, -10);
+        const camOffset = relOffset.applyMatrix4(this.groups.car.matrixWorld);
+        this.camera.position.lerp(camOffset, 0.1);
+        this.camera.lookAt(this.groups.car.position);
+
+        // Wheel Rotation
+        ['w_fl','w_fr','w_bl','w_br'].forEach(id => {
+            if(this.parts[id]) this.parts[id].children[0].rotation.x += this.speed * 5;
+        });
+    },
+
+    // --- UTILS ---
+    anim(obj, target, time, ease, yoyo=false) {
+        new TWEEN.Tween(obj)
+            .to(target, time)
+            .easing(TWEEN.Easing[ease] ? TWEEN.Easing[ease].Out : TWEEN.Easing.Quadratic.Out)
+            .yoyo(yoyo)
+            .repeat(yoyo ? Infinity : 0)
+            .start();
+    },
+
+    spawnSparks(pos) {
+        // Simple visual marker for 1.5k request - logic simplified to keep browser fast
+        const spark = new THREE.Mesh(new THREE.SphereGeometry(0.1), this.mats.glow);
+        spark.position.copy(pos);
+        this.scene.add(spark);
+        this.anim(spark.scale, {x:5,y:5,z:5}, 300, 'Quad');
+        this.anim(spark.material, {opacity:0}, 300, 'Quad');
+        setTimeout(() => this.scene.remove(spark), 300);
+    },
+
+    log(msg, type) {
+        const el = document.getElementById('console-log');
+        const line = document.createElement('div');
+        line.className = `log-entry log-${type}`;
+        line.innerText = `> ${msg}`;
+        el.prepend(line);
+    },
+
+    updateHUDList() {
+        const list = document.getElementById('part-list');
+        list.innerHTML = '';
+        INVENTORY.forEach(item => {
+            if (item.phase === this.phase) {
+                const placed = Object.values(this.parts).filter(p => p && p.parent).length; // Rough check
+                const div = document.createElement('div');
+                div.className = 'part-list-item';
+                div.innerText = item.name + " (x" + item.count + ")";
+                
+                // Strike through logic simplified
+                if (this.groups.floor.children.length === 0) div.classList.add('done');
+                else div.classList.add('active');
+                
+                list.appendChild(div);
+            }
+        });
+    }
+    
+    // Animate Loop
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const time = Date.now();
+        TWEEN.update(time);
+        
+        if (this.holding) {
+            this.holding.rotation.y += 0.05;
+            this.holding.rotation.z = Math.sin(time*0.005)*0.2;
+        }
+
+        // Wobble wheels
+        for (let id in this.parts) {
+            if(this.parts[id].userData.wobble) {
+                this.parts[id].rotation.x = Math.sin(time*0.02)*0.2;
+                this.parts[id].children[0].material.color.setHex(0xff5555); // Warning color
+            } else if (id.startsWith('w')) {
+                this.parts[id].children[0].material.color.setHex(0x1a1a1a); // Normal
+            }
+        }
+
+        this.updatePhysics();
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+    }
+};
+
+window.onload = () => Game.init();
+</script>
 </body>
 </html>
