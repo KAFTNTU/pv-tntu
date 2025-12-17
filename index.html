@@ -3,70 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>TNTU AR Interface v3.3 [Precision Mode]</title>
+    <title>TNTU Neural Interface v4.1 [Red Cursor & Low Profile]</title>
     
     <style>
         :root {
             --primary: #00ffcc;
-            --bg: #000000;
-            --font-main: 'Segoe UI', 'Roboto', sans-serif;
-            --font-mono: 'Courier New', monospace;
+            --secondary: #005544;
+            --alert: #ff0000;
+            --bg: #050505;
+            --font-ui: 'Segoe UI', system-ui, sans-serif;
+            --font-code: 'Consolas', monospace;
         }
 
         body {
             margin: 0;
             overflow: hidden;
             background-color: var(--bg);
-            font-family: var(--font-main);
+            font-family: var(--font-ui);
             color: var(--primary);
             user-select: none;
         }
 
-        /* --- ЗАВАНТАЖУВАЧ --- */
-        #loader {
+        /* --- UI LOADER --- */
+        #boot-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505; z-index: 9999;
+            background: #020202; z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s;
         }
-        .loader-ring {
-            width: 50px; height: 50px; border: 2px solid transparent; border-top: 2px solid var(--primary);
-            border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px;
-        }
-        #btn-start {
-            padding: 15px 40px; background: rgba(0, 255, 204, 0.05); border: 1px solid var(--primary);
-            color: var(--primary); font-size: 1.1rem; cursor: pointer; text-transform: uppercase;
-            letter-spacing: 2px; transition: 0.3s; border-radius: 4px;
+        
+        .spinner {
+            width: 60px; height: 60px;
+            border: 2px solid #333;
+            border-top: 2px solid var(--alert); /* Red spinner */
+            border-radius: 50%;
+            animation: rotate 1s infinite linear;
+            margin-bottom: 24px;
         }
 
-        /* --- ОСНОВНИЙ ЕКРАН --- */
-        #viewport { position: relative; width: 100vw; height: 100vh; }
-        #video-feed {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; transform: scaleX(-1); filter: brightness(0.6) contrast(1.2); z-index: 0;
+        #btn-init {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 16px 48px;
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        #ar-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+        
+        #btn-init:hover {
+            background: rgba(0, 255, 204, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+        }
+
+        /* --- MAIN VIEWPORT --- */
+        #viewport { position: relative; width: 100vw; height: 100vh; }
+        
+        #cam-feed {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; transform: scaleX(-1);
+            filter: grayscale(0.2) contrast(1.1) brightness(0.7);
+            z-index: 0;
+        }
+        
+        #ar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
         /* --- HUD --- */
-        #hud {
-            position: absolute; top: 5%; left: 50%; transform: translateX(-50%);
-            width: 95%; max-width: 800px; z-index: 20; text-align: center; pointer-events: none;
+        #hud-layer {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 800px; z-index: 20;
+            text-align: center; pointer-events: none;
         }
-        .task-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-        .task-text {
-            font-size: 1.2rem; color: #eee; background: rgba(0, 20, 30, 0.6); padding: 12px 25px;
-            border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.3); display: inline-block;
-            backdrop-filter: blur(5px); margin-bottom: 10px; line-height: 1.4;
-        }
-        .input-buffer {
-            font-family: var(--font-mono); font-size: 1.8rem; font-weight: bold; color: var(--primary);
-            min-height: 2.2rem; margin: 10px 0; text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-        .instructions { font-size: 0.8rem; color: #ffeb3b; opacity: 0.8; margin-top: 5px; }
-        .success-anim { animation: successFlash 0.5s ease-out; color: #00ff00 !important; }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes successFlash { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .hud-panel {
+            background: rgba(5, 10, 15, 0.85);
+            border: 1px solid rgba(255, 0, 0, 0.3); /* Red tint border */
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .label {
+            font-size: 10px; color: #888; letter-spacing: 2px; text-transform: uppercase;
+            margin-bottom: 8px; display: block;
+        }
+
+        .target-text {
+            font-size: 18px; color: #fff; font-weight: 500;
+            margin-bottom: 15px; display: block;
+            border-bottom: 1px solid #333; padding-bottom: 10px;
+        }
+
+        .input-display {
+            font-family: var(--font-code);
+            font-size: 28px; color: var(--primary);
+            min-height: 40px; margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        .status-msg { font-size: 12px; color: #aaa; opacity: 0.8; }
+        .match-success { color: #00ff00 !important; text-shadow: 0 0 20px #00ff00; }
+
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -75,358 +115,330 @@
 </head>
 <body>
 
-    <div id="loader">
-        <div class="loader-ring"></div>
-        <h3 style="margin-bottom: 20px; font-weight: 300; letter-spacing: 1px;">TNTU NEURAL INTERFACE v3.3</h3>
-        <button id="btn-start">ПІДКЛЮЧИТИСЬ</button>
+    <div id="boot-screen">
+        <div class="spinner"></div>
+        <div style="margin-bottom: 20px; color: #555; font-family: monospace;">KERNEL v4.1 RELOADING...</div>
+        <button id="btn-init">ЗАПУСТИТИ СИСТЕМУ</button>
     </div>
 
     <div id="viewport">
-        <video id="video-feed" playsinline muted></video>
-        <canvas id="ar-canvas"></canvas>
+        <video id="cam-feed" playsinline muted></video>
+        <canvas id="ar-overlay"></canvas>
 
-        <div id="hud">
-            <div class="task-label">ЦІЛЬОВЕ ЗАВДАННЯ</div>
-            <div class="task-text"><span style="color:#fff">кафедра приладів і контрольно-вимірювальних систем</span></div>
-            
-            <div class="input-buffer" id="user-input">...</div>
-            
-            <div class="instructions">З'єднайте пальці до появи зеленого кола</div>
+        <div id="hud-layer">
+            <div class="hud-panel">
+                <span class="label">ЗАВДАННЯ</span>
+                <span class="target-text">кафедра приладів і контрольно-вимірювальних систем</span>
+                
+                <span class="label">ВВЕДЕНИЙ ТЕКСТ</span>
+                <div class="input-display" id="user-buffer">_</div>
+                
+                <div class="status-msg">
+                    КУРСОР ЗБІЛЬШЕНО. КЛАВІАТУРУ ОПУЩЕНО.
+                </div>
+            </div>
         </div>
     </div>
 
 <script>
 /**
  * ============================================================================
- * TNTU AR SYSTEM CORE v3.3 - "Dynamic Bracket Cursor"
+ * TNTU AR KERNEL v4.1 - "Big Red & Low"
  * ============================================================================
  */
 
 // --- 1. CONFIGURATION ---
 const CONFIG = {
-    CAMERA: { WIDTH: 1280, HEIGHT: 720 },
+    CORE: { WIDTH: 1280, HEIGHT: 720, FPS_CAP: 60 },
+    FILTER: { FREQUENCY: 60, MIN_CUTOFF: 1.0, BETA: 0.007, D_CUTOFF: 1.0 },
+    
+    INPUT: {
+        PINCH_THRESHOLD: 0.035,
+        PINCH_HYSTERESIS: 0.045,
+        COOLDOWN_MS: 300,
+        CURSOR_SENSITIVITY: 1.1
+    },
+
     KEYBOARD: {
         POS_Z: -6.5,
+        // ОПУСКАЄМО КЛАВІАТУРУ НИЖЧЕ (По осі Y)
+        // 0 - це центр екрану. Мінусове значення - вниз.
+        POS_Y: -2.0, 
         SCALE: 1.1,
         SPACING: 0.08,
-        TARGET_PHRASE: "кафедра приладів і контрольно-вимірювальних систем"
+        PHRASE: "кафедра приладів і контрольно-вимірювальних систем"
     },
-    COLORS: {
-        KEY_IDLE: 0x001a26,
+
+    THEME: {
+        KEY_BASE: 0x001a26,
         KEY_HOVER: 0x004455,
         KEY_ACTIVE: 0x00ffcc,
         
-        CURSOR_IDLE: 0xffff00,  // Жовтий (розімкнуто)
-        CURSOR_ACTIVE: 0x00ff00 // Зелений (зімкнуто)
-    },
-    VALIDATION: {
-        PINCH_THRESHOLD: 0.035,
-        PINCH_RELEASE: 0.05,
-        COOLDOWN: 350,
-        
-        // Повернули старі налаштування для стабільності
-        SMOOTHING: 0.25,      // Більш плавно (було 0.4)
-        SENSITIVITY: 1.1      // Менш різко (було 1.3)
+        // ЧЕРВОНИЙ КУРСОР
+        CURSOR_OPEN: 0xff0000,   // Яскраво-червоний
+        CURSOR_LOCKED: 0x00ff00  // Зелений (при кліку)
     }
 };
 
-// --- 2. MATH UTILITIES ---
-const MathUtils = {
-    lerp: (start, end, amt) => (1 - amt) * start + amt * end,
-    smoothVector: (current, target, factor) => {
-        if (!current) return target.clone();
-        current.x = MathUtils.lerp(current.x, target.x, factor);
-        current.y = MathUtils.lerp(current.y, target.y, factor);
-        current.z = MathUtils.lerp(current.z, target.z, factor);
-        return current;
+// --- 2. ADVANCED MATH (1€ Filter) ---
+class LowPassFilter {
+    constructor(alpha) { this.setAlpha(alpha); this.y = null; this.s = null; }
+    setAlpha(alpha) { this.alpha = alpha; }
+    filter(value, timestamp, alpha) {
+        if (alpha) this.setAlpha(alpha);
+        if (this.y === null) { this.s = value; } else { this.s = this.alpha * value + (1.0 - this.alpha) * this.s; }
+        this.y = this.s; return this.y;
+    }
+    lastValue() { return this.y; }
+}
+
+class OneEuroFilter {
+    constructor(freq, minCutoff = 1.0, beta = 0.0, dCutoff = 1.0) {
+        this.freq = freq; this.minCutoff = minCutoff; this.beta = beta; this.dCutoff = dCutoff;
+        this.x = new LowPassFilter(this.alpha(minCutoff));
+        this.dx = new LowPassFilter(this.alpha(dCutoff));
+        this.lastTime = null;
+    }
+    alpha(cutoff) {
+        const te = 1.0 / this.freq; const tau = 1.0 / (2 * Math.PI * cutoff); return 1.0 / (1.0 + tau / te);
+    }
+    filter(value, timestamp) {
+        if (this.lastTime && timestamp) { this.freq = 1.0 / (timestamp - this.lastTime); }
+        this.lastTime = timestamp;
+        const prevX = this.x.lastValue();
+        const dx = (prevX === null) ? 0 : (value - prevX) * this.freq;
+        const edx = this.dx.filter(dx, timestamp, this.alpha(this.dCutoff));
+        const cutoff = this.minCutoff + this.beta * Math.abs(edx);
+        return this.x.filter(value, timestamp, this.alpha(cutoff));
+    }
+}
+
+class Vector3Filter {
+    constructor(config) {
+        this.fX = new OneEuroFilter(config.FREQUENCY, config.MIN_CUTOFF, config.BETA, config.D_CUTOFF);
+        this.fY = new OneEuroFilter(config.FREQUENCY, config.MIN_CUTOFF, config.BETA, config.D_CUTOFF);
+        this.fZ = new OneEuroFilter(config.FREQUENCY, config.MIN_CUTOFF, config.BETA, config.D_CUTOFF);
+    }
+    process(vec3, time) {
+        return new THREE.Vector3(this.fX.filter(vec3.x, time), this.fY.filter(vec3.y, time), this.fZ.filter(vec3.z, time));
+    }
+}
+
+const Utils = {
+    getDistance2D: (p1, p2, aspect) => {
+        const dx = (p1.x - p2.x) * aspect; const dy = p1.y - p2.y; return Math.sqrt(dx * dx + dy * dy);
     },
-    dist2D: (p1, p2, aspect) => {
-        const dx = (p1.x - p2.x) * aspect;
-        const dy = p1.y - p2.y;
-        return Math.sqrt(dx*dx + dy*dy);
-    },
-    clamp: (val, min, max) => Math.min(Math.max(val, min), max)
+    projectLandmark: (lm, camera, zDepth) => {
+        const sens = CONFIG.INPUT.CURSOR_SENSITIVITY;
+        const ndc_x = ((1 - lm.x) * 2 - 1) * sens;
+        const ndc_y = (-lm.y * 2 + 1) * sens;
+        const vec = new THREE.Vector3(ndc_x, ndc_y, 0.5);
+        vec.unproject(camera);
+        const dir = vec.sub(camera.position).normalize();
+        const distance = (zDepth + 1 - camera.position.z) / dir.z;
+        return camera.position.clone().add(dir.multiplyScalar(distance));
+    }
 };
 
-// --- 3. VISUAL KEYBOARD ---
-class VirtualKey {
+// --- 3. BIG RED CURSOR ---
+class PrecisionCursor {
+    constructor(scene) {
+        this.group = new THREE.Group();
+        scene.add(this.group);
+
+        // 1. Центральна точка (ЗБІЛЬШЕНА)
+        // Було 0.016 -> Стало 0.025
+        const dotGeo = new THREE.SphereGeometry(0.025, 32, 32);
+        this.dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({
+            color: CONFIG.THEME.CURSOR_OPEN,
+            depthTest: false
+        }));
+
+        // 2. Дужки (ЗБІЛЬШЕНІ)
+        // Радіус збільшено з 0.040 до 0.060
+        const ringGeo = new THREE.RingGeometry(0.050, 0.060, 64, 1, 0, Math.PI);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: CONFIG.THEME.CURSOR_OPEN,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8, // Більш видимі
+            depthTest: false
+        });
+
+        this.leftBracket = new THREE.Mesh(ringGeo, ringMat.clone());
+        this.leftBracket.rotation.z = Math.PI / 2;
+        
+        this.rightBracket = new THREE.Mesh(ringGeo, ringMat.clone());
+        this.rightBracket.rotation.z = -Math.PI / 2;
+
+        this.group.add(this.dot);
+        this.group.add(this.leftBracket);
+        this.group.add(this.rightBracket);
+        
+        this.group.visible = false;
+        this.targetColor = new THREE.Color(CONFIG.THEME.CURSOR_OPEN);
+    }
+
+    updatePosition(pos) {
+        this.group.visible = true;
+        this.group.position.copy(pos);
+    }
+
+    updateState(pinchStrength, isLocked) {
+        // Адаптація зміщення під новий розмір (0.06)
+        const maxOffset = 0.06;
+        const currentOffset = maxOffset * (1.0 - pinchStrength);
+        
+        this.leftBracket.position.x = -currentOffset;
+        this.rightBracket.position.x = currentOffset;
+
+        const targetHex = isLocked ? CONFIG.THEME.CURSOR_LOCKED : CONFIG.THEME.CURSOR_OPEN;
+        this.targetColor.setHex(targetHex);
+        
+        this.dot.material.color.lerp(this.targetColor, 0.2);
+        this.leftBracket.material.color.lerp(this.targetColor, 0.2);
+        this.rightBracket.material.color.lerp(this.targetColor, 0.2);
+        
+        if (isLocked) {
+             this.leftBracket.position.x = 0;
+             this.rightBracket.position.x = 0;
+        }
+    }
+
+    hide() { this.group.visible = false; }
+}
+
+// --- 4. KEYBOARD ---
+class Key3D {
     constructor(char, x, y, w, h) {
         this.char = char;
-        this.mesh = new THREE.Group();
-        this.mesh.position.set(x, y, 0);
+        this.container = new THREE.Group();
+        this.container.position.set(x, y, 0);
 
-        const geoBox = new THREE.BoxGeometry(w, h, 0.04);
-        this.matBody = new THREE.MeshPhongMaterial({
-            color: CONFIG.COLORS.KEY_IDLE, transparent: true, opacity: 0.9, shininess: 90
+        const geometry = new THREE.BoxGeometry(w, h, 0.04);
+        this.material = new THREE.MeshPhongMaterial({
+            color: CONFIG.THEME.KEY_BASE, transparent: true, opacity: 0.9, shininess: 60
         });
-        this.body = new THREE.Mesh(geoBox, this.matBody);
         
-        const edges = new THREE.EdgesGeometry(geoBox);
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x00ffcc, opacity: 0.2, transparent: true });
-        this.border = new THREE.LineSegments(edges, lineMat);
+        this.mesh = new THREE.Mesh(geometry, this.material);
+        this.mesh.userData = { keyInstance: this };
 
-        this.label = this._createLabel(char, w, h);
-        
-        this.mesh.add(this.body);
-        this.mesh.add(this.border);
-        this.mesh.add(this.label);
-        this.body.userData = { parentKey: this };
+        const edges = new THREE.EdgesGeometry(geometry);
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x00aa88, opacity: 0.3, transparent: true });
+        this.outline = new THREE.LineSegments(edges, lineMat);
+
+        this.label = this.createLabel(char, w, h);
+
+        this.container.add(this.mesh);
+        this.container.add(this.outline);
+        this.container.add(this.label);
     }
 
-    _createLabel(char, w, h) {
-        const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
+    createLabel(char, w, h) {
+        const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0,0,128,128);
+        ctx.clearRect(0, 0, 256, 256);
         ctx.fillStyle = '#ffffff';
-        const fontSize = char.length > 1 ? '40px' : '64px';
-        ctx.font = `bold ${fontSize} "Segoe UI", sans-serif`;
+        const fontSize = (char.length > 1) ? 80 : 140;
+        ctx.font = `600 ${fontSize}px "Segoe UI", sans-serif`;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        let txt = char === 'SPACE' ? '␣' : char;
-        ctx.fillText(txt, 64, 64);
-        
-        const tex = new THREE.CanvasTexture(canvas); tex.minFilter = THREE.LinearFilter;
-        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w*0.85, h*0.85), mat);
-        mesh.position.z = 0.05;
+        let display = char;
+        if (char === 'SPACE') display = '␣';
+        ctx.fillText(display, 128, 128);
+        const texture = new THREE.CanvasTexture(canvas); texture.minFilter = THREE.LinearFilter;
+        const mat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        const geo = new THREE.PlaneGeometry(w * 0.9, h * 0.9);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.z = 0.051;
         return mesh;
     }
 
     setState(state) {
-        if(state === 'press') {
-            this.matBody.color.setHex(CONFIG.COLORS.KEY_ACTIVE);
-            this.body.scale.z = 0.6;
-        } else if(state === 'hover') {
-            this.matBody.color.setHex(CONFIG.COLORS.KEY_HOVER);
-            this.body.scale.z = 1.0;
-        } else {
-            this.matBody.color.setHex(CONFIG.COLORS.KEY_IDLE);
-            this.body.scale.z = 1.0;
+        switch (state) {
+            case 'active':
+                this.material.color.setHex(CONFIG.THEME.KEY_ACTIVE);
+                this.mesh.scale.z = 0.5; break;
+            case 'hover':
+                this.material.color.setHex(CONFIG.THEME.KEY_HOVER);
+                this.mesh.scale.z = 1.0; break;
+            default:
+                this.material.color.setHex(CONFIG.THEME.KEY_BASE);
+                this.mesh.scale.z = 1.0;
         }
     }
 }
 
-class KeyboardManager {
+class KeyboardSystem {
     constructor(scene) {
         this.scene = scene;
         this.group = new THREE.Group();
         this.keys = [];
-        this.buffer = "";
+        this.textBuffer = "";
         
-        this._initLayout();
-        this.scene.add(this.group);
-        this.group.position.z = CONFIG.KEYBOARD.POS_Z;
+        this.generateLayout();
+        
+        // Позиціонування: Z (глибина) + Y (висота)
+        this.group.position.set(0, CONFIG.KEYBOARD.POS_Y, CONFIG.KEYBOARD.POS_Z);
         this.group.scale.setScalar(CONFIG.KEYBOARD.SCALE);
+        this.scene.add(this.group);
     }
 
-    _initLayout() {
+    generateLayout() {
         const rows = [
             ['Й','У','К','Е','Н','Г','Ш','Щ','З','Х'], 
             ['Ф','І','В','А','П','Р','О','Л','Д','Ж'], 
             ['Я','Ч','С','М','И','Т','Ь','Б','Ю'],    
-            ['Ц','Ї','Є','-','SPACE','DEL']
+            ['Ц','Ї','Є','-','SPACE','⌫']
         ];
-        
-        const keyW = 0.5; const keyH = 0.5; const gap = CONFIG.KEYBOARD.SPACING;
-        let cy = 0;
+
+        const kW = 0.5; const kH = 0.5; const gap = CONFIG.KEYBOARD.SPACING;
+        let cY = 0;
 
         rows.forEach(row => {
-            let rowW = 0;
-            row.forEach(char => rowW += (char === 'SPACE' ? 2.0 : keyW) + gap);
-            rowW -= gap;
-            
-            let cx = -rowW / 2 + keyW / 2;
-            if(row[0] === 'SPACE') cx = -rowW / 2 + 1.0; 
+            let rowWidth = 0;
+            row.forEach(c => {
+                let w = kW; if (c === 'SPACE') w = 2.0; if (c === '⌫') w = 1.0;
+                rowWidth += w + gap;
+            });
+            rowWidth -= gap;
+            let cX = -rowWidth / 2;
 
             row.forEach(char => {
-                let w = keyW;
-                let finalX = cx;
-                if(char === 'SPACE') { w = 2.0; finalX += (w/2 - keyW/2); }
-
-                const key = new VirtualKey(char, finalX, cy, w, keyH);
+                let w = kW; if (char === 'SPACE') w = 2.0; if (char === '⌫') w = 1.0;
+                const centerX = cX + w / 2;
+                const key = new Key3D(char, centerX, cY, w, kH);
                 this.keys.push(key);
-                this.group.add(key.mesh);
-
-                cx += w + gap;
-                if(char === 'SPACE') cx += (w - keyW);
+                this.group.add(key.container);
+                cX += w + gap;
             });
-            cy -= (keyH + gap);
+            cY -= (kH + gap);
         });
     }
 
-    type(char) {
-        if(char === 'DEL') this.buffer = this.buffer.slice(0, -1);
-        else if(char === 'SPACE') this.buffer += ' ';
-        else this.buffer += char.toLowerCase();
-        
-        const el = document.getElementById('user-input');
-        el.innerText = this.buffer || "...";
-        
-        if(this.buffer.trim() === CONFIG.KEYBOARD.TARGET_PHRASE) {
-            el.classList.add('success-anim');
-            el.innerHTML += " <br>✅ ВІРНО!";
-            document.body.style.backgroundColor = "#002200";
-            setTimeout(() => document.body.style.backgroundColor = "#000000", 300);
-        } else {
-            el.classList.remove('success-anim');
-        }
+    resetKeys() { this.keys.forEach(k => k.setState('idle')); }
+    getColliders() { return this.keys.map(k => k.mesh); }
+
+    handleInput(char) {
+        if (char === '⌫') { this.textBuffer = this.textBuffer.slice(0, -1); }
+        else if (char === 'SPACE') { this.textBuffer += ' '; }
+        else { this.textBuffer += char.toLowerCase(); }
+        this.updateUI();
     }
 
-    resetState() { this.keys.forEach(k => k.setState('idle')); }
-    getColliders() { return this.keys.map(k => k.body); }
-}
-
-// --- 4. LOGIC & INPUT SYSTEM (WITH NEW CURSOR) ---
-class InputController {
-    constructor(scene, camera, keyboard) {
-        this.scene = scene;
-        this.camera = camera;
-        this.keyboard = keyboard;
-        this.raycaster = new THREE.Raycaster();
-        
-        // Створення Курсора ( )
-        this.cursorGroup = new THREE.Group();
-        this.scene.add(this.cursorGroup);
-        
-        // 1. ЦЕНТРАЛЬНА КРАПКА (Збільшена на 30%, було 0.012 -> 0.016)
-        const dotGeo = new THREE.SphereGeometry(0.016, 16, 16);
-        this.cursorDot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({
-            color: CONFIG.COLORS.CURSOR_IDLE, depthTest: false
-        }));
-        
-        // 2. ДУЖКИ (Напівкола)
-        // Геометрія напівкола (відкрита частина кільця)
-        const arcGeo = new THREE.RingGeometry(0.035, 0.042, 32, 1, 0, Math.PI); 
-        const arcMat = new THREE.MeshBasicMaterial({
-            color: CONFIG.COLORS.CURSOR_IDLE, 
-            side: THREE.DoubleSide, 
-            transparent: true, 
-            opacity: 0.6, // Напівпрозорі
-            depthTest: false
-        });
-
-        // Ліва дужка (
-        this.leftArc = new THREE.Mesh(arcGeo, arcMat.clone());
-        this.leftArc.rotation.z = Math.PI / 2; // Поворот на 90 градусів
-
-        // Права дужка )
-        this.rightArc = new THREE.Mesh(arcGeo, arcMat.clone());
-        this.rightArc.rotation.z = -Math.PI / 2; // Поворот на -90 градусів
-
-        this.cursorGroup.add(this.cursorDot);
-        this.cursorGroup.add(this.leftArc);
-        this.cursorGroup.add(this.rightArc);
-        
-        this.cursorGroup.visible = false;
-
-        this.smoothIndex = null;
-        this.smoothThumb = null;
-        this.isPinching = false;
-        this.lastClick = 0;
-    }
-
-    update(landmarks) {
-        if(!landmarks) {
-            this.cursorGroup.visible = false;
-            return;
-        }
-        this.cursorGroup.visible = true;
-
-        const rawIndex = this._projectFinger(landmarks[8]);
-        const rawThumb = this._projectFinger(landmarks[4]);
-
-        this.smoothIndex = MathUtils.smoothVector(this.smoothIndex, rawIndex, CONFIG.VALIDATION.SMOOTHING);
-        this.smoothThumb = MathUtils.smoothVector(this.smoothThumb, rawThumb, CONFIG.VALIDATION.SMOOTHING);
-
-        const center = new THREE.Vector3().addVectors(this.smoothIndex, this.smoothThumb).multiplyScalar(0.5);
-        this.cursorGroup.position.copy(center);
-
-        // --- АНІМАЦІЯ ДУЖОК ---
-        const aspect = window.innerWidth / window.innerHeight;
-        const dist2d = MathUtils.dist2D(landmarks[8], landmarks[4], aspect);
-
-        // Максимальна ширина розкриття дужок (візуально)
-        const maxOffset = 0.04; 
-        
-        // Перетворюємо фізичну відстань у відстань дужок
-        // Коли пальці далеко -> offset великий. Коли близько -> offset = 0
-        let offset = Math.max(0, (dist2d - 0.02) * 2.0);
-        offset = MathUtils.clamp(offset, 0, maxOffset);
-
-        // Логіка кліку
-        const threshold = this.isPinching ? CONFIG.VALIDATION.PINCH_RELEASE : CONFIG.VALIDATION.PINCH_THRESHOLD;
-        const pinchDetected = dist2d < threshold;
-
-        if (pinchDetected) {
-            // З'ЄДНАНО (Клік)
-            // Дужки з'єднуються в коло (offset = 0)
-            this.leftArc.position.x = 0;
-            this.rightArc.position.x = 0;
-            
-            // Колір Зелений
-            const color = CONFIG.COLORS.CURSOR_ACTIVE;
-            this.leftArc.material.color.setHex(color);
-            this.rightArc.material.color.setHex(color);
-            this.cursorDot.material.color.setHex(color);
-            
-        } else {
-            // РОЗІМКНУТО (Рух)
-            // Дужки розходяться
-            this.leftArc.position.x = -offset;
-            this.rightArc.position.x = offset;
-            
-            // Колір Жовтий
-            const color = CONFIG.COLORS.CURSOR_IDLE;
-            this.leftArc.material.color.setHex(color);
-            this.rightArc.material.color.setHex(color);
-            this.cursorDot.material.color.setHex(color);
-        }
-
-        this._processInteraction(center, pinchDetected);
-        this.isPinching = pinchDetected;
-    }
-
-    _projectFinger(lm) {
-        const sens = CONFIG.VALIDATION.SENSITIVITY;
-        const x = ((1 - lm.x) * 2 - 1) * sens; 
-        const y = (-lm.y * 2 + 1) * sens;
-        const vec = new THREE.Vector3(x, y, 0.5);
-        vec.unproject(this.camera);
-        const dir = vec.sub(this.camera.position).normalize();
-        const dist = (CONFIG.KEYBOARD.POS_Z + 1 - this.camera.position.z) / dir.z;
-        return this.camera.position.clone().add(dir.multiplyScalar(dist));
-    }
-
-    _processInteraction(cursorPos, isPinchingNow) {
-        const screenPos = cursorPos.clone().project(this.camera);
-        this.raycaster.setFromCamera(new THREE.Vector2(screenPos.x, screenPos.y), this.camera);
-        const intersects = this.raycaster.intersectObjects(this.keyboard.getColliders());
-        
-        this.keyboard.resetState();
-
-        if(intersects.length > 0) {
-            const hitKey = intersects[0].object.userData.parentKey;
-            if(hitKey) {
-                const now = Date.now();
-                if(isPinchingNow && !this.isPinching && (now - this.lastClick > CONFIG.VALIDATION.COOLDOWN)) {
-                    hitKey.setState('press');
-                    this.keyboard.type(hitKey.char);
-                    this.lastClick = now;
-                    if(navigator.vibrate) navigator.vibrate(20);
-                } else if (isPinchingNow) {
-                    hitKey.setState('press');
-                } else {
-                    hitKey.setState('hover');
-                }
-            }
-        }
+    updateUI() {
+        const el = document.getElementById('user-buffer');
+        el.innerText = this.textBuffer + "_";
+        if (this.textBuffer.trim() === CONFIG.KEYBOARD.PHRASE) {
+            el.classList.add('match-success'); el.innerHTML = this.textBuffer + " ✅";
+        } else { el.classList.remove('match-success'); }
     }
 }
 
-// --- 5. MAIN SYSTEM ---
-class ARApp {
+// --- 5. ENGINE ---
+class Engine {
     constructor() {
-        this.video = document.getElementById('video-feed');
-        this.canvas = document.getElementById('ar-canvas');
+        this.video = document.getElementById('cam-feed');
+        this.canvas = document.getElementById('ar-overlay');
         
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
@@ -436,13 +448,20 @@ class ARApp {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const ambi = new THREE.AmbientLight(0xffffff, 0.6);
-        const dir = new THREE.DirectionalLight(0x00ffcc, 0.6);
-        dir.position.set(0, 5, 2);
+        const ambi = new THREE.AmbientLight(0xffffff, 0.65);
+        const dir = new THREE.DirectionalLight(0x00ffcc, 0.7);
+        dir.position.set(0, 10, 5);
         this.scene.add(ambi, dir);
 
-        this.keyboard = new KeyboardManager(this.scene);
-        this.input = new InputController(this.scene, this.camera, this.keyboard);
+        this.keyboard = new KeyboardSystem(this.scene);
+        this.cursor = new PrecisionCursor(this.scene);
+        this.raycaster = new THREE.Raycaster();
+
+        this.filterIndex = new Vector3Filter(CONFIG.FILTER);
+        this.filterThumb = new Vector3Filter(CONFIG.FILTER);
+        
+        this.isPinching = false;
+        this.lastClickTime = 0;
 
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -453,37 +472,81 @@ class ARApp {
 
     start() {
         const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.7 });
+        hands.onResults(this.onHandResults.bind(this));
 
-        hands.onResults((results) => {
-            if(results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                this.input.update(results.multiHandLandmarks[0]);
-            } else {
-                this.input.update(null);
-            }
-        });
-
-        const cam = new Camera(this.video, {
+        const camera = new Camera(this.video, {
             onFrame: async () => await hands.send({image: this.video}),
-            width: 1280, height: 720
+            width: CONFIG.CORE.WIDTH, height: CONFIG.CORE.HEIGHT
         });
-        cam.start();
-        this._loop();
+        camera.start();
+        this.animate();
     }
 
-    _loop() {
-        requestAnimationFrame(this._loop.bind(this));
+    onHandResults(results) {
+        if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+            this.cursor.hide(); return;
+        }
+
+        const landmarks = results.multiHandLandmarks[0];
+        const now = performance.now() / 1000;
+
+        const rawIndex = Utils.projectLandmark(landmarks[8], this.camera, CONFIG.KEYBOARD.POS_Z + 1);
+        const rawThumb = Utils.projectLandmark(landmarks[4], this.camera, CONFIG.KEYBOARD.POS_Z + 1);
+
+        const smoothIndex = this.filterIndex.process(rawIndex, now);
+        const smoothThumb = this.filterThumb.process(rawThumb, now);
+
+        const centerPos = new THREE.Vector3().addVectors(smoothIndex, smoothThumb).multiplyScalar(0.5);
+        this.cursor.updatePosition(centerPos);
+
+        const aspect = window.innerWidth / window.innerHeight;
+        const dist2D = Utils.getDistance2D(landmarks[8], landmarks[4], aspect);
+        const pinchStrength = 1.0 - Math.min(Math.max((dist2D - 0.02) / (0.08 - 0.02), 0), 1);
+        const threshold = this.isPinching ? CONFIG.INPUT.PINCH_HYSTERESIS : CONFIG.INPUT.PINCH_THRESHOLD;
+        const isClosed = dist2D < threshold;
+
+        this.cursor.updateState(pinchStrength, isClosed);
+        this.processInteraction(centerPos, isClosed);
+        this.isPinching = isClosed;
+    }
+
+    processInteraction(cursorPos, isClosedNow) {
+        const screenPos = cursorPos.clone().project(this.camera);
+        this.raycaster.setFromCamera(new THREE.Vector2(screenPos.x, screenPos.y), this.camera);
+        const intersects = this.raycaster.intersectObjects(this.keyboard.getColliders());
+        this.keyboard.resetKeys();
+
+        if (intersects.length > 0) {
+            const key = intersects[0].object.userData.keyInstance;
+            if (key) {
+                const now = Date.now();
+                if (isClosedNow && !this.isPinching && (now - this.lastClickTime > CONFIG.INPUT.COOLDOWN_MS)) {
+                    key.setState('active');
+                    this.keyboard.handleInput(key.char);
+                    this.lastClickTime = now;
+                    if (navigator.vibrate) navigator.vibrate(25);
+                } else if (isClosedNow) {
+                    key.setState('active');
+                } else {
+                    key.setState('hover');
+                }
+            }
+        }
+    }
+
+    animate() {
+        requestAnimationFrame(this.animate.bind(this));
         this.renderer.render(this.scene, this.camera);
     }
 }
 
-document.getElementById('btn-start').addEventListener('click', () => {
-    const loader = document.getElementById('loader');
-    loader.style.opacity = '0';
+document.getElementById('btn-init').addEventListener('click', () => {
+    document.getElementById('boot-screen').style.opacity = '0';
     setTimeout(() => {
-        loader.style.display = 'none';
-        const app = new ARApp();
-        app.start();
+        document.getElementById('boot-screen').style.display = 'none';
+        const engine = new Engine();
+        engine.start();
     }, 500);
 });
 
