@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>TNTU AR Neural Interface v3.0 [Clean View]</title>
+    <title>TNTU AR Neural Interface v3.1 [Compact & Fast]</title>
     
     <style>
         :root {
@@ -97,7 +97,7 @@
             max-width: 900px;
             z-index: 20;
             text-align: center;
-            pointer-events: none; /* Пропускає кліки крізь текст */
+            pointer-events: none;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
@@ -148,7 +148,6 @@
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
         @keyframes successFlash { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #fff; } 100% { transform: scale(1); } }
 
-        /* Консоль помилок (прихована, але доступна в коді) */
         #debug-log { display: none; }
     </style>
 
@@ -160,7 +159,7 @@
 
     <div id="loader">
         <div class="loader-ring"></div>
-        <h2 style="margin-bottom: 20px; font-weight: normal;">AR INPUT SYSTEM v3.0</h2>
+        <h2 style="margin-bottom: 20px; font-weight: normal;">AR INPUT SYSTEM v3.1</h2>
         <button id="btn-start">ЗАПУСТИТИ СИСТЕМУ</button>
     </div>
 
@@ -183,10 +182,7 @@
 <script>
 /**
  * ============================================================================
- * TNTU AR SYSTEM CORE - "Clean Edition"
- * Architecture: Component-Based
- * Modules: Config, MathUtils, Particles, Logic, Input, Render
- * Lines of Code Strategy: Robust implementation of Physics & Particles
+ * TNTU AR SYSTEM CORE - "Compact & Fast Edition"
  * ============================================================================
  */
 
@@ -194,9 +190,10 @@
 const CONFIG = {
     CAMERA: { WIDTH: 1280, HEIGHT: 720 },
     KEYBOARD: {
-        POS_Z: -6.5,          // Відстань від камери
-        SCALE: 1.4,           // Розмір клавіатури
-        SPACING: 0.08,        // Відступи
+        POS_Z: -6.5,
+        // SCALE: 1.05 (Було 1.4, зменшено на 25%)
+        SCALE: 1.05, 
+        SPACING: 0.08,
         TARGET_PHRASE: "кафедра приладів і контрольно-вимірювальних систем"
     },
     COLORS: {
@@ -205,19 +202,21 @@ const CONFIG = {
         KEY_ACTIVE: 0x00ffcc,
         TEXT: 0xffffff,
         PARTICLE: 0x00ffcc,
-        CONNECTOR_OPEN: 0xffff00, // Жовтий (відкрито)
-        CONNECTOR_CLOSE: 0x00ff00 // Зелений (натиснуто)
+        CONNECTOR_OPEN: 0xffff00, 
+        CONNECTOR_CLOSE: 0x00ff00 
     },
     VALIDATION: {
-        // Логіка визначення кліку
-        PINCH_THRESHOLD: 0.035,   // Поріг відстані для старту кліку
-        PINCH_RELEASE: 0.05,      // Поріг для відпускання
-        VELOCITY_LIMIT: 0.1,      // Максимальна швидкість руки
-        COOLDOWN: 350,            // Мс між кліками
-        SMOOTHING: 0.2            // Коефіцієнт згладжування (0-1)
+        PINCH_THRESHOLD: 0.035,
+        PINCH_RELEASE: 0.05,
+        VELOCITY_LIMIT: 0.15, // Трохи підняв ліміт швидкості для швидкого курсору
+        COOLDOWN: 350,
+        // SMOOTHING: 0.35 (Було 0.2. Більше число = менше затримки/швидша реакція)
+        SMOOTHING: 0.35,
+        // SENSITIVITY: 1.2 (Множник руху. 1.2 = на 20% швидше/ширше)
+        SENSITIVITY: 1.2 
     },
     PARTICLES: {
-        COUNT: 20,                // Частинок на один клік
+        COUNT: 20,
         SPEED: 0.05,
         DECAY: 0.02
     }
@@ -227,7 +226,6 @@ const CONFIG = {
 const MathUtils = {
     lerp: (start, end, amt) => (1 - amt) * start + amt * end,
     
-    // Векторна інтерполяція для плавності
     smoothVector: (current, target, factor) => {
         if (!current) return target.clone();
         current.x = MathUtils.lerp(current.x, target.x, factor);
@@ -236,24 +234,18 @@ const MathUtils = {
         return current;
     },
 
-    // Відстань між 2D точками (для стабільності кліку)
     dist2D: (p1, p2, aspect) => {
-        const dx = (p1.x - p2.x) * aspect; // Корекція на співвідношення сторін
+        const dx = (p1.x - p2.x) * aspect;
         const dy = p1.y - p2.y;
         return Math.sqrt(dx*dx + dy*dy);
     }
 };
 
-// --- 3. PARTICLE SYSTEM (VISUAL FX) ---
-/**
- * Advanced Particle System for typing feedback.
- * Spawns digital sparks when keys are pressed.
- */
+// --- 3. PARTICLE SYSTEM ---
 class ParticleSystem {
     constructor(scene) {
         this.scene = scene;
         this.particles = [];
-        // Базова геометрія частинки
         this.geometry = new THREE.PlaneGeometry(0.05, 0.05);
         this.material = new THREE.MeshBasicMaterial({
             color: CONFIG.COLORS.PARTICLE,
@@ -268,17 +260,16 @@ class ParticleSystem {
             const mesh = new THREE.Mesh(this.geometry, this.material.clone());
             mesh.position.copy(position);
             
-            // Випадковий розліт
             const velocity = new THREE.Vector3(
                 (Math.random() - 0.5) * 0.3,
                 (Math.random() - 0.5) * 0.3,
-                (Math.random() - 0.5) * 0.2 + 0.1 // Трохи вгору
+                (Math.random() - 0.5) * 0.2 + 0.1
             );
 
             this.particles.push({
                 mesh: mesh,
                 velocity: velocity,
-                life: 1.0, // Життя від 1.0 до 0
+                life: 1.0,
                 rotSpeed: (Math.random() - 0.5) * 0.2
             });
 
@@ -289,23 +280,15 @@ class ParticleSystem {
     update() {
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
-            
-            // Фізика руху
             p.mesh.position.add(p.velocity);
             p.mesh.rotation.z += p.rotSpeed;
-            
-            // Гравітація (легка)
             p.velocity.y -= 0.005;
-
-            // Життєвий цикл
             p.life -= CONFIG.PARTICLES.DECAY;
             p.mesh.material.opacity = p.life;
             p.mesh.scale.setScalar(p.life);
 
-            // Видалення мертвих частинок
             if (p.life <= 0) {
                 this.scene.remove(p.mesh);
-                // Звільнення пам'яті матеріалу
                 p.mesh.material.dispose();
                 this.particles.splice(i, 1);
             }
@@ -320,7 +303,6 @@ class VirtualKey {
         this.mesh = new THREE.Group();
         this.mesh.position.set(x, y, 0);
 
-        // 1. Основний корпус
         const geoBox = new THREE.BoxGeometry(w, h, 0.05);
         this.matBody = new THREE.MeshPhongMaterial({
             color: CONFIG.COLORS.KEY_IDLE,
@@ -330,19 +312,16 @@ class VirtualKey {
         });
         this.body = new THREE.Mesh(geoBox, this.matBody);
         
-        // 2. Рамка (для кращої видимості)
         const edges = new THREE.EdgesGeometry(geoBox);
         const lineMat = new THREE.LineBasicMaterial({ color: 0x00aaaa, opacity: 0.3, transparent: true });
         this.border = new THREE.LineSegments(edges, lineMat);
 
-        // 3. Текст
         this.label = this._createLabel(char, w, h);
         
         this.mesh.add(this.body);
         this.mesh.add(this.border);
         this.mesh.add(this.label);
 
-        // UserData для Raycaster
         this.body.userData = { parentKey: this };
     }
 
@@ -351,7 +330,7 @@ class VirtualKey {
         canvas.width = 128; canvas.height = 128;
         const ctx = canvas.getContext('2d');
         
-        ctx.fillStyle = 'rgba(0,0,0,0)'; // Прозорий фон
+        ctx.fillStyle = 'rgba(0,0,0,0)';
         ctx.fillRect(0,0,128,128);
         
         ctx.fillStyle = '#ffffff';
@@ -359,7 +338,6 @@ class VirtualKey {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Спецсимволи
         let txt = char;
         if(char === 'SPACE') txt = '␣';
         if(char === 'DEL') txt = '←';
@@ -370,7 +348,7 @@ class VirtualKey {
         const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
         const geo = new THREE.PlaneGeometry(w*0.8, h*0.8);
         const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.z = 0.06; // Трохи вище кнопки
+        mesh.position.z = 0.06;
         return mesh;
     }
 
@@ -379,14 +357,14 @@ class VirtualKey {
             case 'press':
                 this.matBody.color.setHex(CONFIG.COLORS.KEY_ACTIVE);
                 this.matBody.emissive.setHex(0x004433);
-                this.body.scale.z = 0.5; // Вдавлення
+                this.body.scale.z = 0.5;
                 break;
             case 'hover':
                 this.matBody.color.setHex(CONFIG.COLORS.KEY_HOVER);
                 this.matBody.emissive.setHex(0x001122);
                 this.body.scale.z = 1.0;
                 break;
-            default: // idle
+            default:
                 this.matBody.color.setHex(CONFIG.COLORS.KEY_IDLE);
                 this.matBody.emissive.setHex(0x000000);
                 this.body.scale.z = 1.0;
@@ -422,15 +400,14 @@ class KeyboardManager {
         let cy = 0;
 
         rows.forEach(row => {
-            // Центрування ряду
             let rowW = row.length * (keyW + gap) - gap;
-            if(row[0] === 'SPACE') rowW = (3 + gap) - gap; // Корекція для пробілу
+            if(row[0] === 'SPACE') rowW = (3 + gap) - gap;
             
             let cx = -rowW / 2 + keyW / 2;
 
             row.forEach(char => {
                 let w = keyW;
-                if(char === 'SPACE') { w = 3; cx = 0; } // Пробіл по центру
+                if(char === 'SPACE') { w = 3; cx = 0; }
 
                 const key = new VirtualKey(char, cx, cy, w, keyH);
                 this.keys.push(key);
@@ -458,7 +435,6 @@ class KeyboardManager {
         const el = document.getElementById('user-input');
         el.innerText = this.buffer || "...";
         
-        // Перевірка на успіх
         if(this.buffer.trim() === CONFIG.KEYBOARD.TARGET_PHRASE) {
             el.classList.add('success-anim');
             el.innerHTML += " <br>✅ ЗАВДАННЯ ВИКОНАНО!";
@@ -482,40 +458,33 @@ class InputController {
         
         this.raycaster = new THREE.Raycaster();
         
-        // Візуалізація курсору
         this.cursorGroup = new THREE.Group();
         this.scene.add(this.cursorGroup);
         
-        // 1. Точка центру (Курсор)
         const dotGeo = new THREE.SphereGeometry(0.04, 16, 16);
         this.cursorDot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({color: 0xffff00}));
         
-        // 2. Лінія з'єднання пальців ("Дві лінії", які просив користувач - насправді одна лінія між пальцями)
-        // Ми зробимо це як динамічну лінію
         const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)]);
         this.connectorLine = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({
             color: CONFIG.COLORS.CONNECTOR_OPEN, 
             linewidth: 3 
         }));
         
-        // 3. Кільце прогресу
         const ringGeo = new THREE.RingGeometry(0.06, 0.07, 32);
         this.cursorRing = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
             color: 0xffff00, side: THREE.DoubleSide, transparent: true, opacity: 0.5
         }));
 
         this.cursorGroup.add(this.cursorDot);
-        this.cursorGroup.add(this.connectorLine); // Додаємо лінію до групи
+        this.cursorGroup.add(this.connectorLine);
         this.cursorGroup.add(this.cursorRing);
         
         this.cursorGroup.visible = false;
 
-        // Змінні стану
         this.smoothIndex = null;
         this.smoothThumb = null;
         this.isPinching = false;
         this.lastClick = 0;
-        this.velocity = 0;
     }
 
     update(landmarks) {
@@ -525,45 +494,34 @@ class InputController {
         }
         this.cursorGroup.visible = true;
 
-        // 1. Отримання координат 3D
-        // Індекс 8 (Вказівний), 4 (Великий)
         const rawIndex = this._projectFinger(landmarks[8]);
         const rawThumb = this._projectFinger(landmarks[4]);
 
-        // 2. Згладжування руху (Low-pass filter)
         this.smoothIndex = MathUtils.smoothVector(this.smoothIndex, rawIndex, CONFIG.VALIDATION.SMOOTHING);
         this.smoothThumb = MathUtils.smoothVector(this.smoothThumb, rawThumb, CONFIG.VALIDATION.SMOOTHING);
 
-        // 3. Розрахунок центру курсору
         const center = new THREE.Vector3().addVectors(this.smoothIndex, this.smoothThumb).multiplyScalar(0.5);
         this.cursorDot.position.copy(center);
         this.cursorRing.position.copy(center);
 
-        // 4. Оновлення лінії з'єднання (ТІ САМІ ЛІНІЇ)
-        // Лінія малюється між реальними положеннями пальців
         const positions = this.connectorLine.geometry.attributes.position.array;
         
-        // Точка 1 (Вказівний)
         positions[0] = this.smoothIndex.x;
         positions[1] = this.smoothIndex.y;
         positions[2] = this.smoothIndex.z;
         
-        // Точка 2 (Великий)
         positions[3] = this.smoothThumb.x;
         positions[4] = this.smoothThumb.y;
         positions[5] = this.smoothThumb.z;
         
         this.connectorLine.geometry.attributes.position.needsUpdate = true;
 
-        // 5. Логіка кліку (на основі 2D відстані екрану для стабільності)
         const aspect = window.innerWidth / window.innerHeight;
         const dist2d = MathUtils.dist2D(landmarks[8], landmarks[4], aspect);
 
-        // Гістерезис
         const threshold = this.isPinching ? CONFIG.VALIDATION.PINCH_RELEASE : CONFIG.VALIDATION.PINCH_THRESHOLD;
         const pinchDetected = dist2d < threshold;
 
-        // Візуалізація стану
         if (pinchDetected) {
             this.connectorLine.material.color.setHex(CONFIG.COLORS.CONNECTOR_CLOSE);
             this.cursorDot.material.color.setHex(CONFIG.COLORS.CONNECTOR_CLOSE);
@@ -574,16 +532,17 @@ class InputController {
             this.cursorRing.scale.setScalar(1.0);
         }
 
-        // Обробка події (Raycast)
         this._processInteraction(center, pinchDetected);
         this.isPinching = pinchDetected;
     }
 
     _projectFinger(lm) {
-        // Конвертація з нормалізованих координат (0..1) в 3D простір
-        // X інвертуємо (1 - x), бо камера дзеркальна
-        const x = (1 - lm.x) * 2 - 1; 
-        const y = -lm.y * 2 + 1;
+        // Застосовуємо SENSITIVITY для прискорення курсору
+        const sens = CONFIG.VALIDATION.SENSITIVITY;
+        
+        // Розширюємо діапазон координат
+        const x = ((1 - lm.x) * 2 - 1) * sens; 
+        const y = (-lm.y * 2 + 1) * sens;
         
         const vec = new THREE.Vector3(x, y, 0.5);
         vec.unproject(this.camera);
@@ -595,13 +554,11 @@ class InputController {
     }
 
     _processInteraction(cursorPos, isPinchingNow) {
-        // Конвертуємо 3D курсор назад в 2D для Raycaster
         const screenPos = cursorPos.clone().project(this.camera);
         this.raycaster.setFromCamera(new THREE.Vector2(screenPos.x, screenPos.y), this.camera);
 
         const intersects = this.raycaster.intersectObjects(this.keyboard.getColliders());
         
-        // Скидаємо підсвітку
         this.keyboard.resetState();
 
         if(intersects.length > 0) {
@@ -609,25 +566,19 @@ class InputController {
             
             if(hitKey) {
                 const now = Date.now();
-                // Логіка: Rising Edge (Тільки момент натискання) + Cooldown
                 if(isPinchingNow && !this.isPinching && (now - this.lastClick > CONFIG.VALIDATION.COOLDOWN)) {
                     
-                    // КЛІК!
                     hitKey.setState('press');
                     this.keyboard.type(hitKey.char);
                     this.lastClick = now;
                     
-                    // Ефект частинок
                     this.particles.spawn(cursorPos);
                     
-                    // Вібрація (якщо мобільний)
                     if(navigator.vibrate) navigator.vibrate(30);
 
                 } else if (isPinchingNow) {
-                    // Утримання
                     hitKey.setState('press');
                 } else {
-                    // Наведення
                     hitKey.setState('hover');
                 }
             }
@@ -641,7 +592,6 @@ class ARApp {
         this.video = document.getElementById('video-feed');
         this.canvas = document.getElementById('ar-canvas');
         
-        // Ініціалізація Three.js
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
         this.camera.position.z = 5;
@@ -650,18 +600,15 @@ class ARApp {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Світло
         const ambi = new THREE.AmbientLight(0xffffff, 0.7);
         const dir = new THREE.DirectionalLight(0x00ffcc, 0.5);
         dir.position.set(0, 5, 2);
         this.scene.add(ambi, dir);
 
-        // Компоненти
         this.particles = new ParticleSystem(this.scene);
         this.keyboard = new KeyboardManager(this.scene);
         this.input = new InputController(this.scene, this.camera, this.keyboard, this.particles);
 
-        // Ресайз
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
@@ -670,7 +617,6 @@ class ARApp {
     }
 
     start() {
-        // MediaPipe Hands Init
         const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
         hands.setOptions({
             maxNumHands: 1,
@@ -698,10 +644,7 @@ class ARApp {
 
     _loop() {
         requestAnimationFrame(this._loop.bind(this));
-        
-        // Оновлення частинок
         this.particles.update();
-        
         this.renderer.render(this.scene, this.camera);
     }
 }
