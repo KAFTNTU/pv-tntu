@@ -2,14 +2,16 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Клавіатура (UA Edition)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Neural AR Keyboard: Pinch Control</title>
     <style>
+        /* --- СТИЛІЗАЦІЯ ІНТЕРФЕЙСУ (HUD) --- */
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #000;
-            font-family: 'Courier New', monospace;
+            background-color: #050510;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #00f3ff;
         }
 
         #container {
@@ -18,7 +20,7 @@
             height: 100vh;
         }
 
-        /* 1. ВІДЕО (Задній фон) */
+        /* Відео на задньому плані */
         #webcam-video {
             position: absolute;
             top: 0;
@@ -26,73 +28,98 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Дзеркальне відображення */
-            z-index: 1;
+            transform: scaleX(-1); /* Дзеркало */
+            z-index: 0;
+            opacity: 0.6; /* Трохи затемнюємо реальність для контрасту */
         }
 
-        /* 2. 3D СЦЕНА (Клавіатура) */
+        /* 3D світ */
         #threejs-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Щоб не блокувало інтерфейс */
-            z-index: 2;
+            z-index: 1;
+            pointer-events: none;
         }
 
-        /* 3. ПАНЕЛЬ ТЕКСТУ (Зверху) */
-        #typing-area {
+        /* Верхня панель тексту */
+        #hud-top {
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
             max-width: 600px;
-            background: rgba(0, 30, 50, 0.85); /* Темно-синій прозорий */
-            border: 2px solid #00ffcc;
+            background: rgba(10, 20, 30, 0.85);
+            border: 1px solid #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            backdrop-filter: blur(5px);
             border-radius: 12px;
             padding: 15px;
             z-index: 10;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         #output-text {
-            color: #00ffcc;
-            font-family: sans-serif;
-            font-size: 1.8rem;
-            font-weight: bold;
-            min-height: 2.2rem;
-            line-height: 2.2rem;
-            display: inline-block;
+            width: 100%;
+            min-height: 40px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 0 5px #00f3ff;
             white-space: pre-wrap;
+            word-break: break-all;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+            margin-bottom: 5px;
+            padding-bottom: 5px;
         }
 
-        /* Курсор, що блимає */
-        #cursor {
-            display: inline-block;
-            width: 3px;
-            height: 2rem;
-            background-color: #00ffcc;
-            animation: blink 1s step-end infinite;
-            vertical-align: bottom;
-            margin-left: 2px;
+        #status-bar {
+            font-size: 0.8rem;
+            color: #aaaaaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            gap: 15px;
         }
 
-        @keyframes blink { 50% { opacity: 0; } }
+        .status-active { color: #00ff00; font-weight: bold; }
+        .status-inactive { color: #ff0000; }
 
-        #loading {
+        /* Екран завантаження */
+        #loader {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #00ffcc;
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 8px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid #222;
+            border-top: 5px solid #00f3ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #debug-info {
+            position: absolute;
+            bottom: 10px; left: 10px;
+            font-size: 10px; color: lime;
             z-index: 20;
-            font-size: 1.2rem;
+            background: rgba(0,0,0,0.5);
+            padding: 5px;
+            pointer-events: none;
         }
     </style>
 
@@ -102,268 +129,547 @@
 </head>
 <body>
 
+<div id="loader">
+    <div class="spinner"></div>
+    <h2 style="color:white; margin-top:20px;">Ініціалізація AR Системи...</h2>
+    <p style="color:#666;">Надайте доступ до камери</p>
+</div>
+
 <div id="container">
-    <div id="loading">Ініціалізація системи...</div>
-    
-    <div id="typing-area">
-        <span id="output-text"></span><span id="cursor"></span>
+    <div id="hud-top">
+        <div id="output-text"></div>
+        <div id="status-bar">
+            <span>Система: <span class="status-active">ОНЛАЙН</span></span>
+            <span id="hand-status">Рука: <span class="status-inactive">НЕМАЄ</span></span>
+        </div>
     </div>
+    
+    <div id="debug-info">FPS: 0 | Objects: 0</div>
 
     <video id="webcam-video" playsinline></video>
     <canvas id="threejs-canvas"></canvas>
 </div>
 
 <script>
-    const videoElement = document.getElementById('webcam-video');
-    const threeCanvas = document.getElementById('threejs-canvas');
-    const outputText = document.getElementById('output-text');
-    const loading = document.getElementById('loading');
+/**
+ * ==========================================================================================
+ * AR KEYBOARD CORE ENGINE v2.0
+ * Features: Raycasting, Pinch Detection, Particle System, Smoothing, Mobile Optimization
+ * ==========================================================================================
+ */
 
-    // === НАЛАШТУВАННЯ ===
-    const PRESS_THRESHOLD = 0.25; // Оптимальна зона дотику
-    const PRESS_COOLDOWN = 400;   // Затримка між натисканнями (мс)
+// --- КОНФІГУРАЦІЯ (SETTINGS) ---
+const CONFIG = {
+    PINCH_THRESHOLD: 0.05,       // Відстань між пальцями для спрацювання (чим менше - тим сильніше треба стиснути)
+    PINCH_COOLDOWN: 300,         // Час між натисканнями (мс)
+    SMOOTHING_FACTOR: 0.3,       // Коефіцієнт згладжування руху (0.1 - дуже плавно/повільно, 0.9 - миттєво/тремтить)
+    KEYBOARD_SCALE: 0.35,        // Розмір клавіатури (менше = краще для телефону)
+    KEYBOARD_Z_POS: -5,          // Відстань клавіатури від камери
+    KEY_COLOR_BASE: 0x002244,    // Колір звичайної кнопки
+    KEY_COLOR_HOVER: 0x0088aa,   // Колір при наведенні
+    KEY_COLOR_PRESS: 0x00ff88,   // Колір при натисканні
+    CURSOR_COLOR_IDLE: 0xff0000, // Червоний курсор
+    CURSOR_COLOR_ACTIVE: 0x00ff00 // Зелений курсор (щипок)
+};
+
+// Глобальні змінні
+let camera, scene, renderer;
+let keyboardGroup;
+let keys = []; // Масив об'єктів кнопок
+let particles = []; // Масив частинок
+let raycaster; // Лазерний промінь
+let cursorMesh, indexFingerMesh, thumbFingerMesh, connectorLine;
+let lastPinchTime = 0;
+let isPinching = false;
+let typedText = "";
+
+// Змінні для згладжування координат
+let smoothIndex = new THREE.Vector3();
+let smoothThumb = new THREE.Vector3();
+
+// DOM Елементи
+const outputEl = document.getElementById('output-text');
+const handStatusEl = document.getElementById('hand-status');
+const debugEl = document.getElementById('debug-info');
+
+// ==========================================================================================
+//  ЧАСТИНА 1: ГРАФІЧНИЙ РУШІЙ (THREE.JS)
+// ==========================================================================================
+
+function initThreeJS() {
+    const canvas = document.getElementById('threejs-canvas');
     
-    let typedString = "";
+    // 1. Сцена
+    scene = new THREE.Scene();
+    // Трохи туману для глибини
+    scene.fog = new THREE.FogExp2(0x000000, 0.02);
 
-    // === 1. THREE.JS (СЦЕНА) ===
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    // 2. Камера
+    // FOV 75 градусів, співвідношення сторін екрану
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 5;
 
-    const renderer = new THREE.WebGLRenderer({ 
-        canvas: threeCanvas, 
-        alpha: true,      // Прозорий фон
-        antialias: true 
+    // 3. Рендерер
+    renderer = new THREE.WebGLRenderer({ 
+        canvas: canvas, 
+        alpha: true, 
+        antialias: true,
+        powerPreference: "high-performance"
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Обмеження для продуктивності
 
-    // Освітлення
-    const light = new THREE.PointLight(0xffffff, 1.5);
-    light.position.set(0, 5, 5);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x606060));
+    // 4. Освітлення
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
 
-    // Група для клавіш
-    const keyboardGroup = new THREE.Group();
-    keyboardGroup.position.set(0, -1.0, 2); // Трохи нижче центру
-    scene.add(keyboardGroup);
+    const dirLight = new THREE.DirectionalLight(0x00f3ff, 0.8);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
 
-    const keysData = [];
+    const pointLight = new THREE.PointLight(0xff00ff, 0.5, 20);
+    pointLight.position.set(0, 0, 2);
+    scene.add(pointLight);
 
-    // === ДОПОМІЖНА ФУНКЦІЯ: Створення текстури з літерою ===
-    // Це дозволяє використовувати УКРАЇНСЬКУ мову без зовнішніх шрифтів
-    function createCharTexture(char) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 128;
-        canvas.height = 128;
-        const ctx = canvas.getContext('2d');
+    // 5. Ініціалізація інструментів
+    raycaster = new THREE.Raycaster();
+    
+    // Створення об'єктів
+    createCursorSystem();
+    createKeyboard();
+    
+    // Запуск циклу
+    animate();
+}
+
+/**
+ * Створює візуалізацію пальців (червоні точки і лінія)
+ */
+function createCursorSystem() {
+    // Матеріали
+    const fingerMat = new THREE.MeshBasicMaterial({ color: CONFIG.CURSOR_COLOR_IDLE, transparent: true, opacity: 0.8 });
+    const cursorMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5, wireframe: true });
+
+    // Сфера вказівного пальця
+    indexFingerMesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), fingerMat);
+    scene.add(indexFingerMesh);
+
+    // Сфера великого пальця
+    thumbFingerMesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), fingerMat.clone());
+    scene.add(thumbFingerMesh);
+
+    // Центральний курсор (приціл)
+    cursorMesh = new THREE.Mesh(new THREE.RingGeometry(0.02, 0.04, 32), cursorMat);
+    scene.add(cursorMesh);
+
+    // Лінія між пальцями
+    const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 2 });
+    connectorLine = new THREE.Line(lineGeo, lineMat);
+    scene.add(connectorLine);
+}
+
+/**
+ * Клас для окремої кнопки
+ */
+class VirtualKey {
+    constructor(char, x, y, width, height) {
+        this.char = char;
+        this.isHovered = false;
+        this.isPressed = false;
+
+        // Геометрія кнопки
+        const geometry = new THREE.BoxGeometry(width, height, 0.05);
         
-        // Малюємо літеру
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 80px Arial, sans-serif'; // Стандартний шрифт браузера
+        // Матеріали
+        this.baseMat = new THREE.MeshPhongMaterial({ 
+            color: CONFIG.KEY_COLOR_BASE, 
+            transparent: true, opacity: 0.8, shininess: 100 
+        });
+        this.hoverMat = new THREE.MeshPhongMaterial({ 
+            color: CONFIG.KEY_COLOR_HOVER, 
+            transparent: true, opacity: 0.9, emissive: 0x004455 
+        });
+        this.pressMat = new THREE.MeshPhongMaterial({ 
+            color: CONFIG.KEY_COLOR_PRESS, 
+            emissive: 0x00ff00 
+        });
+
+        // Меш
+        this.mesh = new THREE.Mesh(geometry, this.baseMat);
+        this.mesh.position.set(x, y, 0);
+        
+        // Додаємо літеру (Текстура з Canvas)
+        const texture = this.createLabel(char);
+        const labelGeo = new THREE.PlaneGeometry(width * 0.8, height * 0.8);
+        const labelMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        this.label = new THREE.Mesh(labelGeo, labelMat);
+        this.label.position.set(0, 0, 0.06); // Трохи вище поверхні
+        this.mesh.add(this.label);
+
+        // Зберігаємо посилання на цей об'єкт в меші для Raycaster
+        this.mesh.userData = { key: this };
+    }
+
+    createLabel(text) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgba(255,255,255,0)'; // Прозорий фон
+        // ctx.fillRect(0,0,128,128); // Debug background
+        
+        ctx.font = 'bold 80px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
         
-        let text = char;
-        if (char === 'SPACE') text = '___';
-        if (char === 'DEL') text = '←';
-
-        ctx.fillText(text, 64, 64);
+        let display = text;
+        if(text === 'SPACE') display = '⎵';
+        if(text === 'DEL') display = '←';
         
-        const texture = new THREE.CanvasTexture(canvas);
-        return texture;
+        ctx.fillText(display, 64, 64);
+        return new THREE.CanvasTexture(canvas);
     }
 
-    // === ГЕНЕРАЦІЯ КЛАВІАТУРИ ===
-    function createKeyboard() {
-        const rows = [
-            ['1','2','3','4','5','6','7','8','9','0','DEL'],
-            ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х'],
-            ['Ф','І','В','А','П','Р','О','Л','Д','Ж','Є'],
-            ['Я','Ч','С','М','И','Т','Ь','Б','Ю','SPACE']
-        ];
-
-        const keyWidth = 0.5;
-        const keyHeight = 0.5;
-        const spacing = 0.08;
-        const keyGeometry = new THREE.BoxGeometry(keyWidth, keyHeight, 0.05);
-        
-        // Матеріал кнопки (напівпрозорий синій)
-        const baseMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x004466, 
-            transparent: true, 
-            opacity: 0.6,
-            shininess: 100
-        });
-        
-        // Матеріал натиснутої кнопки (яскраво-зелений)
-        const pressedMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff44, emissive: 0x004400 });
-
-        rows.forEach((row, rowIndex) => {
-            const rowWidth = row.length * (keyWidth + spacing);
-            const startX = -rowWidth / 2 + keyWidth/2;
-            const y = (rows.length - rowIndex) * (keyHeight + spacing) - 1.5;
-
-            row.forEach((char, charIndex) => {
-                const x = startX + charIndex * (keyWidth + spacing);
-
-                // 1. Створюємо фізичну кнопку
-                const keyMesh = new THREE.Mesh(keyGeometry, baseMaterial.clone());
-                keyMesh.position.set(x, y, 0);
-                keyboardGroup.add(keyMesh);
-
-                // 2. Створюємо "наклейку" з літерою
-                const labelGeo = new THREE.PlaneGeometry(keyWidth * 0.8, keyHeight * 0.8);
-                const labelMat = new THREE.MeshBasicMaterial({ 
-                    map: createCharTexture(char), 
-                    transparent: true 
-                });
-                const labelMesh = new THREE.Mesh(labelGeo, labelMat);
-                labelMesh.position.set(0, 0, 0.06); // Трохи вище кнопки
-                keyMesh.add(labelMesh);
-
-                // 3. Зберігаємо дані для логіки
-                keysData.push({
-                    mesh: keyMesh,
-                    char: char,
-                    baseMat: keyMesh.material,
-                    pressMat: pressedMaterial,
-                    isPressed: false,
-                    lastPressedTime: 0
-                });
-            });
-        });
-        
-        loading.style.display = 'none';
-    }
-    createKeyboard();
-
-    // === ВІЗУАЛІЗАЦІЯ ПАЛЬЦІВ ===
-    const fingerGeo = new THREE.SphereGeometry(0.08, 16, 16);
-    const fingerMat = new THREE.MeshBasicMaterial({ color: 0xff0044 }); // Червоний
-    const leftFinger = new THREE.Mesh(fingerGeo, fingerMat);
-    const rightFinger = new THREE.Mesh(fingerGeo, fingerMat);
-    scene.add(leftFinger);
-    scene.add(rightFinger);
-    leftFinger.visible = false;
-    rightFinger.visible = false;
-
-    // Анімація сцени
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    // === 2. ЛОГІКА (MediaPipe) ===
-
-    // Функція конвертації координат
-    function mapTo3D(x, y) {
-        // Проста проекція для стабільності
-        const rangeX = 7.5; 
-        const rangeY = 5.5;
-        // Центруємо і масштабуємо
-        return new THREE.Vector3(
-            (x - 0.5) * rangeX,
-            -(y - 0.5) * rangeY,
-            keyboardGroup.position.z + 0.1 // Палець на рівні клавіатури
-        );
-    }
-
-    function processFinger(landmarks, mesh) {
-        mesh.visible = true;
-        const indexTip = landmarks[8]; // Кінчик вказівного пальця
-        const pos3D = mapTo3D(indexTip.x, indexTip.y);
-        
-        // Плавний рух (Interpolation) - щоб не тремтіло
-        mesh.position.lerp(pos3D, 0.5);
-
-        const now = Date.now();
-
-        // Перевірка натискань
-        keysData.forEach(key => {
-            // Отримуємо реальну позицію клавіші у світі
-            const keyPos = new THREE.Vector3();
-            key.mesh.getWorldPosition(keyPos);
-
-            // ! ВАЖЛИВО: Рахуємо тільки пласку відстань (X та Y)
-            const dx = mesh.position.x - keyPos.x;
-            const dy = mesh.position.y - keyPos.y;
-            const distance = Math.sqrt(dx*dx + dy*dy);
-
-            if (distance < PRESS_THRESHOLD) {
-                if (!key.isPressed && (now - key.lastPressedTime > PRESS_COOLDOWN)) {
-                    // НАТИСНУТО!
-                    key.isPressed = true;
-                    key.lastPressedTime = now;
-                    key.mesh.material = key.pressMat;
-                    
-                    // Обробка тексту
-                    if (key.char === 'DEL') {
-                        typedString = typedString.slice(0, -1);
-                    } else if (key.char === 'SPACE') {
-                        typedString += ' ';
-                    } else {
-                        typedString += key.char;
-                    }
-                    outputText.innerText = typedString;
-
-                    // Вібрація
-                    if (navigator.vibrate) navigator.vibrate(30);
-
-                    // Повернення кольору через 150мс
-                    setTimeout(() => {
-                        key.mesh.material = key.baseMat;
-                        key.isPressed = false;
-                    }, 150);
-                }
-            }
-        });
-    }
-
-    function onResults(results) {
-        leftFinger.visible = false;
-        rightFinger.visible = false;
-
-        if (results.multiHandLandmarks) {
-            for (const landmarks of results.multiHandLandmarks) {
-                // Визначаємо яка це рука (приблизно)
-                // Але для клавіатури байдуже, головне активувати курсор
-                if (landmarks[8].x < 0.5) { 
-                    processFinger(landmarks, rightFinger); // Дзеркально
-                } else {
-                    processFinger(landmarks, leftFinger);
-                }
-            }
+    update() {
+        // Анімація повернення кольору
+        if (!this.isHovered && !this.isPressed) {
+            this.mesh.material = this.baseMat;
+            this.mesh.scale.set(1, 1, 1);
+        } else if (this.isHovered && !this.isPressed) {
+            this.mesh.material = this.hoverMat;
+            this.mesh.scale.set(1.05, 1.05, 1.05);
+        } else if (this.isPressed) {
+            this.mesh.material = this.pressMat;
+            this.mesh.scale.set(0.95, 0.95, 0.95);
         }
     }
 
-    const hands = new Hands({locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-    }});
-    hands.setOptions({
-        maxNumHands: 2,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.6,
-        minTrackingConfidence: 0.6
-    });
-    hands.onResults(onResults);
+    press() {
+        this.isPressed = true;
+        // Ефект натискання (звук, вібрація, частинки)
+        spawnParticles(this.mesh.position, keyboardGroup.position);
+        if (navigator.vibrate) navigator.vibrate(40);
+        
+        setTimeout(() => { this.isPressed = false; }, 150);
+        return this.char;
+    }
+}
 
-    const cameraFeed = new Camera(videoElement, {
-        onFrame: async () => {
-            await hands.send({image: videoElement});
-        },
-        width: 1280, height: 720
-    });
-    cameraFeed.start();
+function createKeyboard() {
+    keyboardGroup = new THREE.Group();
+    // Українська розкладка БЕЗ ЦИФР
+    const rows = [
+        ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х'],
+        ['Ф','І','В','А','П','Р','О','Л','Д','Ж','Є'],
+        ['Я','Ч','С','М','И','Т','Ь','Б','Ю','DEL'],
+        ['SPACE']
+    ];
 
-    // Адаптивність
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    const keyW = 0.5;
+    const keyH = 0.5;
+    const gap = 0.05;
+
+    let yOffset = 0;
+
+    rows.forEach(row => {
+        let xOffset = -((row.length * (keyW + gap)) / 2) + keyW/2;
+        
+        row.forEach(char => {
+            let width = keyW;
+            if (char === 'SPACE') { width = keyW * 6; xOffset += width/3; } // Широкий пробіл
+            
+            const key = new VirtualKey(char, xOffset, yOffset, width, keyH);
+            keys.push(key);
+            keyboardGroup.add(key.mesh);
+            
+            xOffset += width + gap;
+        });
+        yOffset -= (keyH + gap);
     });
+
+    // Позиціонування групи клавіатури
+    keyboardGroup.scale.set(CONFIG.KEYBOARD_SCALE, CONFIG.KEYBOARD_SCALE, CONFIG.KEYBOARD_SCALE);
+    // keyboardGroup.rotation.x = -0.2; // Легкий нахил
+    scene.add(keyboardGroup);
+}
+
+// ==========================================================================================
+//  ЧАСТИНА 2: СИСТЕМА ЧАСТИНОК (VISUAL FX)
+// ==========================================================================================
+
+class Particle {
+    constructor(pos) {
+        this.mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.05, 0.05),
+            new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true })
+        );
+        this.mesh.position.copy(pos);
+        
+        // Випадкова швидкість вибуху
+        this.velocity = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.1,
+            (Math.random() - 0.5) * 0.1,
+            (Math.random() - 0.5) * 0.1
+        );
+        this.life = 1.0; // Життя (100%)
+    }
+
+    update() {
+        this.mesh.position.add(this.velocity);
+        this.life -= 0.02;
+        this.mesh.material.opacity = this.life;
+        this.mesh.rotation.z += 0.1;
+        return this.life > 0;
+    }
+}
+
+function spawnParticles(localPos, parentPos) {
+    // Конвертуємо локальну позицію кнопки у світову
+    const worldPos = localPos.clone().multiplyScalar(CONFIG.KEYBOARD_SCALE).add(parentPos);
+    
+    for(let i=0; i<8; i++) {
+        const p = new Particle(worldPos);
+        scene.add(p.mesh);
+        particles.push(p);
+    }
+}
+
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (!p.update()) {
+            scene.remove(p.mesh);
+            particles.splice(i, 1);
+        }
+    }
+}
+
+// ==========================================================================================
+//  ЧАСТИНА 3: ШІ ТА ЛОГІКА ЖЕСТІВ (MEDIAPIPE)
+// ==========================================================================================
+
+// Функція експоненціального згладжування (Low Pass Filter)
+function smoothVector(currentVal, targetVal, factor) {
+    // currentVal = currentVal + (targetVal - currentVal) * factor
+    currentVal.lerp(targetVal, factor);
+}
+
+// Конвертація 2D координат MediaPipe (0..1) в 3D координати сцени
+function getSceneCoord(x, y, zDepth) {
+    // Врахування aspect ratio і FOV
+    const vec = new THREE.Vector3();
+    const pos = new THREE.Vector3();
+    
+    vec.set(
+        (x * 2) - 1,
+        -(y * 2) + 1,
+        0.5 );
+
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    const distance = (zDepth - camera.position.z) / vec.z;
+    pos.copy(camera.position).add(vec.multiplyScalar(distance));
+    return pos;
+}
+
+function onHandsResults(results) {
+    // Скидаємо статус, якщо рук немає
+    if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+        document.getElementById('hand-status').innerHTML = 'Рука: <span class="status-inactive">НЕМАЄ</span>';
+        indexFingerMesh.visible = false;
+        thumbFingerMesh.visible = false;
+        cursorMesh.visible = false;
+        connectorLine.visible = false;
+        return;
+    }
+
+    document.getElementById('hand-status').innerHTML = 'Рука: <span class="status-active">ВИЯВЛЕНО</span>';
+    
+    // Беремо першу знайдену руку
+    const landmarks = results.multiHandLandmarks[0];
+    const indexTip = landmarks[8];
+    const thumbTip = landmarks[4];
+
+    // 1. Отримуємо цільові точки в 3D (глибина -2, перед клавіатурою)
+    // Ми використовуємо фіксовану Z площину для курсора для зручності керування
+    const targetIndex = getSceneCoord(indexTip.x, indexTip.y, CONFIG.KEYBOARD_Z_POS + 2);
+    const targetThumb = getSceneCoord(thumbTip.x, thumbTip.y, CONFIG.KEYBOARD_Z_POS + 2);
+
+    // 2. Згладжування руху (щоб не тремтіло)
+    smoothVector(smoothIndex, targetIndex, CONFIG.SMOOTHING_FACTOR);
+    smoothVector(smoothThumb, targetThumb, CONFIG.SMOOTHING_FACTOR);
+
+    // 3. Оновлення візуалізації пальців
+    indexFingerMesh.position.copy(smoothIndex);
+    thumbFingerMesh.position.copy(smoothThumb);
+    indexFingerMesh.visible = true;
+    thumbFingerMesh.visible = true;
+    connectorLine.visible = true;
+
+    // Оновлення лінії між пальцями
+    const points = [smoothThumb, smoothIndex];
+    connectorLine.geometry.setFromPoints(points);
+
+    // 4. Розрахунок центру щипка (Середня точка)
+    const pinchCenter = new THREE.Vector3().addVectors(smoothIndex, smoothThumb).multiplyScalar(0.5);
+    cursorMesh.position.copy(pinchCenter);
+    cursorMesh.visible = true;
+
+    // 5. Перевірка щипка (Відстань між реальними координатами точок 4 і 8)
+    // MediaPipe дає x,y,z в нормалізованих одиницях. Використовуємо їх для відстані.
+    const dx = indexTip.x - thumbTip.x;
+    const dy = indexTip.y - thumbTip.y;
+    // Коригуємо по aspect ratio, бо x ширший за y
+    const aspect = window.innerWidth / window.innerHeight;
+    const distance = Math.sqrt((dx * aspect) * (dx * aspect) + dy * dy);
+
+    // Логіка зміни кольору при щипку
+    const wasPinching = isPinching;
+    isPinching = distance < CONFIG.PINCH_THRESHOLD;
+
+    if (isPinching) {
+        indexFingerMesh.material.color.setHex(CONFIG.CURSOR_COLOR_ACTIVE);
+        thumbFingerMesh.material.color.setHex(CONFIG.CURSOR_COLOR_ACTIVE);
+        connectorLine.material.color.setHex(CONFIG.CURSOR_COLOR_ACTIVE);
+        cursorMesh.scale.set(0.5, 0.5, 0.5); // Стискання прицілу
+    } else {
+        indexFingerMesh.material.color.setHex(CONFIG.CURSOR_COLOR_IDLE);
+        thumbFingerMesh.material.color.setHex(CONFIG.CURSOR_COLOR_IDLE);
+        connectorLine.material.color.setHex(0xffff00);
+        cursorMesh.scale.set(1, 1, 1);
+    }
+
+    // 6. RAYCASTING (Лазерний промінь з центру щипка в глибину)
+    // Нам треба знайти, куди дивиться курсор у 2D просторі екрану
+    // Перетворюємо 3D позицію pinchCenter назад у 2D (-1..1) для Raycaster
+    const screenPos = pinchCenter.clone().project(camera);
+    raycaster.setFromCamera(new THREE.Vector2(screenPos.x, screenPos.y), camera);
+
+    // Перевіряємо перетин з усіма кнопками
+    // Збираємо тільки mesh з кнопок
+    const intersectObjects = keys.map(k => k.mesh);
+    const intersects = raycaster.intersectObjects(intersectObjects);
+
+    // Скидаємо стан "hover" для всіх кнопок
+    keys.forEach(k => k.isHovered = false);
+
+    if (intersects.length > 0) {
+        // Знайшли кнопку під прицілом
+        const hitObj = intersects[0].object;
+        const key = hitObj.userData.key; // Отримуємо об'єкт VirtualKey
+        
+        if (key) {
+            key.isHovered = true;
+
+            // 7. ОБРОБКА НАТИСКАННЯ
+            // Якщо зараз щипок, і раніше його не було (або пройшов час), і ми на кнопці
+            const now = Date.now();
+            if (isPinching && (!wasPinching || (now - lastPinchTime > CONFIG.PINCH_COOLDOWN))) {
+                const char = key.press();
+                lastPinchTime = now;
+                handleInput(char);
+            }
+        }
+    }
+}
+
+// Обробка вводу тексту
+function handleInput(char) {
+    if (char === 'DEL') {
+        typedText = typedText.slice(0, -1);
+    } else if (char === 'SPACE') {
+        typedText += ' ';
+    } else {
+        typedText += char;
+    }
+    outputEl.innerText = typedText;
+    
+    // Автоскрол вниз якщо тексту багато
+    // outputEl.scrollTop = outputEl.scrollHeight;
+}
+
+
+// ==========================================================================================
+//  ЧАСТИНА 4: ІНІЦІАЛІЗАЦІЯ ТА ЦИКЛ
+// ==========================================================================================
+
+const hands = new Hands({locateFile: (file) => {
+    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+}});
+
+hands.setOptions({
+    maxNumHands: 1, // Тільки одна рука для стабільності
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+});
+
+hands.onResults(onHandsResults);
+
+const cameraUtils = new Camera(videoElement, {
+    onFrame: async () => {
+        await hands.send({image: videoElement});
+    },
+    width: 1280,
+    height: 720
+});
+
+// Запуск
+cameraUtils.start()
+    .then(() => {
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+        initThreeJS();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Помилка камери! Перевірте дозволи.");
+    });
+
+// Головний цикл анімації
+let frameCount = 0;
+let lastTime = performance.now();
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Оновлення частинок
+    updateParticles();
+
+    // Оновлення кнопок (анімація)
+    keys.forEach(k => k.update());
+
+    // Плавний рух клавіатури за камерою (якщо треба AR ефект прив'язки)
+    // В цьому режимі клавіатура просто висить у просторі
+    keyboardGroup.position.z = CONFIG.KEYBOARD_Z_POS;
+    
+    // Адаптація під розмір екрану
+    // Якщо екран вузький (телефон), можна відсунути клавіатуру далі
+    if (window.innerWidth < 600) {
+        keyboardGroup.scale.set(0.25, 0.25, 0.25); // Ще менше для телефону
+    } else {
+        keyboardGroup.scale.set(0.35, 0.35, 0.35);
+    }
+
+    renderer.render(scene, camera);
+    
+    // Debug info
+    frameCount++;
+    const time = performance.now();
+    if (time - lastTime >= 1000) {
+        debugEl.innerText = `FPS: ${frameCount} | Part: ${particles.length}`;
+        frameCount = 0;
+        lastTime = time;
+    }
+}
+
+// Ресайз вікна
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 </script>
 </body>
