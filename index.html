@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>TNTU Neural Interface v4.1 [Red Cursor & Low Profile]</title>
+    <title>TNTU Neural Interface v4.2 [Wide Reach]</title>
     
     <style>
         :root {
@@ -34,7 +34,7 @@
         .spinner {
             width: 60px; height: 60px;
             border: 2px solid #333;
-            border-top: 2px solid var(--alert); /* Red spinner */
+            border-top: 2px solid var(--alert);
             border-radius: 50%;
             animation: rotate 1s infinite linear;
             margin-bottom: 24px;
@@ -78,7 +78,7 @@
 
         .hud-panel {
             background: rgba(5, 10, 15, 0.85);
-            border: 1px solid rgba(255, 0, 0, 0.3); /* Red tint border */
+            border: 1px solid rgba(255, 0, 0, 0.3);
             backdrop-filter: blur(8px);
             padding: 20px;
             border-radius: 8px;
@@ -117,7 +117,7 @@
 
     <div id="boot-screen">
         <div class="spinner"></div>
-        <div style="margin-bottom: 20px; color: #555; font-family: monospace;">KERNEL v4.1 RELOADING...</div>
+        <div style="margin-bottom: 20px; color: #555; font-family: monospace;">KERNEL v4.2 [SENSITIVITY BOOST]</div>
         <button id="btn-init">ЗАПУСТИТИ СИСТЕМУ</button>
     </div>
 
@@ -134,7 +134,7 @@
                 <div class="input-display" id="user-buffer">_</div>
                 
                 <div class="status-msg">
-                    КУРСОР ЗБІЛЬШЕНО. КЛАВІАТУРУ ОПУЩЕНО.
+                    ЧУТЛИВІСТЬ ПІДВИЩЕНО (x1.6). ТЕПЕР ЛЕГШЕ ДІСТАТИ ДО КРАЇВ.
                 </div>
             </div>
         </div>
@@ -143,7 +143,8 @@
 <script>
 /**
  * ============================================================================
- * TNTU AR KERNEL v4.1 - "Big Red & Low"
+ * TNTU AR KERNEL v4.2 - "Wide Reach Edition"
+ * Changes: Increased sensitivity to fix lost tracking on edges.
  * ============================================================================
  */
 
@@ -156,15 +157,17 @@ const CONFIG = {
         PINCH_THRESHOLD: 0.035,
         PINCH_HYSTERESIS: 0.045,
         COOLDOWN_MS: 300,
-        CURSOR_SENSITIVITY: 1.1
+        // ВАЖЛИВО: Підвищено з 1.1 до 1.6
+        // Це дозволяє курсору доходити до країв екрану, 
+        // навіть якщо рука залишається ближче до центру.
+        CURSOR_SENSITIVITY: 1.6 
     },
 
     KEYBOARD: {
         POS_Z: -6.5,
-        // ОПУСКАЄМО КЛАВІАТУРУ НИЖЧЕ (По осі Y)
-        // 0 - це центр екрану. Мінусове значення - вниз.
         POS_Y: -2.0, 
-        SCALE: 1.1,
+        // Трохи зменшив масштаб, щоб клавіші були кучніше
+        SCALE: 1.05, 
         SPACING: 0.08,
         PHRASE: "кафедра приладів і контрольно-вимірювальних систем"
     },
@@ -173,10 +176,8 @@ const CONFIG = {
         KEY_BASE: 0x001a26,
         KEY_HOVER: 0x004455,
         KEY_ACTIVE: 0x00ffcc,
-        
-        // ЧЕРВОНИЙ КУРСОР
-        CURSOR_OPEN: 0xff0000,   // Яскраво-червоний
-        CURSOR_LOCKED: 0x00ff00  // Зелений (при кліку)
+        CURSOR_OPEN: 0xff0000,
+        CURSOR_LOCKED: 0x00ff00
     }
 };
 
@@ -230,6 +231,7 @@ const Utils = {
     },
     projectLandmark: (lm, camera, zDepth) => {
         const sens = CONFIG.INPUT.CURSOR_SENSITIVITY;
+        // Множення на sens розширює діапазон руху
         const ndc_x = ((1 - lm.x) * 2 - 1) * sens;
         const ndc_y = (-lm.y * 2 + 1) * sens;
         const vec = new THREE.Vector3(ndc_x, ndc_y, 0.5);
@@ -246,22 +248,20 @@ class PrecisionCursor {
         this.group = new THREE.Group();
         scene.add(this.group);
 
-        // 1. Центральна точка (ЗБІЛЬШЕНА)
-        // Було 0.016 -> Стало 0.025
+        // Центральна точка
         const dotGeo = new THREE.SphereGeometry(0.025, 32, 32);
         this.dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({
             color: CONFIG.THEME.CURSOR_OPEN,
             depthTest: false
         }));
 
-        // 2. Дужки (ЗБІЛЬШЕНІ)
-        // Радіус збільшено з 0.040 до 0.060
+        // Дужки
         const ringGeo = new THREE.RingGeometry(0.050, 0.060, 64, 1, 0, Math.PI);
         const ringMat = new THREE.MeshBasicMaterial({
             color: CONFIG.THEME.CURSOR_OPEN,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.8, // Більш видимі
+            opacity: 0.8,
             depthTest: false
         });
 
@@ -285,7 +285,6 @@ class PrecisionCursor {
     }
 
     updateState(pinchStrength, isLocked) {
-        // Адаптація зміщення під новий розмір (0.06)
         const maxOffset = 0.06;
         const currentOffset = maxOffset * (1.0 - pinchStrength);
         
@@ -377,7 +376,6 @@ class KeyboardSystem {
         
         this.generateLayout();
         
-        // Позиціонування: Z (глибина) + Y (висота)
         this.group.position.set(0, CONFIG.KEYBOARD.POS_Y, CONFIG.KEYBOARD.POS_Z);
         this.group.scale.setScalar(CONFIG.KEYBOARD.SCALE);
         this.scene.add(this.group);
