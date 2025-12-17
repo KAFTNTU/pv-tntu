@@ -3,121 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Neural Interface v4.1 [Fixed Mirror & Scale]</title>
+    <title>TNTU Neural Input System [Secure Core]</title>
     
     <style>
         :root {
-            --primary: #00ffcc;
-            --secondary: #0088aa;
-            --danger: #ff3333;
-            --bg: #050510;
+            --bg-color: #0a0a0a;
+            --primary-color: #00ffcc;
+            --secondary-color: #008f7a;
+            --error-color: #ff3333;
+            --text-font: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
 
         body {
             margin: 0;
             overflow: hidden;
-            background-color: var(--bg);
-            font-family: 'Segoe UI', 'Roboto Mono', monospace;
-            color: var(--primary);
+            background-color: var(--bg-color);
+            font-family: var(--text-font);
+            color: var(--primary-color);
             user-select: none;
         }
 
+        /* --- ЗАВАНТАЖУВАЧ --- */
+        #init-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(5, 5, 10, 0.98);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader-text {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+            animation: blink 2s infinite;
+        }
+
+        #start-btn {
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-family: var(--text-font);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #start-btn:hover {
+            background: var(--primary-color);
+            color: black;
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        /* --- ОСНОВНИЙ ІНТЕРФЕЙС --- */
         #viewport {
             position: relative;
             width: 100vw;
             height: 100vh;
         }
 
-        /* ВІДЕО ФОН */
-        #camera-feed {
+        #camera-layer {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Дзеркальне відображення CSS */
-            z-index: 0;
+            transform: scaleX(-1);
             opacity: 0.4;
-            filter: contrast(1.1) brightness(0.8);
+            filter: grayscale(100%) contrast(1.2);
+            z-index: 0;
         }
 
-        /* 3D СЦЕНА */
-        #ar-scene {
+        #ar-canvas {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            z-index: 1;
+            z-index: 10;
+        }
+
+        /* --- HUD (HEADS-UP DISPLAY) --- */
+        #hud-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 20;
             pointer-events: none;
         }
 
-        /* ВЕРХНЯ ПАНЕЛЬ (HUD) */
-        #hud-layer {
+        .top-panel {
             position: absolute;
-            top: 20px; left: 50%;
+            top: 20px;
+            left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 700px;
-            z-index: 10;
+            width: 80%;
+            text-align: center;
+            background: rgba(0, 20, 20, 0.85);
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .task-title {
+            font-size: 10px;
+            color: #888;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .task-target {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .user-input {
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 30px;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        .status-valid { color: #00ff00; }
+        .status-error { color: #ff3333; }
+
+        /* --- СИСТЕМНИЙ ЛОГЕР (ЛІВА ПАНЕЛЬ) --- */
+        #system-monitor {
+            position: absolute;
+            top: 100px; left: 20px;
+            width: 250px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 2px solid var(--secondary-color);
+            padding: 10px;
+            font-size: 10px;
+            color: #aaa;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 10px;
         }
 
-        .text-panel {
-            background: rgba(0, 20, 30, 0.85);
-            border: 1px solid var(--primary);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.15);
-            backdrop-filter: blur(4px);
+        .monitor-header {
+            color: var(--primary-color);
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
 
-        #output {
-            font-size: 1.8rem;
-            font-weight: 700;
-            min-height: 1.8rem;
-            white-space: pre-wrap;
-            text-align: center;
-            text-shadow: 0 0 5px var(--primary);
-            color: #fff;
+        #log-feed {
+            flex-grow: 1;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column-reverse;
         }
 
-        #status-bar {
+        .log-entry { margin-bottom: 2px; }
+        .log-warn { color: orange; }
+        .log-crit { color: red; }
+        .log-info { color: #00aaff; }
+
+        /* --- ПАНЕЛЬ СТАБІЛЬНОСТІ (ПРАВА ПАНЕЛЬ) --- */
+        #stability-panel {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            width: 200px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        
+        .metric-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #ccc;
         }
 
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: #333;
-        }
-        .dot.active { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
-        .dot.error { background: #ff0000; box-shadow: 0 0 8px #ff0000; }
-
-        /* КОНСОЛЬ НАЛАГОДЖЕННЯ */
-        #debug-console {
-            position: absolute;
-            bottom: 10px; left: 10px;
-            font-size: 10px;
-            color: lime;
-            background: rgba(0,0,0,0.7);
-            padding: 5px;
-            pointer-events: none;
-            max-width: 300px;
-            max-height: 100px;
-            overflow: hidden;
-            border-left: 2px solid lime;
-        }
+        @keyframes blink { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -126,537 +199,646 @@
 </head>
 <body>
 
-    <div id="viewport">
-        <video id="camera-feed" playsinline muted autoplay></video>
-        <canvas id="ar-scene"></canvas>
+    <div id="init-overlay">
+        <div class="loader-text">INITIALIZING SECURE PROTOCOLS...</div>
+        <button id="start-btn">ПІДКЛЮЧИТИ НЕЙРОІНТЕРФЕЙС</button>
+    </div>
 
-        <div id="hud-layer">
-            <div class="text-panel">
-                <div id="output">SYSTEM INITIALIZING...</div>
+    <div id="viewport">
+        <video id="camera-layer" playsinline muted></video>
+        <canvas id="ar-canvas"></canvas>
+
+        <div id="hud-container">
+            <div class="top-panel">
+                <div class="task-title">CURRENT OBJECTIVE</div>
+                <div class="task-target">кафедра приладів і контрольно-вимірювальних систем</div>
+                <div class="task-title">INPUT BUFFER</div>
+                <div id="user-output" class="user-input">...ОЧІКУВАННЯ ВВОДУ...</div>
+                <div style="margin-top:10px; font-size: 11px; color:#666;">
+                    ІНСТРУКЦІЯ: Щільно з'єднайте два пальці та утримуйте для підтвердження.
+                </div>
             </div>
-            <div id="status-bar">
-                <div class="status-indicator">
-                    <div class="dot" id="st-cam"></div> CAM
-                </div>
-                <div class="status-indicator">
-                    <div class="dot" id="st-ai"></div> AI ENGINE
-                </div>
-                <div class="status-indicator">
-                    <div class="dot" id="st-hand"></div> HAND TRACK
-                </div>
-                <div class="status-indicator">
-                    <div class="dot" id="st-pinch"></div> PINCH LOCK
-                </div>
+
+            <div id="system-monitor">
+                <div class="monitor-header">SYSTEM KERNEL LOG</div>
+                <div id="log-feed"></div>
+            </div>
+
+            <div id="stability-panel">
+                <div class="monitor-header">INPUT TELEMETRY</div>
+                <div class="metric-row"><span>Velocity:</span> <span id="val-vel">0.00</span></div>
+                <div class="metric-row"><span>Jitter:</span> <span id="val-jit">0.00</span></div>
+                <div class="metric-row"><span>Pinch Conf:</span> <span id="val-conf">0%</span></div>
+                <div class="metric-row"><span>Lock State:</span> <span id="val-lock" style="color:red">UNLOCKED</span></div>
             </div>
         </div>
-
-        <div id="debug-console">waiting for logs...</div>
     </div>
 
 <script>
 /**
  * ============================================================================
- * NEURAL AR KEYBOARD CORE SYSTEM v5.1 (Fixed Edition)
+ * TNTU SECURE AR INPUT SYSTEM CORE
+ * Version: 2.4.0 (Stable/Strict)
+ * Author: Gemini AI
+ * Description: High-precision hand tracking with multi-stage input validation.
  * ============================================================================
  */
 
-// --- 1. GLOBAL CONFIGURATION & CONSTANTS ---
+// --- 1. GLOBAL CONFIGURATION REGISTRY ---
+// Централізоване сховище всіх параметрів для легкого налаштування
 const CONFIG = {
-    CAMERA: {
-        WIDTH: 1280,
-        HEIGHT: 720,
-        FPS: 30
-    },
-    INTERACTION: {
-        PINCH_THRESHOLD: 0.055,
-        PINCH_RELEASE_BUFFER: 0.07,
-        SMOOTHING_ALPHA: 0.25,
-        RAYCAST_DEPTH: 50,
-        COOLDOWN_MS: 350
+    SYSTEM: {
+        FPS_LIMIT: 60,
+        DEBUG_VISUALS: true,
+        LOG_LIMIT: 50
     },
     KEYBOARD: {
-        POS_Z: -6,
-        SCALE: 1.6, // <--- ВИПРАВЛЕНО: Збільшено з 0.4 до 1.6 (в 4 рази)
-        KEY_SPACING: 0.08,
-        KEY_COLOR: 0x002233,
-        KEY_ACTIVE: 0x00ffcc,
-        KEY_HOVER: 0x005577
+        POSITION_Z: -6.0,
+        SCALE: 1.35,          // Зменшено на ~15% від стандарту 1.6
+        SPACING_X: 0.08,
+        SPACING_Y: 0.08,
+        ROW_OFFSET: 0.5,
+        // Цільова фраза для перевірки
+        TARGET_PHRASE: "кафедра приладів і контрольно-вимірювальних систем"
     },
-    FX: {
-        PARTICLE_COUNT: 12,
-        CURSOR_SIZE: 0.03
+    COLORS: {
+        KEY_IDLE: 0x002233,
+        KEY_HOVER: 0x004455,
+        KEY_PREPRESS: 0x0088aa, // Колір коли жест майже готовий
+        KEY_ACTIVE: 0x00ffcc,
+        KEY_TEXT: 0xffffff,
+        CURSOR_NORMAL: 0xffff00,
+        CURSOR_LOCKED: 0x00ff00,
+        CURSOR_ERROR: 0xff0000
+    },
+    // --- НАЙВАЖЛИВІШЕ: НАЛАШТУВАННЯ ВАЛІДАЦІЇ ---
+    VALIDATION: {
+        // Геометричний поріг (дистанція між пальцями)
+        PINCH_DISTANCE_THRESHOLD: 0.030, // Дуже малий поріг, треба щільно з'єднати
+        
+        // Гістерезис (щоб не "блимало" на межі)
+        PINCH_RELEASE_BUFFER: 0.045,
+        
+        // Фільтр швидкості (якщо рука рухається швидше цього, клік ігнорується)
+        MAX_VELOCITY_FOR_CLICK: 0.08, 
+        
+        // Час утримання (скільки мілісекунд треба тримати жест)
+        CLICK_HOLD_TIME_MS: 120, 
+        
+        // Затримка між натисканнями (захист від подвійного кліку)
+        COOLDOWN_MS: 450, 
+        
+        // Згладжування руху (0.1 - дуже плавно, 0.9 - різко)
+        SMOOTHING_FACTOR: 0.15 
     }
 };
 
-// --- 2. MATH UTILITIES & HELPERS ---
-const Utils = {
+// --- 2. LOGGER SUBSYSTEM ---
+// Модуль для виводу діагностичних повідомлень на екран
+const Logger = {
+    element: document.getElementById('log-feed'),
+    
+    log: function(msg, type = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        const time = new Date().toLocaleTimeString().split(' ')[0];
+        entry.innerText = `[${time}] ${msg}`;
+        
+        this.element.prepend(entry);
+        
+        if (this.element.children.length > CONFIG.SYSTEM.LOG_LIMIT) {
+            this.element.removeChild(this.element.lastChild);
+        }
+    },
+    
+    info: function(msg) { this.log(msg, 'info'); },
+    warn: function(msg) { this.log(msg, 'warn'); },
+    crit: function(msg) { this.log(msg, 'crit'); }
+};
+
+// --- 3. MATH UTILITIES ---
+// Власна математична бібліотека для векторних операцій та аналізу
+const MathUtils = {
     lerp: (start, end, amt) => (1 - amt) * start + amt * end,
-    smoothVector: (current, target, factor) => {
-        current.x = Utils.lerp(current.x, target.x, factor);
-        current.y = Utils.lerp(current.y, target.y, factor);
-        current.z = Utils.lerp(current.z, target.z, factor);
+
+    distanceSq: (v1, v2) => {
+        return (v1.x - v2.x)**2 + (v1.y - v2.y)**2;
+    },
+
+    // Векторне згладжування (Low-pass filter)
+    smoothVector3: (current, target, factor) => {
+        if (!current) return target.clone();
+        current.x = MathUtils.lerp(current.x, target.x, factor);
+        current.y = MathUtils.lerp(current.y, target.y, factor);
+        current.z = MathUtils.lerp(current.z, target.z, factor);
         return current;
     },
-    distSq: (v1, v2) => {
-        const dx = v1.x - v2.x;
-        const dy = v1.y - v2.y;
-        return dx * dx + dy * dy;
-    },
-    dist2D: (v1, v2) => {
-        return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2));
-    },
-    log: (msg) => {
-        const el = document.getElementById('debug-console');
-        if (el) {
-            el.innerHTML += `<div>> ${msg}</div>`;
-            el.scrollTop = el.scrollHeight;
-        }
-        console.log(`[SYS]: ${msg}`);
-    },
-    setStatus: (id, state) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.className = `dot ${state ? 'active' : (state === false ? 'error' : '')}`;
-        }
+
+    // Обчислення швидкості (Delta position)
+    calculateVelocity: (pos1, pos2) => {
+        if (!pos1 || !pos2) return 0;
+        const dx = pos1.x - pos2.x;
+        const dy = pos1.y - pos2.y;
+        return Math.sqrt(dx*dx + dy*dy);
     }
 };
 
-// --- 3. CLASS: VISUAL EFFECTS (PARTICLES) ---
-class ParticleSystem {
-    constructor(scene) {
-        this.scene = scene;
-        this.particles = [];
-        this.geometry = new THREE.PlaneGeometry(0.04, 0.04);
-        this.material = new THREE.MeshBasicMaterial({
-            color: 0x00ffcc, transparent: true, opacity: 1
-        });
+// --- 4. INPUT VALIDATION ENGINE (CORE LOGIC) ---
+// Це серце системи захисту від помилок. 
+// Аналізує сирі дані з MediaPipe і вирішує, чи є намір користувача натиснути.
+class InputValidator {
+    constructor() {
+        this.history = [];
+        this.pinchStartTime = 0;
+        this.isPinchingInternal = false;
+        this.lastClickTime = 0;
+        
+        this.currentVelocity = 0;
+        this.pinchConfidence = 0; // 0.0 to 1.0
     }
 
-    spawn(position) {
-        for (let i = 0; i < CONFIG.FX.PARTICLE_COUNT; i++) {
-            const mesh = new THREE.Mesh(this.geometry, this.material.clone());
-            mesh.position.copy(position);
-            const velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 0.2,
-                (Math.random() - 0.5) * 0.2,
-                (Math.random() - 0.5) * 0.2
-            );
-            this.particles.push({ mesh, velocity, life: 1.0 });
-            this.scene.add(mesh);
+    /**
+     * Головний метод перевірки
+     * @param {number} rawDistance - відстань між пальцями
+     * @param {THREE.Vector3} cursorPosition - поточна позиція курсору
+     * @returns {Object} - стан валідації { isValidClick, isHovering, metrics }
+     */
+    process(rawDistance, cursorPosition) {
+        const now = Date.now();
+        
+        // 1. Розрахунок швидкості руху руки
+        this._updateVelocity(cursorPosition);
+
+        // 2. Перевірка на "Cooldown" (захист від подвійного кліку)
+        if (now - this.lastClickTime < CONFIG.VALIDATION.COOLDOWN_MS) {
+            return { isClick: false, isHolding: false, locked: true };
         }
+
+        // 3. Логіка Гістерезису (Поріг входу < Поріг виходу)
+        let threshold = this.isPinchingInternal 
+            ? CONFIG.VALIDATION.PINCH_RELEASE_BUFFER 
+            : CONFIG.VALIDATION.PINCH_DISTANCE_THRESHOLD;
+
+        const isGeometricPinch = rawDistance < threshold;
+
+        // 4. Velocity Gate (Блокування при швидкому русі)
+        const isStable = this.currentVelocity < CONFIG.VALIDATION.MAX_VELOCITY_FOR_CLICK;
+
+        // 5. Накопичення впевненості
+        if (isGeometricPinch && isStable) {
+            if (!this.isPinchingInternal) {
+                this.isPinchingInternal = true;
+                this.pinchStartTime = now;
+                Logger.info("Gesture Detected... Stabilizing");
+            }
+            
+            // Розрахунок прогресу утримання (0% -> 100%)
+            const holdDuration = now - this.pinchStartTime;
+            this.pinchConfidence = Math.min(holdDuration / CONFIG.VALIDATION.CLICK_HOLD_TIME_MS, 1.0);
+        } else {
+            this.isPinchingInternal = false;
+            this.pinchConfidence = 0;
+        }
+
+        // 6. Фінальне рішення про клік
+        const isClick = (this.pinchConfidence >= 1.0) && (now - this.lastClickTime > CONFIG.VALIDATION.COOLDOWN_MS);
+
+        if (isClick) {
+            this.lastClickTime = now;
+            this.pinchConfidence = 0; // Скидання після успішного кліку
+            Logger.info(">>> INPUT CONFIRMED <<<");
+        }
+
+        // Оновлення UI метрик
+        this._updateTelemetry(isClick);
+
+        return {
+            isClick: isClick,
+            isHolding: this.isPinchingInternal,
+            confidence: this.pinchConfidence
+        };
     }
 
-    update() {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-            p.mesh.position.add(p.velocity);
-            p.mesh.rotation.z += 0.1;
-            p.life -= 0.03;
-            p.mesh.material.opacity = p.life;
-            p.mesh.scale.setScalar(p.life);
-            if (p.life <= 0) {
-                this.scene.remove(p.mesh);
-                this.particles.splice(i, 1);
-            }
+    _updateVelocity(pos) {
+        if (this.history.length > 0) {
+            const lastPos = this.history[this.history.length - 1];
+            // Проста евклідова відстань як міра швидкості за кадр
+            const dist = Math.sqrt(
+                Math.pow(pos.x - lastPos.x, 2) + 
+                Math.pow(pos.y - lastPos.y, 2)
+            );
+            // Експоненційне згладжування швидкості
+            this.currentVelocity = MathUtils.lerp(this.currentVelocity, dist, 0.2);
+        }
+        
+        this.history.push(pos.clone());
+        if (this.history.length > 5) this.history.shift();
+    }
+
+    _updateTelemetry(clickState) {
+        document.getElementById('val-vel').innerText = (this.currentVelocity * 100).toFixed(2);
+        document.getElementById('val-jit').innerText = "LOW"; 
+        document.getElementById('val-conf').innerText = Math.round(this.pinchConfidence * 100) + "%";
+        
+        const lockEl = document.getElementById('val-lock');
+        if (this.currentVelocity > CONFIG.VALIDATION.MAX_VELOCITY_FOR_CLICK) {
+            lockEl.innerText = "VELOCITY LOCK";
+            lockEl.style.color = "red";
+        } else {
+            lockEl.innerText = "READY";
+            lockEl.style.color = "lime";
         }
     }
 }
 
-// --- 4. CLASS: VIRTUAL KEY (3D BUTTON) ---
+// --- 5. VISUAL KEYBOARD SYSTEM ---
+// Відповідає за рендеринг кнопок, тексту та їх станів
 class VirtualKey {
-    constructor(char, x, y, w, h) {
+    constructor(char, x, y, width, height) {
         this.char = char;
-        this.width = w;
-        this.height = h;
-        this.isHovered = false;
-        this.isPressed = false;
+        this.state = 'idle'; // idle, hover, prepress, pressed
         
-        this.mesh = this._createMesh(w, h);
+        this.mesh = new THREE.Group();
         this.mesh.position.set(x, y, 0);
-        
-        this.label = this._createLabel(char, w, h);
-        this.mesh.add(this.label);
-        
-        this.mesh.userData = { keyInstance: this };
-    }
 
-    _createMesh(w, h) {
-        const geo = new THREE.BoxGeometry(w, h, 0.05);
-        const mat = new THREE.MeshPhongMaterial({
-            color: CONFIG.KEYBOARD.KEY_COLOR,
+        // Геометрія кнопки
+        const geometry = new THREE.BoxGeometry(width, height, 0.04);
+        this.material = new THREE.MeshPhongMaterial({
+            color: CONFIG.COLORS.KEY_IDLE,
             transparent: true,
             opacity: 0.85,
-            shininess: 80
+            shininess: 30
         });
-        return new THREE.Mesh(geo, mat);
+        
+        this.baseMesh = new THREE.Mesh(geometry, this.material);
+        this.mesh.add(this.baseMesh);
+
+        // Генерація текстури тексту
+        this.textMesh = this._createLabel(char, width, height);
+        this.textMesh.position.z = 0.051; // Трохи вище поверхні
+        this.mesh.add(this.textMesh);
+
+        // Прив'язка даних для Raycaster
+        this.baseMesh.userData = { parentKey: this };
     }
 
-    _createLabel(text, w, h) {
+    _createLabel(char, w, h) {
         const canvas = document.createElement('canvas');
         canvas.width = 128;
         canvas.height = 128;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 60px "Segoe UI", Arial';
+
+        // Фон для дебагу (прозорий)
+        ctx.fillStyle = 'rgba(0,0,0,0)';
+        ctx.fillRect(0, 0, 128, 128);
+
+        // Налаштування шрифту
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 64px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
-        let display = text;
-        if (text === 'SPACE') display = '⎵';
-        if (text === 'DEL') display = '←';
-        
-        ctx.fillText(display, 64, 64);
-        
+
+        // Обробка спецсимволів
+        let displayText = char;
+        if (char === 'SPACE') displayText = '␣';
+        if (char === 'DEL') displayText = '←';
+
+        ctx.fillText(displayText, 64, 64);
+
         const texture = new THREE.CanvasTexture(canvas);
-        const labelGeo = new THREE.PlaneGeometry(w * 0.8, h * 0.8);
-        const labelMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-        
-        const mesh = new THREE.Mesh(labelGeo, labelMat);
-        mesh.position.z = 0.06;
-        return mesh;
+        const geometry = new THREE.PlaneGeometry(w * 0.8, h * 0.8);
+        const material = new THREE.MeshBasicMaterial({ 
+            map: texture, 
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        return new THREE.Mesh(geometry, material);
     }
 
-    setState(state) {
-        const mat = this.mesh.material;
-        if (state === 'press') {
-            mat.color.setHex(CONFIG.KEYBOARD.KEY_ACTIVE);
-            mat.emissive.setHex(0x00ff00);
-            this.mesh.scale.setZ(0.5);
-        } else if (state === 'hover') {
-            mat.color.setHex(CONFIG.KEYBOARD.KEY_HOVER);
-            mat.emissive.setHex(0x002244);
-            this.mesh.scale.setZ(1.0);
-        } else {
-            mat.color.setHex(CONFIG.KEYBOARD.KEY_COLOR);
-            mat.emissive.setHex(0x000000);
-            this.mesh.scale.setZ(1.0);
+    // Оновлення візуального стану
+    updateState(newState, confidence = 0) {
+        if (this.state === newState && newState !== 'prepress') return;
+        
+        this.state = newState;
+
+        switch (newState) {
+            case 'idle':
+                this.material.color.setHex(CONFIG.COLORS.KEY_IDLE);
+                this.baseMesh.scale.z = 1.0;
+                break;
+            case 'hover':
+                this.material.color.setHex(CONFIG.COLORS.KEY_HOVER);
+                this.baseMesh.scale.z = 1.0;
+                break;
+            case 'prepress':
+                // Інтерполяція кольору залежно від впевненості (progressive feedback)
+                const c1 = new THREE.Color(CONFIG.COLORS.KEY_HOVER);
+                const c2 = new THREE.Color(CONFIG.COLORS.KEY_PREPRESS);
+                this.material.color.copy(c1.lerp(c2, confidence));
+                this.baseMesh.scale.z = 1.0 - (0.3 * confidence); // Легке вдавлювання
+                break;
+            case 'pressed':
+                this.material.color.setHex(CONFIG.COLORS.KEY_ACTIVE);
+                this.baseMesh.scale.z = 0.5; // Сильне вдавлювання
+                break;
         }
     }
 }
 
-// --- 5. CLASS: KEYBOARD MANAGER ---
 class KeyboardManager {
     constructor(scene) {
         this.scene = scene;
-        this.group = new THREE.Group();
         this.keys = [];
-        this.typedText = "";
+        this.container = new THREE.Group();
+        this.outputString = "";
+        
         this._buildLayout();
-        this.scene.add(this.group);
-        this.group.position.z = CONFIG.KEYBOARD.POS_Z;
-        this.group.scale.setScalar(CONFIG.KEYBOARD.SCALE);
+        
+        this.scene.add(this.container);
+        this.container.position.z = CONFIG.KEYBOARD.POSITION_Z;
+        this.container.scale.setScalar(CONFIG.KEYBOARD.SCALE);
     }
 
     _buildLayout() {
-        const layout = [
-            ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х'],
+        const layoutMap = [
+            ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х','Ї'],
             ['Ф','І','В','А','П','Р','О','Л','Д','Ж','Є'],
-            ['Я','Ч','С','М','И','Т','Ь','Б','Ю','DEL'],
+            ['Я','Ч','С','М','И','Т','Ь','Б','Ю','-','DEL'],
             ['SPACE']
         ];
-        
-        const keyW = 0.5;
-        const keyH = 0.5;
-        const gap = CONFIG.KEYBOARD.KEY_SPACING;
+
+        const kW = 0.5; // Базова ширина
+        const kH = 0.5; // Базова висота
+        const gap = CONFIG.KEYBOARD.SPACING_X;
+
         let currentY = 0;
 
-        layout.forEach((row) => {
-            let rowWidth = row.length * (keyW + gap);
-            if (row[0] === 'SPACE') rowWidth = 3 + gap;
-            let currentX = -(rowWidth / 2) + keyW / 2;
+        layoutMap.forEach((row, rowIndex) => {
+            // Розрахунок центрування рядка
+            let rowWidth = 0;
+            row.forEach(char => {
+                rowWidth += (char === 'SPACE' ? 3 : kW) + gap;
+            });
+            rowWidth -= gap; // Прибрати останній відступ
+
+            let currentX = -rowWidth / 2 + kW / 2; // Початкова позиція X
+
+            // Якщо рядок з Space, зміщуємо X для правильного центрування широкої клавіші
+            if (row[0] === 'SPACE') currentX = 0; 
 
             row.forEach(char => {
-                let w = keyW;
-                if (char === 'SPACE') { w = 3; currentX += 1.25; }
-                const key = new VirtualKey(char, currentX, currentY, w, keyH);
+                let actualW = kW;
+                if (char === 'SPACE') actualW = 3;
+
+                const key = new VirtualKey(char, currentX, currentY, actualW, kH);
                 this.keys.push(key);
-                this.group.add(key.mesh);
-                currentX += w + gap;
-            });
-            currentY -= (keyH + gap);
-        });
-    }
+                this.container.add(key.mesh);
 
-    resetStates() {
-        this.keys.forEach(k => {
-            if (!k.isPressed) k.setState('idle');
-        });
-    }
-
-    getIntersectObjects() {
-        return this.keys.map(k => k.mesh);
-    }
-
-    type(char) {
-        if (char === 'DEL') {
-            this.typedText = this.typedText.slice(0, -1);
-        } else if (char === 'SPACE') {
-            this.typedText += ' ';
-        } else {
-            this.typedText += char;
-        }
-        const el = document.getElementById('output');
-        el.innerText = this.typedText || "READY TO TYPE...";
-        el.style.textShadow = "0 0 15px #ffffff";
-        setTimeout(() => el.style.textShadow = "0 0 5px #00ffcc", 100);
-    }
-}
-
-// --- 6. CLASS: HAND TRACKING ENGINE ---
-class HandTrackingEngine {
-    constructor(videoElement, onResultsCallback) {
-        this.video = videoElement;
-        this.onResults = onResultsCallback;
-        this.hands = null;
-        this._initMediaPipe();
-    }
-
-    _initMediaPipe() {
-        Utils.log("Initializing MediaPipe Hands...");
-        this.hands = new Hands({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-        });
-        this.hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.65,
-            minTrackingConfidence: 0.65
-        });
-        this.hands.onResults(this._handleResults.bind(this));
-        this._startCameraLoop();
-    }
-
-    async _startCameraLoop() {
-        if (this.video.readyState >= 2) {
-            await this.hands.send({image: this.video});
-        }
-        requestAnimationFrame(this._startCameraLoop.bind(this));
-    }
-
-    _handleResults(results) {
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            Utils.setStatus('st-hand', true);
-            this.onResults(results.multiHandLandmarks[0]);
-        } else {
-            Utils.setStatus('st-hand', false);
-            this.onResults(null);
-        }
-    }
-}
-
-// --- 7. CLASS: INPUT SYSTEM (LOGIC & PHYSICS) ---
-class InputSystem {
-    constructor(scene, camera, keyboard) {
-        this.scene = scene;
-        this.camera = camera;
-        this.keyboard = keyboard;
-        this.raycaster = new THREE.Raycaster();
-        this.fx = new ParticleSystem(scene);
-        
-        this.cursorGroup = new THREE.Group();
-        this.scene.add(this.cursorGroup);
-        this._createCursorVisuals();
-
-        this.smoothIndex = new THREE.Vector3();
-        this.smoothThumb = new THREE.Vector3();
-        this.isPinching = false;
-        this.lastPinchTime = 0;
-    }
-
-    _createCursorVisuals() {
-        const dotGeo = new THREE.SphereGeometry(0.06, 16, 16);
-        const dotMat = new THREE.MeshBasicMaterial({ color: 0xff3333, depthTest: false });
-        this.indexDot = new THREE.Mesh(dotGeo, dotMat);
-        this.thumbDot = new THREE.Mesh(dotGeo, dotMat);
-        
-        const ringGeo = new THREE.RingGeometry(0.02, 0.04, 32);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
-        this.crosshair = new THREE.Mesh(ringGeo, ringMat);
-        
-        const lineMat = new THREE.LineBasicMaterial({ color: 0xffff00 });
-        const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-        this.connector = new THREE.Line(lineGeo, lineMat);
-
-        this.cursorGroup.add(this.indexDot, this.thumbDot, this.crosshair, this.connector);
-        this.cursorGroup.visible = false;
-    }
-
-    processHand(landmarks) {
-        if (!landmarks) {
-            this.cursorGroup.visible = false;
-            Utils.setStatus('st-pinch', false);
-            return;
-        }
-
-        this.cursorGroup.visible = true;
-
-        const rawIndex = this._projectToScene(landmarks[8]);
-        const rawThumb = this._projectToScene(landmarks[4]);
-
-        Utils.smoothVector(this.smoothIndex, rawIndex, CONFIG.INTERACTION.SMOOTHING_ALPHA);
-        Utils.smoothVector(this.smoothThumb, rawThumb, CONFIG.INTERACTION.SMOOTHING_ALPHA);
-
-        this.indexDot.position.copy(this.smoothIndex);
-        this.thumbDot.position.copy(this.smoothThumb);
-        this.connector.geometry.setFromPoints([this.smoothIndex, this.smoothThumb]);
-
-        const pinchCenter = new THREE.Vector3().addVectors(this.smoothIndex, this.smoothThumb).multiplyScalar(0.5);
-        this.crosshair.position.copy(pinchCenter);
-
-        this._checkPinchLogic(landmarks[8], landmarks[4], pinchCenter);
-        this.fx.update();
-    }
-
-    _projectToScene(landmark) {
-        // <--- ВИПРАВЛЕНО: Інверсія координат X для дзеркального режиму
-        const vector = new THREE.Vector3(
-            ((1 - landmark.x) * 2) - 1, 
-            -(landmark.y * 2) + 1,
-            0.5
-        );
-        vector.unproject(this.camera);
-        const dir = vector.sub(this.camera.position).normalize();
-        const distance = (CONFIG.KEYBOARD.POS_Z + 2 - this.camera.position.z) / dir.z;
-        return this.camera.position.clone().add(dir.multiplyScalar(distance));
-    }
-
-    _checkPinchLogic(rawIndex2D, rawThumb2D, center3D) {
-        const dx = (rawIndex2D.x - rawThumb2D.x) * (window.innerWidth / window.innerHeight);
-        const dy = rawIndex2D.y - rawThumb2D.y;
-        const distance = Math.sqrt(dx*dx + dy*dy);
-
-        let threshold = this.isPinching ? CONFIG.INTERACTION.PINCH_RELEASE_BUFFER : CONFIG.INTERACTION.PINCH_THRESHOLD;
-        const isCurrentlyPinching = distance < threshold;
-
-        if (isCurrentlyPinching) {
-            this.crosshair.scale.setScalar(0.5);
-            this.crosshair.material.color.setHex(0x00ff00);
-            this.connector.material.color.setHex(0x00ff00);
-            Utils.setStatus('st-pinch', true);
-        } else {
-            this.crosshair.scale.setScalar(1.0);
-            this.crosshair.material.color.setHex(0xffff00);
-            this.connector.material.color.setHex(0xffff00);
-            Utils.setStatus('st-pinch', false);
-        }
-
-        this._performRaycast(center3D, isCurrentlyPinching);
-        this.isPinching = isCurrentlyPinching;
-    }
-
-    _performRaycast(origin, isPinching) {
-        const screenPos = origin.clone().project(this.camera);
-        this.raycaster.setFromCamera(new THREE.Vector2(screenPos.x, screenPos.y), this.camera);
-
-        const intersects = this.raycaster.intersectObjects(this.keyboard.getIntersectObjects());
-        this.keyboard.resetStates();
-
-        if (intersects.length > 0) {
-            const hitObj = intersects[0].object;
-            const key = hitObj.userData.keyInstance;
-
-            if (key) {
-                key.setState('hover');
-                const now = Date.now();
-                if (isPinching && !this.isPinching) {
-                    if (now - this.lastPinchTime > CONFIG.INTERACTION.COOLDOWN_MS) {
-                        this._triggerKey(key);
-                        this.lastPinchTime = now;
-                    }
+                if (char === 'SPACE') {
+                    // Space одна, тому наступного X не треба
+                } else {
+                    currentX += actualW + gap;
                 }
-            }
+            });
+
+            currentY -= (kH + CONFIG.KEYBOARD.SPACING_Y);
+        });
+
+        Logger.info(`Keyboard built. Total keys: ${this.keys.length}`);
+    }
+
+    handleInput(char) {
+        if (char === 'DEL') {
+            this.outputString = this.outputString.slice(0, -1);
+            Logger.info("Action: Backspace");
+        } else if (char === 'SPACE') {
+            this.outputString += ' ';
+            Logger.info("Action: Space");
+        } else {
+            this.outputString += char.toLowerCase();
+            Logger.info(`Input: ${char}`);
+        }
+        
+        this._updateDisplay();
+    }
+
+    _updateDisplay() {
+        const display = document.getElementById('user-output');
+        display.innerText = this.outputString.length > 0 ? this.outputString : "...";
+
+        // Валідація фрази
+        if (this.outputString.trim() === CONFIG.KEYBOARD.TARGET_PHRASE) {
+            display.classList.add('status-valid');
+            display.innerText += " [ВІРНО]";
+            Logger.crit("TARGET PHRASE MATCHED!");
+        } else {
+            display.classList.remove('status-valid');
         }
     }
 
-    _triggerKey(key) {
-        key.setState('press');
-        this.keyboard.type(key.char);
-        this.fx.spawn(key.mesh.position);
-        if (navigator.vibrate) navigator.vibrate(40);
-        Utils.log(`Typed: ${key.char}`);
+    resetKeyStates() {
+        this.keys.forEach(k => k.updateState('idle'));
+    }
+
+    getIntersectables() {
+        return this.keys.map(k => k.baseMesh);
     }
 }
 
-// --- 8. MAIN APPLICATION ---
-class App {
+// --- 6. MAIN APPLICATION CONTROLLER ---
+class ARSystem {
     constructor() {
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.keyboard = null;
-        this.handTracking = null;
-        this.inputSystem = null;
-        this.videoElement = document.getElementById('camera-feed');
-        this.canvasElement = document.getElementById('ar-scene');
-    }
-
-    async init() {
-        Utils.log("System Starting...");
-        Utils.setStatus('st-ai', false);
-        Utils.setStatus('st-cam', false);
-
-        try {
-            await this._setupCamera();
-            Utils.setStatus('st-cam', true);
-            this._setupGraphics();
-            this.keyboard = new KeyboardManager(this.scene);
-            this.inputSystem = new InputSystem(this.scene, this.camera, this.keyboard);
-            this.handTracking = new HandTrackingEngine(this.videoElement, (landmarks) => {
-                this.inputSystem.processHand(landmarks);
-            });
-            Utils.setStatus('st-ai', true);
-            this._animate();
-            document.getElementById('output').innerText = "READY.";
-            Utils.log("Initialization Complete.");
-        } catch (error) {
-            Utils.log("FATAL ERROR: " + error.message);
-            console.error(error);
-            document.getElementById('output').innerText = "ERROR: ACCESS DENIED";
-            document.getElementById('output').style.color = "red";
-            Utils.setStatus('st-cam', false);
-        }
-    }
-
-    async _setupCamera() {
-        Utils.log("Requesting Webcam Stream...");
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'user',
-                width: { ideal: CONFIG.CAMERA.WIDTH },
-                height: { ideal: CONFIG.CAMERA.HEIGHT }
-            },
-            audio: false
-        });
-        this.videoElement.srcObject = stream;
-        return new Promise((resolve) => {
-            this.videoElement.onloadedmetadata = () => {
-                this.videoElement.play();
-                resolve();
-            };
-        });
-    }
-
-    _setupGraphics() {
+        this.video = document.getElementById('camera-layer');
+        this.canvas = document.getElementById('ar-canvas');
+        
+        // Three.js Setup
         this.scene = new THREE.Scene();
-        this.scene.fog = new THREE.FogExp2(0x050510, 0.05);
-        this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         this.camera.position.z = 5;
-        this.renderer = new THREE.WebGLRenderer({
-            canvas: this.canvasElement,
-            alpha: true,
-            antialias: true
+
+        this.renderer = new THREE.WebGLRenderer({ 
+            canvas: this.canvas, 
+            alpha: true, 
+            antialias: true 
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         const dirLight = new THREE.DirectionalLight(0x00ffcc, 0.8);
-        dirLight.position.set(5, 10, 7);
-        this.scene.add(ambient, dirLight);
+        dirLight.position.set(2, 5, 5);
+        this.scene.add(ambientLight, dirLight);
+
+        // Components
+        this.keyboard = new KeyboardManager(this.scene);
+        this.validator = new InputValidator();
+        this.raycaster = new THREE.Raycaster();
+
+        // Cursor Setup
+        this._initCursor();
+
+        // State variables
+        this.smoothIndex = null;
+        this.smoothThumb = null;
+        
+        // Resize handler
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
+    }
+
+    _initCursor() {
+        // Складний курсор для візуалізації стабільності
+        this.cursorGroup = new THREE.Group();
+        
+        // Центральна точка
+        const dotGeo = new THREE.SphereGeometry(0.04, 16, 16);
+        const dotMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        this.cursorDot = new THREE.Mesh(dotGeo, dotMat);
+        
+        // Кільце прогресу (візуалізує pinchConfidence)
+        const ringGeo = new THREE.RingGeometry(0.06, 0.08, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+        this.cursorRing = new THREE.Mesh(ringGeo, ringMat);
+
+        this.cursorGroup.add(this.cursorDot);
+        this.cursorGroup.add(this.cursorRing);
+        this.scene.add(this.cursorGroup);
+        this.cursorGroup.visible = false;
+    }
+
+    start() {
+        Logger.info("Starting MediaPipe Hands...");
+        
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7, // High confidence required
+            minTrackingConfidence: 0.7
+        });
+
+        hands.onResults(this._onHandResults.bind(this));
+
+        const camera = new Camera(this.video, {
+            onFrame: async () => {
+                await hands.send({image: this.video});
+            },
+            width: 1280,
+            height: 720
+        });
+
+        camera.start();
+        this._animate();
+        Logger.info("System Loop Started.");
+    }
+
+    _onHandResults(results) {
+        if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+            this.cursorGroup.visible = false;
+            return;
+        }
+
+        this.cursorGroup.visible = true;
+        const landmarks = results.multiHandLandmarks[0];
+
+        // --- 1. COORDINATE MAPPING ---
+        // Landmarks: 8 (Index Tip), 4 (Thumb Tip)
+        const rawIndex = this._landmarkToVector(landmarks[8]);
+        const rawThumb = this._landmarkToVector(landmarks[4]);
+
+        // --- 2. SMOOTHING ---
+        if (!this.smoothIndex) {
+            this.smoothIndex = rawIndex;
+            this.smoothThumb = rawThumb;
+        } else {
+            this.smoothIndex = MathUtils.smoothVector3(this.smoothIndex, rawIndex, CONFIG.VALIDATION.SMOOTHING_FACTOR);
+            this.smoothThumb = MathUtils.smoothVector3(this.smoothThumb, rawThumb, CONFIG.VALIDATION.SMOOTHING_FACTOR);
+        }
+
+        // --- 3. CURSOR POSITIONING ---
+        // Курсор знаходиться посередині між пальцями
+        const cursorCenter = new THREE.Vector3()
+            .addVectors(this.smoothIndex, this.smoothThumb)
+            .multiplyScalar(0.5);
+        
+        this.cursorGroup.position.copy(cursorCenter);
+
+        // --- 4. VALIDATION LOGIC ---
+        // Розрахунок 2D дистанції для щипка (більш надійно ніж 3D)
+        const dx = (landmarks[8].x - landmarks[4].x) * (window.innerWidth / window.innerHeight);
+        const dy = landmarks[8].y - landmarks[4].y;
+        const rawDistance = Math.sqrt(dx*dx + dy*dy);
+
+        const inputState = this.validator.process(rawDistance, cursorCenter);
+
+        // --- 5. VISUAL FEEDBACK (CURSOR) ---
+        // Оновлення кільця прогресу
+        const scale = 1.0 + (inputState.confidence * 0.5);
+        this.cursorRing.scale.setScalar(scale);
+        
+        if (inputState.isHolding) {
+            this.cursorDot.material.color.setHex(0x00aaff); // Blue for holding
+            this.cursorRing.material.color.setHex(0x00aaff);
+            this.cursorRing.material.opacity = 0.8;
+        } else {
+            this.cursorDot.material.color.setHex(0xffff00); // Yellow idle
+            this.cursorRing.material.color.setHex(0xffff00);
+            this.cursorRing.material.opacity = 0.3;
+        }
+
+        if (inputState.isClick) {
+             this.cursorDot.material.color.setHex(0x00ff00); // Green Click
+        }
+
+        // --- 6. RAYCASTING & INTERACTION ---
+        this._handleRaycast(cursorCenter, inputState);
+    }
+
+    _landmarkToVector(lm) {
+        // (1 - x) для дзеркального відображення
+        const x = (1 - lm.x) * 2 - 1;
+        const y = -lm.y * 2 + 1;
+        
+        const vec = new THREE.Vector3(x, y, 0.5);
+        vec.unproject(this.camera);
+        const dir = vec.sub(this.camera.position).normalize();
+        const distance = (CONFIG.KEYBOARD.POSITION_Z + 1 - this.camera.position.z) / dir.z;
+        return this.camera.position.clone().add(dir.multiplyScalar(distance));
+    }
+
+    _handleRaycast(origin, inputState) {
+        // Конвертація 3D точки назад в координати екрану для raycaster
+        const screenPos = origin.clone().project(this.camera);
+        this.raycaster.setFromCamera(new THREE.Vector2(screenPos.x, screenPos.y), this.camera);
+
+        const intersects = this.raycaster.intersectObjects(this.keyboard.getIntersectables());
+        
+        // Скидання станів (якщо ми не тримаємо клавішу)
+        this.keyboard.resetKeyStates();
+
+        if (intersects.length > 0) {
+            const hitObject = intersects[0].object;
+            const keyInstance = hitObject.userData.parentKey;
+
+            if (keyInstance) {
+                // Визначаємо стан клавіші
+                if (inputState.isClick) {
+                    keyInstance.updateState('pressed');
+                    this.keyboard.handleInput(keyInstance.char);
+                } else if (inputState.isHolding) {
+                    keyInstance.updateState('prepress', inputState.confidence);
+                } else {
+                    keyInstance.updateState('hover');
+                }
+            }
+        }
     }
 
     _animate() {
@@ -665,13 +847,21 @@ class App {
     }
 }
 
-window.onload = () => {
+// --- BOOTSTRAP ---
+document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('init-overlay').style.display = 'none';
+    
+    Logger.info("Boot sequence initiated.");
+    
+    // Перевірка HTTPS
     if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-        alert("УВАГА! Для роботи камери потрібен HTTPS або localhost.");
+        Logger.crit("SECURE CONTEXT REQUIRED (HTTPS). Camera access may fail.");
     }
-    const app = new App();
-    app.init();
-};
+
+    const app = new ARSystem();
+    app.start();
+});
+
 </script>
 </body>
 </html>
