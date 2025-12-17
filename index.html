@@ -1,202 +1,343 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebAR: Магія Рук</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebAR: Повітряна Клавіатура</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #111;
+            font-family: 'Courier New', monospace;
         }
 
         #container {
             position: relative;
-            width: 640px; /* Базовий розмір відео */
-            height: 480px;
+            width: 100vw;
+            height: 100vh;
         }
 
-        /* Відео з вебкамери - на задньому плані */
+        /* Відео на весь екран */
         #webcam-video {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            transform: scaleX(-1); /* Дзеркальне відображення */
             object-fit: cover;
+            transform: scaleX(-1);
             z-index: 1;
         }
 
-        /* Канвас для 3D графіки - поверх відео */
+        /* 3D Канвас поверх відео */
         #threejs-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2; /* Вищий пріоритет */
-            pointer-events: none; /* Щоб кліки проходили крізь нього */
+            z-index: 2;
+            pointer-events: none;
         }
 
-        #status {
+        /* Панель виводу тексту */
+        #typing-area {
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00ffcc;
+            border-radius: 10px;
+            padding: 15px;
             z-index: 10;
-            color: #00ffcc;
-            font-family: sans-serif;
-            font-size: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            display: none;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
         }
+
+        #output-text {
+            color: #00ffcc;
+            font-size: 1.5rem;
+            min-height: 1.5rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        #cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.5rem;
+            background-color: #00ffcc;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ffcc; z-index: 20; font-size: 2rem;}
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
-    <div id="container">
-        <div id="status">ПІДНІМИ РУКИ! 🙌</div>
-        <video id="webcam-video" playsinline></video>
-        <canvas id="threejs-canvas"></canvas>
+<div id="container">
+    <div id="loading">Завантаження кібер-системи...</div>
+    <div id="typing-area">
+        <span id="output-text"></span><span id="cursor"></span>
     </div>
+    <video id="webcam-video" playsinline></video>
+    <canvas id="threejs-canvas"></canvas>
+</div>
 
 <script>
     const videoElement = document.getElementById('webcam-video');
     const threeCanvas = document.getElementById('threejs-canvas');
-    const statusText = document.getElementById('status');
-    let isModelVisible = false;
-    let poseResults = null;
+    const outputText = document.getElementById('output-text');
+    const loading = document.getElementById('loading');
+
+    // --- КОНФІГУРАЦІЯ ---
+    const PRESS_THRESHOLD = 0.05; // Відстань (в 3D одиницях), при якій зараховується натискання
+    const PRESS_COOLDOWN = 300;   // Мілісекунди між натисканнями однієї клавіші (щоб не спамило)
+
+    let typedString = "";
 
     // ==========================================
-    // ЧАСТИНА 1: НАЛАШТУВАННЯ 3D СЦЕНИ (Three.js)
+    // ЧАСТИНА 1: THREE.JS (3D СВІТ)
     // ==========================================
-    
-    // Створюємо сцену
     const scene = new THREE.Scene();
-    
-    // Створюємо камеру для 3D світу
-    const camera = new THREE.PerspectiveCamera(75, 640 / 480, 0.1, 1000);
+    // Камера дивиться прямо. Налаштуємо FOV (кут огляду)
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5; // Відсуваємо камеру назад
 
-    // Створюємо рендерер (малювальник)
-    const renderer = new THREE.WebGLRenderer({ 
-        canvas: threeCanvas, 
-        alpha: true, // ВАЖЛИВО: Прозорий фон, щоб бачити відео під ним
-        antialias: true 
-    });
-    renderer.setSize(640, 480);
+    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // --- СТВОРЮЄМО 3D ОБ'ЄКТ (Замість завантаження файлу, створимо процедурний куб) ---
-    
-    // Геометрія куба
-    const geometry = new THREE.BoxGeometry(2, 2, 2);
-    
-    // Матеріал (вигляд) - зробимо його напівпрозорим і каркасним для футуристичності
-    const material = new THREE.MeshBasicMaterial({ 
-        color: 0x00ffcc,
-        wireframe: true, // Малювати тільки ребра
-        transparent: true,
-        opacity: 0.8
-    });
-
-    // Об'єднуємо геометрію і матеріал у Меш (Mesh)
-    const cube = new THREE.Mesh(geometry, material);
-    
-    // Спочатку ховаємо його
-    cube.visible = false;
-    scene.add(cube);
-
-    // Додамо трохи світла (хоча для wireframe матеріалу воно не обов'язкове)
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(0, 1, 1).normalize();
+    const light = new THREE.PointLight(0xffffff, 1.5);
+    light.position.set(0, 5, 5);
     scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
 
+    // ГРУПА КЛАВІАТУРИ
+    const keyboardGroup = new THREE.Group();
+    keyboardGroup.position.set(0, -0.5, 2); // Позиція клавіатури у просторі
+    // keyboardGroup.rotation.x = -0.2; // Трохи нахилимо її
+    scene.add(keyboardGroup);
 
-    // Функція анімації 3D сцени (викликається постійно)
-    function animateThreeJS() {
-        requestAnimationFrame(animateThreeJS);
+    // Масиви для зберігання даних клавіш
+    const keysData = [];
 
-        if (isModelVisible) {
-            // Якщо модель видима, крутимо її
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            statusText.style.display = 'block';
-        } else {
-             statusText.style.display = 'none';
-        }
+    // --- ГЕНЕРАЦІЯ КЛАВІШ ---
+    function createKeyboard() {
+        const rows = [
+            ['1','2','3','4','5','6','7','8','9','0','DEL'],
+            ['Q','W','E','R','T','Y','U','I','O','P'],
+            ['A','S','D','F','G','H','J','K','L'],
+            ['Z','X','C','V','B','N','M','SPACE']
+        ];
+
+        const keyWidth = 0.4;
+        const keyHeight = 0.4;
+        const spacing = 0.05;
+        const keyGeometry = new THREE.BoxGeometry(keyWidth, keyHeight, 0.1);
         
+        // Базовий матеріал клавіші
+        const baseMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x003344, 
+            transparent: true, 
+            opacity: 0.6,
+            shininess: 100
+        });
+        // Матеріал натиснутої клавіші
+        const pressedMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, emissive: 0x00ff00 });
+
+        // Створюємо текстури для літер (складний, але потрібний процес)
+        const fontLoader = new THREE.FontLoader();
+        // Використовуємо стандартний шрифт Three.js (потрібен інтернет)
+        fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            
+            rows.forEach((row, rowIndex) => {
+                const rowWidth = row.length * (keyWidth + spacing);
+                const startX = -rowWidth / 2 + keyWidth/2;
+                const y = (rows.length - rowIndex) * (keyHeight + spacing) - 1.5;
+
+                row.forEach((char, charIndex) => {
+                    const x = startX + charIndex * (keyWidth + spacing);
+
+                    // Створюємо 3D об'єкт клавіші
+                    const keyMesh = new THREE.Mesh(keyGeometry, baseMaterial.clone());
+                    keyMesh.position.set(x, y, 0);
+                    keyboardGroup.add(keyMesh);
+
+                    // Додаємо 3D текст на клавішу
+                    let displayText = char === 'SPACE' ? '___' : char;
+                    const textGeo = new THREE.TextGeometry(displayText, {
+                        font: font, size: 0.15, height: 0.02
+                    });
+                    textGeo.center();
+                    const textMesh = new THREE.Mesh(textGeo, new THREE.MeshBasicMaterial({color: 0xffffff}));
+                    textMesh.position.set(0,0, 0.06);
+                    keyMesh.add(textMesh);
+
+                    // Зберігаємо дані про клавішу для логіки
+                    keysData.push({
+                        mesh: keyMesh,
+                        char: char,
+                        baseMat: keyMesh.material,
+                        pressMat: pressedMaterial,
+                        isPressed: false,
+                        lastPressedTime: 0
+                    });
+                });
+            });
+            loading.style.display = 'none'; // Приховуємо завантаження
+        });
+    }
+    createKeyboard();
+
+
+    // --- ВІЗУАЛІЗАЦІЯ ПАЛЬЦІВ ---
+    // Створимо дві сфери, які будуть слідувати за вказівними пальцями
+    const fingerGeometry = new THREE.SphereGeometry(0.05, 16, 16);
+    const fingerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const leftFingerMesh = new THREE.Mesh(fingerGeometry, fingerMaterial);
+    const rightFingerMesh = new THREE.Mesh(fingerGeometry, fingerMaterial);
+    scene.add(leftFingerMesh);
+    scene.add(rightFingerMesh);
+    // Ховаємо їх спочатку
+    leftFingerMesh.visible = false;
+    rightFingerMesh.visible = false;
+
+
+    function animate() {
+        requestAnimationFrame(animate);
         renderer.render(scene, camera);
     }
-    animateThreeJS(); // Запускаємо цикл анімації
-
+    animate();
 
     // ==========================================
-    // ЧАСТИНА 2: НАЛАШТУВАННЯ ШІ (MediaPipe Pose)
+    // ЧАСТИНА 2: MEDIAPIPE HANDS (ШІ)
     // ==========================================
 
-    // Ця функція викликається щоразу, коли MediaPipe обробив кадр
-    function onPoseResults(results) {
-        poseResults = results;
+    // Функція для перетворення 2D координат відео (0.0 - 1.0) у 3D координати світу Three.js
+    function mapTo3DSpace(normalizedX, normalizedY, depthZ) {
+        // Ці магічні числа залежать від FOV камери та відстані Z. 
+        // Підібрані експериментально для поточної сцени.
+        const rangeX = 7; // Ширина видимої зони на глибині Z=0
+        const rangeY = 5; // Висота видимої зони
+        
+        // Y в MediaPipe йде зверху вниз (0->1), в 3D знизу вгору. Інвертуємо Y.
+        const x = (normalizedX - 0.5) * rangeX;
+        const y = -(normalizedY - 0.5) * rangeY; 
+        
+        // Встановлюємо глибину пальців трохи перед клавіатурою
+        return new THREE.Vector3(x, y, keyboardGroup.position.z + 0.2);
+    }
 
-        if (results.poseLandmarks) {
-             // Отримуємо координати важливих точок (від 0.0 до 1.0, де 0 - верх)
-            const nose = results.poseLandmarks[0]; 
-            const leftWrist = results.poseLandmarks[15]; // Ліве зап'ястя
-            const rightWrist = results.poseLandmarks[16]; // Праве зап'ястя
+    function handleFinger(handLandmarks, fingerMesh) {
+        fingerMesh.visible = true;
+        // Точка 8 - це кінчик вказівного пальця
+        const indexTip = handLandmarks[8]; 
+        
+        // Переводимо у 3D
+        const fingerPos3D = mapTo3DSpace(indexTip.x, indexTip.y);
+        fingerMesh.position.copy(fingerPos3D);
 
-            // ЛОГІКА: Якщо ОЧІ (нос) є на екрані
-            // І ОБИДВА зап'ястя вище носа (y координата менша)
-            if (nose.visibility > 0.8 && leftWrist.y < nose.y && rightWrist.y < nose.y) {
-                isModelVisible = true;
-                cube.visible = true;
+        // --- ГОЛОВНА ЛОГІКА НАТИСКАННЯ ---
+        const now = Date.now();
+
+        keysData.forEach(keyData => {
+            // Отримуємо світову позицію клавіші (з урахуванням позиції групи)
+            const keyWorldPos = new THREE.Vector3();
+            keyData.mesh.getWorldPosition(keyWorldPos);
+
+            // Рахуємо відстань між пальцем і центром клавіші
+            const distance = fingerPos3D.distanceTo(keyWorldPos);
+
+            // Перевірка на колізію
+            if (distance < PRESS_THRESHOLD) {
+                // Якщо палець близько і пройшов час охолодження
+                if (!keyData.isPressed && now - keyData.lastPressedTime > PRESS_COOLDOWN) {
+                    // НАТИСКАННЯ!
+                    keyData.isPressed = true;
+                    keyData.mesh.material = keyData.pressMat; // Змінюємо колір
+                    keyData.lastPressedTime = now;
+                    
+                    // Обробка тексту
+                    processTyping(keyData.char);
+                    // Невелика вібрація телефону (якщо підтримується)
+                    if (window.navigator.vibrate) window.navigator.vibrate(20);
+                }
             } else {
-                isModelVisible = false;
-                cube.visible = false;
+                 // Якщо палець далеко - відпускаємо клавішу
+                 if(distance > PRESS_THRESHOLD * 1.5) { // Гістерезис для стабільності
+                    keyData.isPressed = false;
+                    keyData.mesh.material = keyData.baseMat; // Повертаємо колір
+                 }
+            }
+        });
+    }
+
+    function processTyping(char) {
+        if (char === 'DEL') {
+            typedString = typedString.slice(0, -1);
+        } else if (char === 'SPACE') {
+            typedString += ' ';
+        } else {
+            typedString += char;
+        }
+        outputText.innerText = typedString;
+    }
+
+
+    function onResults(results) {
+        // Скидаємо видимість пальців перед кожним кадром
+        leftFingerMesh.visible = false;
+        rightFingerMesh.visible = false;
+
+        if (results.multiHandLandmarks && results.multiHandedness) {
+            for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+                const landmarks = results.multiHandLandmarks[i];
+                const handedness = results.multiHandedness[i].label; // "Left" або "Right"
+
+                if (handedness === 'Left') {
+                    handleFinger(landmarks, leftFingerMesh); // MediaPipe часто плутає ліво/право дзеркально
+                } else {
+                    handleFinger(landmarks, rightFingerMesh);
+                }
             }
         }
     }
 
-    // Ініціалізація MediaPipe
-    const pose = new Pose({locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+    // Ініціалізація MediaPipe Hands
+    const hands = new Hands({locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
     }});
-
-    pose.setOptions({
+    hands.setOptions({
+        maxNumHands: 2,
         modelComplexity: 1,
-        smoothLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minDetectionConfidence: 0.7, // Висока точність
+        minTrackingConfidence: 0.7
     });
+    hands.onResults(onResults);
 
-    pose.onResults(onPoseResults);
-
-    // Запуск камери
     const cameraFeed = new Camera(videoElement, {
         onFrame: async () => {
-            await pose.send({image: videoElement});
+            await hands.send({image: videoElement});
         },
-        width: 640,
-        height: 480
+        width: 1280, height: 720 // Вища роздільна здатність для точності
     });
     cameraFeed.start();
 
-    // Адаптація під розмір вікна
+    // Адаптивність вікна
     window.addEventListener('resize', () => {
-        // Тут можна додати логіку для зміни розмірів контейнера при зміні вікна браузера
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
 </script>
 </body>
 </html>
+ 
+ 
